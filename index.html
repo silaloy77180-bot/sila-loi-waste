@@ -716,37 +716,38 @@
 <script>
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9oCxE7YRrwzjdSMBeLK4zVWKpmuSkr8DqLugyfah__B6dxujcc7i2jh8d9VB9giGpIg/exec";
 
-  // ดักจับการส่งฟอร์มเพื่อส่งไป Google Sheets
-  document.addEventListener('submit', function(event) {
-    // ป้องกันไม่ให้หน้าเว็บรีเฟรชทันที
-    event.preventDefault();
+  // ระบุให้ทำงานเฉพาะฟอร์มบันทึกข้อมูล (ไม่ยุ่งกับฟอร์มล็อกอิน)
+  document.addEventListener('DOMContentLoaded', function() {
+    const addForm = document.querySelector('form:not(#login-form)'); // เจาะจงฟอร์มที่ไม่ใช่ login
+    
+    if (addForm) {
+      addForm.addEventListener('submit', function(event) {
+        event.preventDefault();
 
-    // ดึงข้อมูลจากช่องกรอกต่างๆ บนหน้าเว็บ
-    const formData = {
-      date: document.querySelector('input[type="date"]')?.value || new Date().toLocaleDateString('th-TH'),
-      binNo: document.querySelector('input[placeholder*="เลขถัง"]')?.value || '',
-      name: document.querySelector('input[placeholder*="ชื่อ"]')?.value || '',
-      phone: document.querySelector('input[placeholder*="เบอร์"]')?.value || '',
-      address: document.querySelector('input[placeholder*="บ้านเลขที่"]')?.value || '',
-      binType: document.querySelector('select')?.value || ''
-    };
+        const formData = {
+          date: document.querySelector('input[type="date"]')?.value || new Date().toLocaleDateString('th-TH'),
+          binNo: document.querySelector('input[placeholder*="เลขถัง"]')?.value || '',
+          name: document.querySelector('input[placeholder*="ชื่อ"]')?.value || '',
+          phone: document.querySelector('input[placeholder*="เบอร์"]')?.value || '',
+          address: document.querySelector('input[placeholder*="บ้านเลขที่"]')?.value || '',
+          binType: document.querySelector('select')?.value || ''
+        };
 
-    // ส่งข้อมูลไป Google Sheets
-    fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(formData)
-    })
-    .then(() => {
-      alert("บันทึกข้อมูลและส่งเข้า Google Sheets เรียบร้อยแล้ว!");
-      window.location.reload(); // รีเฟรชหน้าเว็บเมื่อเสร็จสิ้น
-    })
-    .catch(error => {
-      console.error("เกิดข้อผิดพลาด:", error);
-      alert("เกิดข้อผิดพลาดในการส่งข้อมูล");
-    });
+        fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        })
+        .then(() => {
+          alert("บันทึกข้อมูลและส่งเข้า Google Sheets เรียบร้อยแล้ว!");
+          window.location.reload();
+        })
+        .catch(error => {
+          console.error("เกิดข้อผิดพลาด:", error);
+          alert("เกิดข้อผิดพลาดในการส่งข้อมูล");
+        });
+      });
+    }
   });
 </script>
