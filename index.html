@@ -714,25 +714,32 @@
 </body>
 </html>
 <script>
-  const SCRIPT_URL = "const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbymxucvXx1Vj7aki3pxOAbx0kPElVvBQqM5pgWcMrc2GNUpHwngnp43AeUclwqIiL6lYw/exec";";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbymxucvXx1Vj7aki3pxOAbx0kPElVvBQqM5pgWcMrc2GNUpHwngnp43AeUclwqIiL6lYw/exec";
 
-  // ระบุให้ทำงานเฉพาะฟอร์มบันทึกข้อมูล (ไม่ยุ่งกับฟอร์มล็อกอิน)
   document.addEventListener('DOMContentLoaded', function() {
-    const addForm = document.querySelector('form:not(#login-form)'); // เจาะจงฟอร์มที่ไม่ใช่ login
-    
-    if (addForm) {
-      addForm.addEventListener('submit', function(event) {
-        event.preventDefault();
+    // ดักจับการกดปุ่มบันทึกข้อมูลโดยตรง
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('button');
+      if (btn && btn.textContent.includes('บันทึกข้อมูล')) {
+        
+        // ดึงค่าจากฟอร์มกรอกข้อมูลตามลำดับช่อง
+        const inputs = document.querySelectorAll('input, select, textarea');
+        let formData = {};
+        
+        inputs.forEach(input => {
+          if (input.placeholder && input.placeholder.includes('นาย/นาง')) formData.name = input.value;
+          if (input.placeholder && input.placeholder.includes('08X')) formData.phone = input.value;
+          if (input.placeholder && input.placeholder.includes('123/4')) formData.address = input.value;
+          if (input.placeholder && input.placeholder.includes('SLL')) formData.binNo = input.value;
+          if (input.type === 'date') formData.date = input.value;
+        });
 
-        const formData = {
-          date: document.querySelector('input[type="date"]')?.value || new Date().toLocaleDateString('th-TH'),
-          binNo: document.querySelector('input[placeholder*="เลขถัง"]')?.value || '',
-          name: document.querySelector('input[placeholder*="ชื่อ"]')?.value || '',
-          phone: document.querySelector('input[placeholder*="เบอร์"]')?.value || '',
-          address: document.querySelector('input[placeholder*="บ้านเลขที่"]')?.value || '',
-          binType: document.querySelector('select')?.value || ''
-        };
+        // ดึงค่าหมู่บ้าน และ ประเภทการชำระเงิน
+        const selects = document.querySelectorAll('select');
+        if (selects.length >= 1) formData.village = selects[0].value;
+        if (selects.length >= 2) formData.binType = selects[1].value;
 
+        // ส่งข้อมูลไปที่ Google Sheets
         fetch(SCRIPT_URL, {
           method: "POST",
           mode: "no-cors",
@@ -740,14 +747,13 @@
           body: JSON.stringify(formData)
         })
         .then(() => {
-          alert("บันทึกข้อมูลและส่งเข้า Google Sheets เรียบร้อยแล้ว!");
-          window.location.reload();
+          alert("ส่งข้อมูลเข้า Google Sheets เรียบร้อยแล้ว!");
         })
-        .catch(error => {
-          console.error("เกิดข้อผิดพลาด:", error);
+        .catch(err => {
+          console.error(err);
           alert("เกิดข้อผิดพลาดในการส่งข้อมูล");
         });
-      });
-    }
+      }
+    });
   });
 </script>
