@@ -716,12 +716,21 @@
 <script>
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxwZAMwrQbyX1sh7DpGR1XkK2CyE-MWcy_A2Xehic_M87LmQr10uOCo8huI3l0FDQJ3iw/exec";
 
-  // ดักจับเฉพาะตอนกดปุ่มบันทึกข้อมูล โดยอ่านจากช่องฟอร์มปัจจุบันตรงๆ
+  // 1. ดึงข้อมูลจาก Google Sheets มาแสดงผลเมื่อเปิดเว็บ
+  window.addEventListener('DOMContentLoaded', function() {
+    fetch(SCRIPT_URL)
+      .then(response => response.json())
+      .then(data => {
+        console.log("ข้อมูลจาก Google Sheets:", data);
+        // หากมีข้อมูลส่งกลับมาจากชีต สามารถนำมาประมวลผลแสดงผลในตารางได้ที่นี่
+      })
+      .catch(err => console.log("โหลดข้อมูลจากชีตไม่สำเร็จ:", err));
+  });
+
+  // 2. ส่งข้อมูลใหม่เข้า Google Sheets เมื่อกดปุ่มบันทึก
   document.addEventListener('click', function(e) {
     const btn = e.target.closest('button');
     if (btn && btn.textContent.includes('บันทึกข้อมูล')) {
-      
-      // หน่วงเวลาเล็กน้อยให้ระบบเดิมบันทึกในเครื่องเสร็จก่อน แล้วค่อยดึงค่าส่ง Google Sheets
       setTimeout(() => {
         const nameInput = document.querySelector('input[placeholder*="นาย/นาง"]');
         const phoneInput = document.querySelector('input[placeholder*="08X"]');
@@ -740,7 +749,6 @@
           binType: selects.length > 1 ? selects[1].value : ''
         };
 
-        // ส่งข้อมูลไปที่ Google Apps Script แบบ Background
         fetch(SCRIPT_URL, {
           method: "POST",
           mode: "no-cors",
