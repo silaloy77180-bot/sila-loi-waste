@@ -716,44 +716,38 @@
 <script>
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxwZAMwrQbyX1sh7DpGR1XkK2CyE-MWcy_A2Xehic_M87LmQr10uOCo8huI3l0FDQJ3iw/exec";
 
-  document.addEventListener('DOMContentLoaded', function() {
-    // ดักจับการกดปุ่มบันทึกข้อมูลโดยตรง
-    document.addEventListener('click', function(e) {
-      const btn = e.target.closest('button');
-      if (btn && btn.textContent.includes('บันทึกข้อมูล')) {
-        
-        // ดึงค่าจากฟอร์มกรอกข้อมูลตามลำดับช่อง
-        const inputs = document.querySelectorAll('input, select, textarea');
-        let formData = {};
-        
-        inputs.forEach(input => {
-          if (input.placeholder && input.placeholder.includes('นาย/นาง')) formData.name = input.value;
-          if (input.placeholder && input.placeholder.includes('08X')) formData.phone = input.value;
-          if (input.placeholder && input.placeholder.includes('123/4')) formData.address = input.value;
-          if (input.placeholder && input.placeholder.includes('SLL')) formData.binNo = input.value;
-          if (input.type === 'date') formData.date = input.value;
-        });
-
-        // ดึงค่าหมู่บ้าน และ ประเภทการชำระเงิน
+  // ดักจับเฉพาะตอนกดปุ่มบันทึกข้อมูล โดยอ่านจากช่องฟอร์มปัจจุบันตรงๆ
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('button');
+    if (btn && btn.textContent.includes('บันทึกข้อมูล')) {
+      
+      // หน่วงเวลาเล็กน้อยให้ระบบเดิมบันทึกในเครื่องเสร็จก่อน แล้วค่อยดึงค่าส่ง Google Sheets
+      setTimeout(() => {
+        const nameInput = document.querySelector('input[placeholder*="นาย/นาง"]');
+        const phoneInput = document.querySelector('input[placeholder*="08X"]');
+        const addressInput = document.querySelector('input[placeholder*="123/4"]');
+        const binInput = document.querySelector('input[placeholder*="SLL"]');
+        const dateInput = document.querySelector('input[type="date"]');
         const selects = document.querySelectorAll('select');
-        if (selects.length >= 1) formData.village = selects[0].value;
-        if (selects.length >= 2) formData.binType = selects[1].value;
 
-        // ส่งข้อมูลไปที่ Google Sheets
+        const formData = {
+          date: dateInput ? dateInput.value : '',
+          binNo: binInput ? binInput.value : '',
+          name: nameInput ? nameInput.value : '',
+          phone: phoneInput ? phoneInput.value : '',
+          address: addressInput ? addressInput.value : '',
+          village: selects.length > 0 ? selects[0].value : '',
+          binType: selects.length > 1 ? selects[1].value : ''
+        };
+
+        // ส่งข้อมูลไปที่ Google Apps Script แบบ Background
         fetch(SCRIPT_URL, {
           method: "POST",
           mode: "no-cors",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData)
-        })
-        .then(() => {
-          alert("ส่งข้อมูลเข้า Google Sheets เรียบร้อยแล้ว!");
-        })
-        .catch(err => {
-          console.error(err);
-          alert("เกิดข้อผิดพลาดในการส่งข้อมูล");
-        });
-      }
-    });
+        }).catch(err => console.log(err));
+      }, 500);
+    }
   });
 </script>
