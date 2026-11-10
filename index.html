@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -712,3 +713,25 @@
     </script>
 </body>
 </html>
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby9oCxE7YRrwzjdSMBeLK4zVWKpmuSkr8DqLugyfah__B6dxujcc7i2jh8d9VB9giGpIg/exec";
+
+  // ตัวอย่างฟังก์ชันสำหรับส่งข้อมูลเข้า Google Sheets
+  function sendDataToSheet(formData) {
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(formData)
+    })
+    .then(() => {
+      alert("บันทึกข้อมูลสำเร็จ!");
+    })
+    .catch(error => {
+      console.error("เกิดข้อผิดพลาด:", error);
+      alert("บันทึกไม่สำเร็จ");
+    });
+  }
+</script>
