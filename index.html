@@ -714,48 +714,38 @@
 </body>
 </html>
 <script>
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzSPEh49lIcQSypyQn2s5M0fHUYujWdyXm0d8r6qRD9VmjUgKUuw8J5LQfMZEaGlNMTA/exec";
+  // นำ URL Web App ของคุณมาใส่ตรงนี้
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwqd7jghg-ATdJeuI-ig26CcDtjOTq6a0KAJz-nbhlcMfx1NiiMj-MX0EBooiN0TMn/exec";
 
-  // 1. ดึงข้อมูลจาก Google Sheets มาแสดงผลเมื่อเปิดเว็บ
-  window.addEventListener('DOMContentLoaded', function() {
-    fetch(SCRIPT_URL)
-      .then(response => response.json())
-      .then(data => {
-        console.log("ข้อมูลจาก Google Sheets:", data);
-        // หากมีข้อมูลส่งกลับมาจากชีต สามารถนำมาประมวลผลแสดงผลในตารางได้ที่นี่
-      })
-      .catch(err => console.log("โหลดข้อมูลจากชีตไม่สำเร็จ:", err));
-  });
-
-  // 2. ส่งข้อมูลใหม่เข้า Google Sheets เมื่อกดปุ่มบันทึก
-  document.addEventListener('click', function(e) {
-    const btn = e.target.closest('button');
-    if (btn && btn.textContent.includes('บันทึกข้อมูล')) {
-      setTimeout(() => {
-        const nameInput = document.querySelector('input[placeholder*="นาย/นาง"]');
-        const phoneInput = document.querySelector('input[placeholder*="08X"]');
-        const addressInput = document.querySelector('input[placeholder*="123/4"]');
-        const binInput = document.querySelector('input[placeholder*="SLL"]');
-        const dateInput = document.querySelector('input[type="date"]');
-        const selects = document.querySelectorAll('select');
-
-        const formData = {
-          date: dateInput ? dateInput.value : '',
-          binNo: binInput ? binInput.value : '',
-          name: nameInput ? nameInput.value : '',
-          phone: phoneInput ? phoneInput.value : '',
-          address: addressInput ? addressInput.value : '',
-          village: selects.length > 0 ? selects[0].value : '',
-          binType: selects.length > 1 ? selects[1].value : ''
-        };
-
-        fetch(SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData)
-        }).catch(err => console.log(err));
-      }, 500);
+  // ฟังก์ชันโหลดข้อมูลจาก Google Sheets มาแสดงผล
+  async function loadData() {
+    try {
+      let response = await fetch(SCRIPT_URL);
+      let data = await response.json();
+      // นำข้อมูล data ไปแสดงผลในตารางหน้าเว็บของคุณตามฟังก์ชันเดิมที่มีอยู่
+      console.log("โหลดข้อมูลสำเร็จ:", data);
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
     }
-  });
+  }
+
+  // ฟังก์ชันบันทึกข้อมูลส่งไปที่ Google Sheets
+  async function saveData(newItem) {
+    try {
+      let response = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify(newItem)
+      });
+      let result = await response.json();
+      if(result.status === "success") {
+        alert("บันทึกข้อมูลสำเร็จ!");
+        loadData(); // โหลดข้อมูลใหม่ทันที
+      }
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการบันทึก:", error);
+    }
+  }
+
+  // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
+  window.onload = loadData;
 </script>
