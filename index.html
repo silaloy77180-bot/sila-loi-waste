@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -370,7 +369,10 @@
         </div>
     </div>
 
+    <!-- MAIN SCRIPT CONNECTED TO GOOGLE SHEETS -->
     <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzrKpF5PCzokVo8WkXCKZAH_sC58zz81qCF5fYGWDzgVuuLIPS6JuMH3-hLlE8cFtJ1/exec";
+
         const VILLAGES = {
             "1": "หมู่ 1 บ้านห้วยขวาง", "2": "หมู่ 2 บ้านนาปุ่ม", "3": "หมู่ 3 บ้านหนองคาง",
             "4": "หมู่ 4 บ้านหนองหญ้าปล้อง", "5": "หมู่ 5 บ้านลาดวิถี", "6": "หมู่ 6 บ้านเขาโป่ง",
@@ -411,21 +413,75 @@
             document.getElementById('login-password').value = '';
         }
 
-        function loadData() {
-            const saved = localStorage.getItem('silaloy_waste_data');
-            if (saved) {
-                wasteData = JSON.parse(saved);
-            } else {
-                wasteData = [
-                    { id: '1', fullname: 'นายสมชาย ดีมาก', phone: '0812345678', houseNo: '12', village: '1', binCode: 'SLL-M1-001', paymentType: 'monthly', customPaymentText: '', feeAmount: 40, regDate: '2026-11-01', notes: 'จ่ายทุกต้นเดือน' },
-                    { id: '2', fullname: 'นางสมศรี มีสุข', phone: '0898765432', houseNo: '45/1', village: '3', binCode: 'SLL-M3-012', paymentType: 'yearly', customPaymentText: '', feeAmount: 480, regDate: '2026-11-02', notes: 'ชำระรายปีล่วงหน้า' },
-                    { id: '3', fullname: 'นายบุญส่ง รุ่งเรือง', phone: '0861112233', houseNo: '88', village: '9', binCode: 'SLL-M9-005', paymentType: 'custom', customPaymentText: 'ราย 6 เดือน', feeAmount: 240, regDate: '2026-11-05', notes: 'เหมาจ่ายครึ่งปี' }
-                ];
-                saveData();
+        // ดึงข้อมูลจาก Google Sheets ผ่าน Apps Script Web App (GET)
+        async function loadData() {
+            try {
+                let response = await fetch(SCRIPT_URL);
+                let data = await response.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    wasteData = data;
+                } else {
+                    wasteData = [];
+                }
+                renderAll();
+            } catch (error) {
+                console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
+                // Fallback ใช้ข้อมูลจาก LocalStorage ถ้าดึงจากเว็บไม่ได้ชั่วคราว
+                const saved = localStorage.getItem('silaloy_waste_data');
+                if (saved) wasteData = JSON.parse(saved);
+                renderAll();
             }
         }
 
-        function saveData() {
+        // บันทึกข้อมูลส่งไปที่ Google Sheets (POST)
+        async function handleSaveData(e) {
+            e.preventDefault();
+            const editId = document.getElementById('edit-id').value;
+            const newItem = {
+                id: editId || Date.now().toString(),
+                binCode: document.getElementById('bin-code').value.trim().toUpperCase(),
+                title: "", 
+                fname: document.getElementById('fullname').value.trim(),
+                lname: "",
+                phone: document.getElementById('phone').value.trim(),
+                address: document.getElementById('house-no').value.trim(),
+                village: document.getElementById('village').value,
+                amount: parseFloat(document.getElementById('fee-amount').value) || 0,
+                regDate: document.getElementById('reg-date').value,
+                houseNo: document.getElementById('house-no').value.trim(),
+                paymentType: document.getElementById('payment-type').value,
+                customPaymentText: document.getElementById('custom-payment-text').value.trim(),
+                feeAmount: parseFloat(document.getElementById('fee-amount').value) || 0,
+                notes: document.getElementById('notes').value.trim()
+            };
+
+            try {
+                let response = await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify(newItem)
+                });
+                let result = await response.json();
+                if(result.status === "success") {
+                    alert("บันทึกข้อมูลสำเร็จ!");
+                    if (!editId) {
+                        wasteData.push(newItem);
+                    } else {
+                        const index = wasteData.findIndex(item => item.id === editId);
+                        if (index !== -1) wasteData[index] = newItem;
+                    }
+                    saveLocal();
+                    resetForm();
+                    renderAll();
+                } else {
+                    alert("เกิดข้อผิดพลาด: " + (result.message || "ไม่สามารถบันทึกได้"));
+                }
+            } catch (error) {
+                console.error("เกิดข้อผิดพลาดในการเชื่อมต่อ:", error);
+                alert("ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+            }
+        }
+
+        function saveLocal() {
             localStorage.setItem('silaloy_waste_data', JSON.stringify(wasteData));
         }
 
@@ -450,73 +506,6 @@
             document.getElementById('bin-code').value = `SLL-M${v}-${num}`;
         }
 
-        function handleSaveData(e) {
-            e.preventDefault();
-            const editId = document.getElementById('edit-id').value;
-            const item = {
-                id: editId || Date.now().toString(),
-                fullname: document.getElementById('fullname').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                houseNo: document.getElementById('house-no').value.trim(),
-                village: document.getElementById('village').value,
-                binCode: document.getElementById('bin-code').value.trim().toUpperCase(),
-                paymentType: document.getElementById('payment-type').value,
-                customPaymentText: document.getElementById('custom-payment-text').value.trim(),
-                feeAmount: parseFloat(document.getElementById('fee-amount').value) || 0,
-                regDate: document.getElementById('reg-date').value,
-                notes: document.getElementById('notes').value.trim()
-            };
-
-            if (editId) {
-                const idx = wasteData.findIndex(d => d.id === editId);
-                if (idx !== -1) wasteData[idx] = item;
-            } else {
-                wasteData.unshift(item);
-            }
-
-            saveData();
-            resetForm();
-            renderAll();
-            alert(editId ? 'แก้ไขข้อมูลสำเร็จ!' : 'บันทึกข้อมูลสำเร็จ!');
-        }
-
-        function resetForm() {
-            document.getElementById('waste-form').reset();
-            document.getElementById('edit-id').value = '';
-            document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-file-pen text-emerald-600"></i> แบบฟอร์มลงทะเบียนถังขยะ ตำบลศิลาลอย';
-            document.getElementById('cancel-edit-btn').classList.add('hidden');
-            document.getElementById('reg-date').value = new Date().toISOString().split('T')[0];
-            calculateFee();
-        }
-
-        function editItem(id) {
-            const item = wasteData.find(d => d.id === id);
-            if (!item) return;
-            document.getElementById('edit-id').value = item.id;
-            document.getElementById('fullname').value = item.fullname;
-            document.getElementById('phone').value = item.phone;
-            document.getElementById('house-no').value = item.houseNo;
-            document.getElementById('village').value = item.village;
-            document.getElementById('bin-code').value = item.binCode;
-            document.getElementById('payment-type').value = item.paymentType;
-            document.getElementById('custom-payment-text').value = item.customPaymentText || '';
-            document.getElementById('fee-amount').value = item.feeAmount;
-            document.getElementById('reg-date').value = item.regDate;
-            document.getElementById('notes').value = item.notes || '';
-            calculateFee();
-            document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-amber-600"></i> แก้ไขข้อมูลลงทะเบียน';
-            document.getElementById('cancel-edit-btn').classList.remove('hidden');
-            switchTab('tab-register');
-        }
-
-        function deleteItem(id) {
-            if (confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
-                wasteData = wasteData.filter(d => d.id !== id);
-                saveData();
-                renderAll();
-            }
-        }
-
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => {
@@ -524,138 +513,146 @@
                 el.classList.add('border-transparent', 'text-slate-500');
             });
             document.getElementById(tabId).classList.remove('hidden');
-            const activeBtn = document.getElementById('tab-btn-' + tabId.replace('tab-', ''));
-            activeBtn.classList.remove('border-transparent', 'text-slate-500');
+            const activeBtn = document.getElementById(`tab-btn-${tabId.replace('tab-', '')}`);
             activeBtn.classList.add('border-emerald-600', 'text-emerald-600', 'active');
-            if (tabId === 'tab-dashboard') renderCharts();
+            activeBtn.classList.remove('border-transparent', 'text-slate-500');
+            if(tabId === 'tab-dashboard') renderCharts();
         }
 
         function renderAll() {
-            renderStats();
             renderTable();
-            renderSummaryTable();
-        }
-
-        function renderStats() {
-            document.getElementById('stat-total-houses').innerText = wasteData.length;
-            const totalRev = wasteData.reduce((sum, d) => sum + d.feeAmount, 0);
-            document.getElementById('stat-total-revenue').innerText = `฿${totalRev.toLocaleString()}`;
-            const mData = wasteData.filter(d => d.paymentType === 'monthly');
-            const yData = wasteData.filter(d => d.paymentType === 'yearly');
-            document.getElementById('stat-monthly-revenue').innerText = `฿${mData.reduce((s,d)=>s+d.feeAmount,0).toLocaleString()}`;
-            document.getElementById('stat-monthly-count').innerText = mData.length;
-            document.getElementById('stat-yearly-revenue').innerText = `฿${yData.reduce((s,d)=>s+d.feeAmount,0).toLocaleString()}`;
-            document.getElementById('stat-yearly-count').innerText = yData.length;
+            updateStats();
         }
 
         function renderTable() {
+            const tbody = document.getElementById('table-body');
             const search = document.getElementById('search-input').value.toLowerCase();
             const filterV = document.getElementById('filter-village').value;
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
             
-            const filtered = wasteData.filter(d => {
-                const matchSearch = d.fullname.toLowerCase().includes(search) || d.phone.includes(search) || d.houseNo.includes(search) || d.binCode.toLowerCase().includes(search);
-                const matchV = !filterV || d.village === filterV;
+            tbody.innerHTML = '';
+            let filtered = wasteData.filter(item => {
+                const matchSearch = (item.fullname || '').toLowerCase().includes(search) ||
+                                    (item.phone || '').includes(search) ||
+                                    (item.houseNo || '').includes(search) ||
+                                    (item.binCode || '').toLowerCase().includes(search);
+                const matchV = filterV === "" || item.village === filterV;
                 return matchSearch && matchV;
             });
 
             document.getElementById('showing-count').innerText = filtered.length;
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-400">ไม่พบข้อมูล</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-400">ไม่พบข้อมูลที่ค้นหา</td></tr>`;
                 return;
             }
 
-            filtered.forEach((d, idx) => {
-                const payText = d.paymentType === 'monthly' ? '<span class="px-2 py-0.5 bg-cyan-100 text-cyan-800 text-xs rounded-full">รายเดือน</span>' : 
-                               (d.paymentType === 'yearly' ? '<span class="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">รายปี</span>' : 
-                               `<span class="px-2 py-0.5 bg-purple-100 text-purple-800 text-xs rounded-full">${d.customPaymentText || 'กำหนดเอง'}</span>`);
-                
+            filtered.forEach((item, index) => {
+                const villageName = VILLAGES[item.village] || `หมู่ ${item.village}`;
                 const tr = document.createElement('tr');
-                tr.className = 'border-b hover:bg-slate-50';
+                tr.className = "border-b hover:bg-slate-50 transition";
                 tr.innerHTML = `
-                    <td class="px-4 py-3 text-center">${idx + 1}</td>
-                    <td class="px-4 py-3 font-mono font-bold text-emerald-700">${d.binCode}</td>
-                    <td class="px-4 py-3 font-medium">${d.fullname}</td>
-                    <td class="px-4 py-3">${d.phone}</td>
-                    <td class="px-4 py-3 text-center">${d.houseNo} (${VILLAGES[d.village] || ''})</td>
-                    <td class="px-4 py-3 text-center">${payText}</td>
-                    <td class="px-4 py-3 text-right font-bold">฿${d.feeAmount.toLocaleString()}</td>
+                    <td class="px-4 py-3 text-center font-medium">${index + 1}</td>
+                    <td class="px-4 py-3 font-mono font-semibold text-emerald-600">${item.binCode || '-'}</td>
+                    <td class="px-4 py-3 font-medium text-slate-800">${item.fullname || ''}</td>
+                    <td class="px-4 py-3">${item.phone || ''}</td>
+                    <td class="px-4 py-3 text-center">บ้านเลขที่ ${item.houseNo || '-'} (${villageName})</td>
+                    <td class="px-4 py-3 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">${item.paymentType === 'monthly' ? 'รายเดือน' : item.paymentType === 'yearly' ? 'รายปี' : 'ระบุเอง'}</span></td>
+                    <td class="px-4 py-3 text-right font-bold text-emerald-700">฿${Number(item.feeAmount || item.amount || 0).toLocaleString()}</td>
                     <td class="px-4 py-3 text-center space-x-1">
-                        <button onclick="openReceiptModal('${d.id}')" class="text-emerald-600 hover:text-emerald-800 px-1.5 py-1" title="พิมพ์ใบเสร็จ"><i class="fa-solid fa-receipt"></i></button>
-                        <button onclick="editItem('${d.id}')" class="text-amber-600 hover:text-amber-800 px-1.5 py-1" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button onclick="deleteItem('${d.id}')" class="text-rose-600 hover:text-rose-800 px-1.5 py-1" title="ลบ"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="openReceipt('${item.id}')" class="p-1.5 bg-sky-50 text-sky-600 hover:bg-sky-100 rounded" title="พิมพ์ใบเสร็จ"><i class="fa-solid fa-print"></i></button>
+                        <button onclick="editItem('${item.id}')" class="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded" title="แก้ไข"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteItem('${item.id}')" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded" title="ลบ"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function renderSummaryTable() {
-            const tbody = document.getElementById('village-summary-table-body');
-            tbody.innerHTML = '';
-            for (let i = 1; i <= 9; i++) {
-                const vStr = i.toString();
-                const items = wasteData.filter(d => d.village === vStr);
-                const count = items.length;
-                const mRev = items.filter(d => d.paymentType === 'monthly').reduce((s, d) => s + d.feeAmount, 0);
-                const yRev = items.filter(d => d.paymentType === 'yearly').reduce((s, d) => s + d.feeAmount, 0);
-                const total = items.reduce((s, d) => s + d.feeAmount, 0);
+        function updateStats() {
+            const totalHouses = wasteData.length;
+            let totalRevenue = 0;
+            let monthlyCount = 0, monthlyRev = 0;
+            let yearlyCount = 0, yearlyRev = 0;
 
-                const tr = document.createElement('tr');
-                tr.className = 'border-b hover:bg-slate-50';
-                tr.innerHTML = `
-                    <td class="px-4 py-3 font-medium">${VILLAGES[vStr]}</td>
-                    <td class="px-4 py-3 text-center font-bold">${count}</td>
-                    <td class="px-4 py-3 text-right">฿${mRev.toLocaleString()}</td>
-                    <td class="px-4 py-3 text-right">฿${yRev.toLocaleString()}</td>
-                    <td class="px-4 py-3 text-right font-bold text-emerald-700">฿${total.toLocaleString()}</td>
-                `;
-                tbody.appendChild(tr);
+            wasteData.forEach(item => {
+                const amt = Number(item.feeAmount || item.amount || 0);
+                totalRevenue += amt;
+                if(item.paymentType === 'monthly') {
+                    monthlyCount++;
+                    monthlyRev += amt;
+                } else if(item.paymentType === 'yearly') {
+                    yearlyCount++;
+                    yearlyRev += amt;
+                }
+            });
+
+            document.getElementById('stat-total-houses').innerText = totalHouses;
+            document.getElementById('stat-total-revenue').innerText = `฿${totalRevenue.toLocaleString()}`;
+            document.getElementById('stat-monthly-revenue').innerText = `฿${monthlyRev.toLocaleString()}`;
+            document.getElementById('stat-monthly-count').innerText = monthlyCount;
+            document.getElementById('stat-yearly-revenue').innerText = `฿${yearlyRev.toLocaleString()}`;
+            document.getElementById('stat-yearly-count').innerText = yearlyCount;
+        }
+
+        function editItem(id) {
+            const item = wasteData.find(i => i.id === id);
+            if(!item) return;
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('fullname').value = item.fullname || '';
+            document.getElementById('phone').value = item.phone || '';
+            document.getElementById('house-no').value = item.houseNo || item.address || '';
+            document.getElementById('village').value = item.village || '1';
+            document.getElementById('bin-code').value = item.binCode || '';
+            document.getElementById('payment-type').value = item.paymentType || 'monthly';
+            calculateFee();
+            if(item.paymentType === 'custom') {
+                document.getElementById('custom-payment-text').value = item.customPaymentText || '';
+            }
+            document.getElementById('fee-amount').value = item.feeAmount || item.amount || 40;
+            document.getElementById('reg-date').value = item.regDate || new Date().toISOString().split('T')[0];
+            document.getElementById('notes').value = item.notes || '';
+            
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-amber-600"></i> แก้ไขข้อมูลลงทะเบียน`;
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            switchTab('tab-register');
+        }
+
+        function resetForm() {
+            document.getElementById('waste-form').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-file-pen text-emerald-600"></i> แบบฟอร์มลงทะเบียนถังขยะ ตำบลศิลาลอย`;
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+            document.getElementById('reg-date').value = new Date().toISOString().split('T')[0];
+            calculateFee();
+        }
+
+        function deleteItem(id) {
+            if(confirm('คุณต้องการลบข้อมูลนี้ใช่หรือไม่?')) {
+                wasteData = wasteData.filter(i => i.id !== id);
+                saveLocal();
+                renderAll();
             }
         }
 
-        function renderCharts() {
-            const vCounts = [];
-            for (let i = 1; i <= 9; i++) {
-                vCounts.push(wasteData.filter(d => d.village === i.toString()).length);
+        function clearAllData() {
+            if(confirm('คำเตือน: คุณต้องการลบข้อมูลทั้งหมดใช่หรือไม่?')) {
+                wasteData = [];
+                saveLocal();
+                renderAll();
             }
-            if (villageChartInstance) villageChartInstance.destroy();
-            villageChartInstance = new Chart(document.getElementById('villageChart'), {
-                type: 'bar',
-                data: {
-                    labels: ['หมู่ 1', 'หมู่ 2', 'หมู่ 3', 'หมู่ 4', 'หมู่ 5', 'หมู่ 6', 'หมู่ 7', 'หมู่ 8', 'หมู่ 9'],
-                    datasets: [{ label: 'จำนวนถัง (ครัวเรือน)', data: vCounts, backgroundColor: '#10b981' }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            const mC = wasteData.filter(d => d.paymentType === 'monthly').length;
-            const yC = wasteData.filter(d => d.paymentType === 'yearly').length;
-            const cC = wasteData.filter(d => d.paymentType === 'custom').length;
-            if (paymentChartInstance) paymentChartInstance.destroy();
-            paymentChartInstance = new Chart(document.getElementById('paymentChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['รายเดือน', 'รายปี', 'ระบุเอง'],
-                    datasets: [{ data: [mC, yC, cC], backgroundColor: ['#06b6d4', '#3b82f6', '#a855f7'] }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
         }
 
-        function openReceiptModal(id) {
-            const d = wasteData.find(item => item.id === id);
-            if (!d) return;
-            document.getElementById('rec-no').innerText = `REC-${d.regDate.replace(/-/g,'')}-${d.id.slice(-3)}`;
-            document.getElementById('rec-date').innerText = d.regDate;
-            document.getElementById('rec-name').innerText = d.fullname;
-            document.getElementById('rec-phone').innerText = d.phone;
-            document.getElementById('rec-address').innerText = `บ้านเลขที่ ${d.houseNo} ${VILLAGES[d.village]}`;
-            document.getElementById('rec-bin').innerText = d.binCode;
-            document.getElementById('rec-type').innerText = d.paymentType === 'monthly' ? 'รายเดือน' : (d.paymentType === 'yearly' ? 'รายปี' : d.customPaymentText);
-            document.getElementById('rec-amount').innerText = `฿${d.feeAmount.toLocaleString()}`;
+        function openReceipt(id) {
+            const item = wasteData.find(i => i.id === id);
+            if(!item) return;
+            document.getElementById('rec-no').innerText = `REC-${item.id.slice(-6)}`;
+            document.getElementById('rec-date').innerText = item.regDate || '-';
+            document.getElementById('rec-name').innerText = item.fullname || '-';
+            document.getElementById('rec-phone').innerText = item.phone || '-';
+            document.getElementById('rec-address').innerText = `บ้านเลขที่ ${item.houseNo || '-'} (${VILLAGES[item.village] || ''})`;
+            document.getElementById('rec-bin').innerText = item.binCode || '-';
+            document.getElementById('rec-type').innerText = item.paymentType === 'monthly' ? 'รายเดือน' : item.paymentType === 'yearly' ? 'รายปี' : (item.customPaymentText || 'ระบุเอง');
+            document.getElementById('rec-amount').innerText = `฿${Number(item.feeAmount || item.amount || 0).toLocaleString()}`;
             document.getElementById('rec-admin').innerText = ADMINS[currentAdmin]?.name || 'Admin';
             document.getElementById('receipt-modal').classList.remove('hidden');
         }
@@ -665,24 +662,25 @@
         }
 
         function exportToCSV() {
-            let csv = "\uFEFFลำดับ,รหัสถังขยะ,ชื่อ-นามสกุล,เบอร์โทร,บ้านเลขที่,หมู่บ้าน,ประเภทการชำระ,จำนวนเงิน,วันที่ลงทะเบียน\n";
-            wasteData.forEach((d, idx) => {
-                const payT = d.paymentType === 'monthly' ? 'รายเดือน' : (d.paymentType === 'yearly' ? 'รายปี' : d.customPaymentText);
-                csv += `"${idx+1}","${d.binCode}","${d.fullname}","${d.phone}","${d.houseNo}","${VILLAGES[d.village]}","${payT}","${d.feeAmount}","${d.regDate}"\n`;
+            let csv = '\uFEFFลำดับ,รหัสถัง,ชื่อ-นามสกุล,เบอร์โทร,บ้านเลขที่,หมู่บ้าน,ประเภทชำระ,จำนวนเงิน,วันที่\n';
+            wasteData.forEach((item, index) => {
+                csv += `${index + 1},"${item.binCode || ''}","${item.fullname || ''}","${item.phone || ''}","${item.houseNo || ''}","${VILLAGES[item.village] || ''}","${item.paymentType}","${item.feeAmount || item.amount || 0}","${item.regDate || ''}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `รายงานขยะ_ตำบลศิลาลอย_${new Date().toISOString().split('T')[0]}.csv`;
+            link.download = `SilaLoy_Waste_Data_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
         }
 
         function backupJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(wasteData));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(wasteData, null, 2));
             const dlAnchor = document.createElement('a');
             dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `backup_waste_${new Date().toISOString().split('T')[0]}.json`);
+            dlAnchor.setAttribute("download", `silaloy_backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(dlAnchor);
             dlAnchor.click();
+            dlAnchor.remove();
         }
 
         function restoreJSON(e) {
@@ -691,61 +689,116 @@
             const reader = new FileReader();
             reader.onload = function(evt) {
                 try {
-                    const imported = JSON.parse(evt.target.result);
-                    if (Array.isArray(imported)) {
-                        wasteData = imported;
-                        saveData();
+                    const parsed = JSON.parse(evt.target.result);
+                    if (Array.isArray(parsed)) {
+                        wasteData = parsed;
+                        saveLocal();
                         renderAll();
-                        alert('นำเข้าข้อมูลสำเร็จ!');
+                        alert("นำเข้าข้อมูลสำเร็จ!");
+                    } else {
+                        alert("ไฟล์ข้อมูลไม่ถูกต้อง");
                     }
-                } catch(err) { alert('ไฟล์ไม่ถูกต้อง'); }
+                } catch(err) {
+                    alert("เกิดข้อผิดพลาดในการอ่านไฟล์ JSON");
+                }
             };
             reader.readAsText(file);
         }
 
-        function clearAllData() {
-            if (confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างข้อมูลทั้งหมด?')) {
-                wasteData = [];
-                saveData();
-                renderAll();
+        function renderCharts() {
+            // สรุปข้อมูลหมู่ 1-9
+            const villageCounts = Array(9).fill(0);
+            const villageRevenues = Array(9).fill(0);
+            const villageMonthly = Array(9).fill(0);
+            const villageYearly = Array(9).fill(0);
+
+            wasteData.forEach(item => {
+                const vIdx = parseInt(item.village) - 1;
+                if(vIdx >= 0 && vIdx < 9) {
+                    villageCounts[vIdx]++;
+                    const amt = Number(item.feeAmount || item.amount || 0);
+                    villageRevenues[vIdx] += amt;
+                    if(item.paymentType === 'monthly') villageMonthly[vIdx] += amt;
+                    if(item.paymentType === 'yearly') villageYearly[vIdx] += amt;
+                }
+            });
+
+            // ตารางสรุปรายหมู่บ้านในแดชบอร์ด
+            const summaryTableBody = document.getElementById('village-summary-table-body');
+            summaryTableBody.innerHTML = '';
+            let sumBins = 0, sumM = 0, sumY = 0, sumTotal = 0;
+
+            for(let i = 0; i < 9; i++) {
+                const vNum = (i + 1).toString();
+                const vName = VILLAGES[vNum];
+                const count = villageCounts[i];
+                const mRev = villageMonthly[i];
+                const yRev = villageYearly[i];
+                const totalRev = villageRevenues[i];
+
+                sumBins += count;
+                sumM += mRev;
+                sumY += yRev;
+                sumTotal += totalRev;
+
+                summaryTableBody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="px-4 py-3 font-medium text-slate-800">${vName}</td>
+                        <td class="px-4 py-3 text-center font-bold">${count} ถัง</td>
+                        <td class="px-4 py-3 text-right">฿${mRev.toLocaleString()}</td>
+                        <td class="px-4 py-3 text-right">฿${yRev.toLocaleString()}</td>
+                        <td class="px-4 py-3 text-right font-bold text-emerald-700">฿${totalRev.toLocaleString()}</td>
+                    </tr>
+                `;
             }
+
+            // แถวรวมทั้งหมด
+            summaryTableBody.innerHTML += `
+                <tr class="bg-slate-100 font-bold text-slate-800">
+                    <td class="px-4 py-3">รวมทั้งสิ้น (9 หมู่บ้าน)</td>
+                    <td class="px-4 py-3 text-center">${sumBins} ถัง</td>
+                    <td class="px-4 py-3 text-right">฿${sumM.toLocaleString()}</td>
+                    <td class="px-4 py-3 text-right">฿${sumY.toLocaleString()}</td>
+                    <td class="px-4 py-3 text-right text-emerald-700">฿${sumTotal.toLocaleString()}</td>
+                </tr>
+            `;
+
+            // กราฟแท่ง
+            const ctxV = document.getElementById('villageChart').getContext('2d');
+            if(villageChartInstance) villageChartInstance.destroy();
+            villageChartInstance = new Chart(ctxV, {
+                type: 'bar',
+                data: {
+                    labels: ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6', 'ม.7', 'ม.8', 'ม.9'],
+                    datasets: [{
+                        label: 'จำนวนถังขยะ (ถัง)',
+                        data: villageCounts,
+                        backgroundColor: '#059669',
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // กราฟวงกลม
+            let monthlyTotalCount = wasteData.filter(i => i.paymentType === 'monthly').length;
+            let yearlyTotalCount = wasteData.filter(i => i.paymentType === 'yearly').length;
+            let customTotalCount = wasteData.filter(i => i.paymentType === 'custom').length;
+
+            const ctxP = document.getElementById('paymentChart').getContext('2d');
+            if(paymentChartInstance) paymentChartInstance.destroy();
+            paymentChartInstance = new Chart(ctxP, {
+                type: 'doughnut',
+                data: {
+                    labels: ['รายเดือน', 'รายปี', 'ระบุเอง'],
+                    datasets: [{
+                        data: [monthlyTotalCount, yearlyTotalCount, customTotalCount],
+                        backgroundColor: ['#059669', '#0284c7', '#d97706']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
         }
     </script>
 </body>
 </html>
-<script>
-  // นำ URL Web App ของคุณมาใส่ตรงนี้
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwqd7jghg-ATdJeuI-ig26CcDtjOTq6a0KAJz-nbhlcMfx1NiiMj-MX0EBooiN0TMn/exec";
-
-  // ฟังก์ชันโหลดข้อมูลจาก Google Sheets มาแสดงผล
-  async function loadData() {
-    try {
-      let response = await fetch(SCRIPT_URL);
-      let data = await response.json();
-      // นำข้อมูล data ไปแสดงผลในตารางหน้าเว็บของคุณตามฟังก์ชันเดิมที่มีอยู่
-      console.log("โหลดข้อมูลสำเร็จ:", data);
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการโหลดข้อมูล:", error);
-    }
-  }
-
-  // ฟังก์ชันบันทึกข้อมูลส่งไปที่ Google Sheets
-  async function saveData(newItem) {
-    try {
-      let response = await fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify(newItem)
-      });
-      let result = await response.json();
-      if(result.status === "success") {
-        alert("บันทึกข้อมูลสำเร็จ!");
-        loadData(); // โหลดข้อมูลใหม่ทันที
-      }
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการบันทึก:", error);
-    }
-  }
-
-  // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
-  window.onload = loadData;
-</script>
