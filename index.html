@@ -19,6 +19,11 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
 
+    <!-- GOOGLE SCRIPT URL CONFIG -->
+    <script>
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbo0rY0yJe9STl05DTrdyfMH_nhmwXcnX43pdmhzxm3uIPcoEV4pJiTq634I3XYOP1/exec";
+    </script>
+
     <!-- LOGIN MODAL -->
     <div id="login-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-emerald-100">
@@ -288,5 +293,37 @@
 
             <!-- TAB 3: DASHBOARD -->
             <div id="tab-dashboard" class="tab-content hidden space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <!-- เนื้อหาแดชบอร์ดและสคริปต์การทำงาน -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ฟังก์ชันพื้นฐานระบบจัดการขยะ อบต.ศิลาลอย
+        function handleLogin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('login-password').value;
+            if(pass === '032684111' || pass === '032684112') {
+                document.getElementById('login-modal').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+        function handleLogout() {
+            location.reload();
+        }
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+        }
+        function calculateFee() {
+            const type = document.getElementById('payment-type').value;
+            const feeInput = document.getElementById('fee-amount');
+            if(type === 'monthly') feeInput.value = 40;
+            else if(type === 'yearly') feeInput.value = 480;
+            else feeInput.value = '';
+        }
+    </script>
+</body>
+</html>
