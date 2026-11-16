@@ -29,8 +29,8 @@
           <label class="block text-sm font-medium mb-1.5 text-slate-700">เลือกสิทธิ์ผู้ใช้งาน *</label>
           <select id="adminRole" required class="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
             <option value="">-- เลือกสิทธิ์ Admin --</option>
-            <option value="Admin 1">Admin 1 (ระบบของฉัน)</option>
-            <option value="Admin 2">Admin 2 (ระบบของเธอ)</option>
+            <option value="Admin 1">Admin 1 (ผู้ดูแลระบบหลัก)</option>
+            <option value="Admin 2">Admin 2 (เจ้าหน้าที่บันทึกข้อมูล)</option>
           </select>
         </div>
 
@@ -50,7 +50,7 @@
     </div>
   </div>
 
-  <!-- ================= ส่วนเนื้อหาหลักของระบบ (ซ่อนไว้ก่อนจนกว่าจะ Login สำเร็จ) ================= -->
+  <!-- ================= ส่วนเนื้อหาหลักของระบบ ================= -->
   <div id="mainAppContent" class="hidden">
     <!-- Header -->
     <header class="bg-gradient-to-r from-emerald-700 to-teal-600 text-white shadow-md">
@@ -199,193 +199,4 @@
               <option value="หมู่ 6 บ้านเขาโป่ง">หมู่ 6 บ้านเขาโป่ง</option>
               <option value="หมู่ 7 บ้านหนองกลางดง">หมู่ 7 บ้านหนองกลางดง</option>
               <option value="หมู่ 8 บ้านเกาะนาน้อย">หมู่ 8 บ้านเกาะนาน้อย</option>
-              <option value="หมู่ 9 บ้านเขาน้อยห้วยตามา">หมู่ 9 บ้านเขาน้อยห้วยตามา</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-slate-100 text-slate-700 text-sm">
-                <th class="p-3 rounded-tl-lg">ลำดับ</th>
-                <th class="p-3">เลขถังขยะ</th>
-                <th class="p-3">ชื่อ - นามสกุล</th>
-                <th class="p-3">เบอร์โทรศัพท์</th>
-                <th class="p-3">บ้านเลขที่</th>
-                <th class="p-3">หมู่ที่ / หมู่บ้าน</th>
-                <th class="p-3">ประเภทชำระ</th>
-                <th class="p-3 text-right">จำนวนเงิน</th>
-                <th class="p-3 text-center rounded-tr-lg">จัดการ</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody" class="divide-y divide-slate-100 text-sm"></tbody>
-          </table>
-        </div>
-
-        <div class="mt-4 text-sm text-slate-500">
-          แสดงทั้งหมด <strong id="totalCount">0</strong> รายการ
-        </div>
-      </div>
-
-      <!-- ส่วนสรุปข้อมูลภาพรวม 9 หมู่บ้าน -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2 mb-1">
-          <i class="fa-solid fa-chart-pie text-emerald-600"></i> สรุปข้อมูลภาพรวม 9 หมู่บ้าน
-        </h3>
-        <p class="text-sm text-slate-500 mb-4">แสดงสถิติจำนวนครัวเรือนและยอดจัดเก็บรายได้แยกตามรายหมู่บ้าน</p>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="villageSummaryContainer">
-          <!-- สร้างผ่าน Javascript อัตโนมัติ -->
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- Modal แก้ไขข้อมูล -->
-  <div id="editModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl">
-      <div class="flex justify-between items-center border-b pb-3 mb-4">
-        <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-pen-to-square text-amber-500"></i> แก้ไขข้อมูลถังขยะ</h3>
-        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-      </div>
-
-      <form id="editForm" class="space-y-3">
-        <input type="hidden" id="editId">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-sm font-medium mb-1">เลขถังขยะ *</label>
-            <input type="text" id="editBinId" required class="w-full border rounded-lg px-3 py-2">
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">บ้านเลขที่ *</label>
-            <input type="text" id="editHouseNo" required class="w-full border rounded-lg px-3 py-2">
-          </div>
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">ชื่อ - นามสกุล *</label>
-          <input type="text" id="editFullName" required class="w-full border rounded-lg px-3 py-2">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">เบอร์โทรศัพท์</label>
-          <input type="tel" id="editPhone" class="w-full border rounded-lg px-3 py-2">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">หมู่ที่ / หมู่บ้าน *</label>
-          <select id="editVillage" required class="w-full border rounded-lg px-3 py-2">
-            <option value="หมู่ 1 บ้านห้วยขวาง">หมู่ 1 บ้านห้วยขวาง</option>
-            <option value="หมู่ 2 บ้านนาปุ่ม">หมู่ 2 บ้านนาปุ่ม</option>
-            <option value="หมู่ 3 บ้านหนองคาง">หมู่ 3 บ้านหนองคาง</option>
-            <option value="หมู่ 4 บ้านหนองหญ้าปล้อง">หมู่ 4 บ้านหนองหญ้าปล้อง</option>
-            <option value="หมู่ 5 บ้านลาดวิถี">หมู่ 5 บ้านลาดวิถี</option>
-            <option value="หมู่ 6 บ้านเขาโป่ง">หมู่ 6 บ้านเขาโป่ง</option>
-            <option value="หมู่ 7 บ้านหนองกลางดง">หมู่ 7 บ้านหนองกลางดง</option>
-            <option value="หมู่ 8 บ้านเกาะนาน้อย">หมู่ 8 บ้านเกาะนาน้อย</option>
-            <option value="หมู่ 9 บ้านเขาน้อยห้วยตามา">หมู่ 9 บ้านเขาน้อยห้วยตามา</option>
-          </select>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-sm font-medium mb-1">ประเภทชำระ *</label>
-            <select id="editPayType" required class="w-full border rounded-lg px-3 py-2">
-              <option value="รายเดือน">รายเดือน</option>
-              <option value="รายปี">รายปี</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-1">จำนวนเงิน (บาท) *</label>
-            <input type="number" id="editAmount" required class="w-full border rounded-lg px-3 py-2">
-          </div>
-        </div>
-
-        <div class="flex justify-end gap-2 pt-4 border-t mt-4">
-          <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-lg border text-slate-600 hover:bg-slate-50">ยกเลิก</button>
-          <button type="submit" id="btnSaveEdit" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-semibold">บันทึกการแก้ไข</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script>
-    // 🔴 1. นำ URL ของ Google Apps Script Web App มาวางตรงนี้
-    const SCRIPT_URL = "วาง_URL_GOOGLE_APPS_SCRIPT_ของคุณที่นี่";
-
-    // 🔴 2. กำหนดรหัสผ่านสำหรับแต่ละสิทธิ์ (สามารถเปลี่ยนรหัสผ่านได้ที่นี่)
-    const PASSWORDS = {
-      "Admin 1": "032684111", // รหัสผ่านของ Admin 1
-      "Admin 2": "032684112"  // รหัสผ่านของ Admin 2
-    };
-
-    let allRecords = [];
-
-    // จัดการระบบ Login
-    document.getElementById("loginForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const role = document.getElementById("adminRole").value;
-      const pwd = document.getElementById("adminPassword").value;
-      const errorDiv = document.getElementById("loginError");
-
-      if (PASSWORDS[role] && PASSWORDS[role] === pwd) {
-        // เข้าสู่ระบบสำเร็จ
-        document.getElementById("loginOverlay").classList.add("hidden");
-        document.getElementById("mainAppContent").classList.remove("hidden");
-        document.getElementById("currentRoleDisplay").innerText = role;
-        
-        // บันทึกสถานะ Login ลง Session Storage
-        sessionStorage.setItem("isLoggedIn", "true");
-        sessionStorage.setItem("adminRole", role);
-
-        // ดึงข้อมูลจาก Google Sheets
-        fetchData();
-      } else {
-        errorDiv.classList.remove("hidden");
-      }
-    });
-
-    // ตรวจสอบว่าเคย Login อยู่แล้วหรือไม่
-    window.onload = () => {
-      if (sessionStorage.getItem("isLoggedIn") === "true") {
-        document.getElementById("loginOverlay").classList.add("hidden");
-        document.getElementById("mainAppContent").classList.remove("hidden");
-        document.getElementById("currentRoleDisplay").innerText = sessionStorage.getItem("adminRole");
-        fetchData();
-      }
-    };
-
-    function logout() {
-      sessionStorage.clear();
-      location.reload();
-    }
-
-    // ดึงข้อมูลจาก Google Apps Script
-    async function fetchData() {
-      const loading = document.getElementById("loadingBar");
-      loading.classList.remove("hidden");
-      try {
-        const res = await fetch(SCRIPT_URL);
-        const json = await res.json();
-        if (json.status === "success") {
-          allRecords = json.data;
-          updateStats();
-          renderTable();
-          renderVillageSummary();
-        }
-      } catch (err) {
-        console.error(err);
-        alert("ไม่สามารถดึงข้อมูลได้ กรุณาตรวจสอบ SCRIPT_URL");
-      } finally {
-        loading.classList.add("hidden");
-      }
-    }
-
-    // อัปเดตการ์ดสรุปยอดภาพรวม
-    function updateStats() {
-      let totalAmount = 0, monthlyAmount = 0, monthlyCount = 0, yearlyAmount = 0, yearlyCount = 0;
-
-      allRecords.forEach(item => {
-        const amt = Number(item.amount || 0);
-        totalAmount += amt;
-        if (item.payType === "รายเดือน") {
-          monthlyAmount += amt;
-          monthlyCount++;
-        } else
+              <option value="หมู่ 9 บ้านเขาน้อย
