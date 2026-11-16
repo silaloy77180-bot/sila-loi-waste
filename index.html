@@ -18,7 +18,7 @@
        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw01amYiV8v-fau5VFqOYg1s_ew7WPCW4vRM_Yp0tZ0LAQsUsO4_jw0VnSeva9aHD8N/exec";
     </script>
 
-    <!-- MAIN APP WRAPPER (เปิดใช้งานทันที ไม่ต้องล็อกอิน) -->
+    <!-- MAIN APP WRAPPER -->
     <div id="main-app" class="min-h-screen flex flex-col">
         <header class="bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 text-white shadow-lg sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -96,12 +96,15 @@
             </div>
 
             <!-- TABS -->
-            <div class="flex border-b border-slate-200 mb-6 bg-white rounded-t-xl px-4 pt-2">
-                <button onclick="switchTab('tab-list')" id="tab-btn-list" class="tab-btn px-4 py-3 font-semibold text-sm border-b-2 border-emerald-600 text-emerald-600 flex items-center gap-2">
+            <div class="flex border-b border-slate-200 mb-6 bg-white rounded-t-xl px-4 pt-2 overflow-x-auto">
+                <button onclick="switchTab('tab-list')" id="tab-btn-list" class="tab-btn active px-4 py-3 font-semibold text-sm border-b-2 border-emerald-600 text-emerald-600 flex items-center gap-2 whitespace-nowrap">
                     <i class="fa-solid fa-list-check"></i> รายชื่อผู้ลงทะเบียน
                 </button>
-                <button onclick="switchTab('tab-register')" id="tab-btn-register" class="tab-btn px-4 py-3 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2">
+                <button onclick="switchTab('tab-register')" id="tab-btn-register" class="tab-btn px-4 py-3 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
                     <i class="fa-solid fa-user-plus"></i> ลงทะเบียนใหม่
+                </button>
+                <button onclick="switchTab('tab-dashboard')" id="tab-btn-dashboard" class="tab-btn px-4 py-3 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-chart-pie"></i> สรุปผล 9 หมู่บ้าน
                 </button>
             </div>
 
@@ -229,6 +232,18 @@
                     </form>
                 </div>
             </div>
+
+            <!-- TAB 3: DASHBOARD -->
+            <div id="tab-dashboard" class="tab-content hidden space-y-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="font-bold text-lg mb-4 text-slate-800"><i class="fa-solid fa-chart-pie text-emerald-600 mr-2"></i> สรุปข้อมูลภาพรวม 9 หมู่บ้าน</h3>
+                    <p class="text-sm text-slate-500 mb-6">แสดงสถิติจำนวนครัวเรือนและยอดจัดเก็บรายได้แยกตามรายหมู่บ้าน</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="village-stats-grid">
+                        <!-- จะถูกเติมข้อมูลด้วย JavaScript อัตโนมัติ -->
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -289,6 +304,7 @@
                     allData = result.data;
                     updateStats();
                     renderTable();
+                    renderDashboard();
                     statusBanner.classList.add('hidden');
                 } else {
                     throw new Error("Invalid data format");
@@ -335,7 +351,7 @@
                                    (item.phone && item.phone.toLowerCase().includes(keyword)) ||
                                    (item.houseNo && String(item.houseNo).toLowerCase().includes(keyword)) ||
                                    (item.binCode && item.binCode.toLowerCase().includes(keyword));
-                const matchVillage = villageFilter === "" || String(item.village) === String(villageFilter);
+                const matchVillage = villageFilter === "" || String(item.village).trim() === String(villageFilter).trim();
                 return matchKeyword && matchVillage;
             });
 
@@ -349,7 +365,7 @@
             let rowsHTML = "";
             filtered.forEach((item, index) => {
                 const payLabel = item.paymentType === 'monthly' ? 'รายเดือน' : (item.paymentType === 'yearly' ? 'รายปี' : item.paymentType);
-                const vText = villageNames[String(item.village)] || (item.village ? `หมู่ ${item.village}` : '-');
+                const vText = villageNames[String(item.village).trim()] || (item.village ? `หมู่ ${item.village}` : '-');
                 rowsHTML += `
                     <tr class="bg-white border-b hover:bg-slate-50">
                         <td class="px-4 py-3 text-center font-medium">${index + 1}</td>
@@ -364,6 +380,32 @@
                 `;
             });
             tbody.innerHTML = rowsHTML;
+        }
+
+        function renderDashboard() {
+            const grid = document.getElementById('village-stats-grid');
+            if(!grid) return;
+            grid.innerHTML = "";
+
+            for (let i = 1; i <= 9; i++) {
+                const vItems = allData.filter(item => String(item.village).trim() === String(i));
+                const vCount = vItems.length;
+                const vRev = vItems.reduce((sum, item) => sum + (Number(item.feeAmount) || 0), 0);
+                const vName = villageNames[String(i)] || `หมู่ ${i}`;
+
+                grid.innerHTML += `
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-sm mb-1">${vName}</h4>
+                            <p class="text-xs text-slate-500">ลงทะเบียน: <strong class="text-slate-700">${vCount.toLocaleString()}</strong> ครัวเรือน</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center">
+                            <span class="text-xs text-slate-500">ยอดจัดเก็บ:</span>
+                            <span class="font-bold text-emerald-600 text-base">฿${vRev.toLocaleString()}</span>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         function generateBinCode() {
