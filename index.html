@@ -18,45 +18,8 @@
        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw01amYiV8v-fau5VFqOYg1s_ew7WPCW4vRM_Yp0tZ0LAQsUsO4_jw0VnSeva9aHD8N/exec";
     </script>
 
-    <!-- LOGIN MODAL -->
-    <div id="login-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-emerald-100">
-            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white text-center">
-                <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 border border-white/40">
-                    <i class="fa-solid fa-recycle text-3xl text-white"></i>
-                </div>
-                <h2 class="text-xl font-bold">ระบบลงทะเบียนขยะ</h2>
-                <p class="text-emerald-100 text-xs mt-1">องค์การบริหารส่วนตำบลศิลาลอย (9 หมู่บ้าน)</p>
-            </div>
-            
-            <form id="login-form" onsubmit="handleLogin(event)" class="p-6 space-y-4">
-                <div id="login-error" class="hidden bg-rose-50 border border-rose-200 text-rose-600 text-xs p-3 rounded-lg flex items-center gap-2">
-                    <i class="fa-solid fa-circle-exclamation"></i>
-                    <span>รหัสผ่านไม่ถูกต้อง</span>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-medium text-slate-700 mb-1">เลือกผู้ดูแลระบบ (Admin)</label>
-                    <select id="login-username" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm outline-none">
-                        <option value="Admin 1">Admin 1 (ระบบฉัน)</option>
-                        <option value="Admin 2">Admin 2 (ระบบเธอ)</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-medium text-slate-700 mb-1">รหัสผ่าน (Password)</label>
-                    <input type="password" id="login-password" required placeholder="กรอกรหัสผ่าน" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm outline-none">
-                </div>
-
-                <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-sm shadow transition">
-                    <i class="fa-solid fa-right-to-bracket mr-1"></i> เข้าสู่ระบบ
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MAIN APP WRAPPER -->
-    <div id="main-app" class="hidden min-h-screen flex flex-col">
+    <!-- MAIN APP WRAPPER (เปิดใช้งานทันที ไม่ต้องล็อกอิน) -->
+    <div id="main-app" class="min-h-screen flex flex-col">
         <header class="bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 text-white shadow-lg sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -70,16 +33,13 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <button onclick="loadDataFromSheet()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg text-xs transition">
+                    <button onclick="loadDataFromSheet()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs transition">
                         <i class="fa-solid fa-rotate mr-1"></i> รีเฟรชข้อมูล
                     </button>
-                    <div class="bg-white/10 px-3 py-1 rounded-full flex items-center gap-2 text-xs">
+                    <div class="bg-white/10 px-3 py-1.5 rounded-full flex items-center gap-2 text-xs">
                         <i class="fa-solid fa-user-shield text-emerald-300"></i>
-                        <span id="current-admin-name" class="font-medium">Admin 1</span>
+                        <span class="font-medium">ผู้ดูแลระบบ</span>
                     </div>
-                    <button onclick="location.reload()" class="bg-rose-500/80 hover:bg-rose-600 text-white px-3 py-1 rounded-lg text-xs transition">
-                        <i class="fa-solid fa-power-off"></i> ออก
-                    </button>
                 </div>
             </div>
         </header>
@@ -203,7 +163,7 @@
                         <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                             <i class="fa-solid fa-file-pen text-emerald-600"></i> แบบฟอร์มลงทะเบียนถังขยะ ตำบลศิลาลอย
                         </h2>
-                        <p class="text-xs text-slate-500">กรอกข้อมูลผู้ชำระค่าบริการจัดเก็บขยะมูลฝอย (แยกช่องบ้านเลขที่และหมู่บ้าน)</p>
+                        <p class="text-xs text-slate-500">กรอกข้อมูลผู้ชำระค่าบริการจัดเก็บขยะมูลฝอย</p>
                     </div>
 
                     <form id="waste-form" onsubmit="handleSaveData(event)" class="space-y-6">
@@ -252,3 +212,101 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-1">จำนวนเงินค่าขยะ (บาท) <span class="text-rose-500">*</span></label>
+                                <input type="number" id="fee-amount" required min="0" value="40" class="w-full px-3.5 py-2.5 bg-slate-100 font-bold text-emerald-700 border border-slate-300 rounded-lg text-sm outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">วันที่ลงทะเบียน</label>
+                                <input type="date" id="reg-date" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm outline-none">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                            <button type="button" onclick="resetForm()" class="px-5 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium rounded-lg text-sm">ล้างข้อมูล</button>
+                            <button type="submit" id="save-btn" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm shadow">
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกข้อมูล
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let allData = [];
+        const villageNames = {
+            "1": "หมู่ 1 บ้านห้วยขวาง",
+            "2": "หมู่ 2 บ้านนาปุ่ม",
+            "3": "หมู่ 3 บ้านหนองคาง",
+            "4": "หมู่ 4 บ้านหนองหญ้าปล้อง",
+            "5": "หมู่ 5 บ้านลาดวิถี",
+            "6": "หมู่ 6 บ้านเขาโป่ง",
+            "7": "หมู่ 7 บ้านหนองกลางดง",
+            "8": "หมู่ 8 บ้านเกาะนาน้อย",
+            "9": "หมู่ 9 บ้านเขาน้อยห้วยตามา"
+        };
+
+        window.onload = function() {
+            // ตั้งค่าวันที่ปัจจุบันในฟอร์ม
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('reg-date');
+            if(dateInput) dateInput.value = today;
+
+            loadDataFromSheet();
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-emerald-600', 'text-emerald-600');
+                btn.classList.add('border-transparent', 'text-slate-500');
+            });
+            const activeBtn = document.getElementById('tab-btn-' + tabId.replace('tab-', ''));
+            if(activeBtn) {
+                activeBtn.classList.add('border-emerald-600', 'text-emerald-600');
+                activeBtn.classList.remove('border-transparent', 'text-slate-500');
+            }
+        }
+
+        function calculateFee() {
+            const type = document.getElementById('payment-type').value;
+            const feeInput = document.getElementById('fee-amount');
+            if(type === 'monthly') feeInput.value = 40;
+            else if(type === 'yearly') feeInput.value = 480;
+            else feeInput.value = '';
+        }
+
+        async function loadDataFromSheet() {
+            const statusBanner = document.getElementById('loading-status');
+            statusBanner.classList.remove('hidden', 'bg-rose-50', 'text-rose-700', 'border-rose-200');
+            statusBanner.classList.add('bg-amber-50', 'text-amber-800', 'border-amber-200');
+            statusBanner.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังเชื่อมต่อและดึงข้อมูลจาก Google Sheets...</span>';
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL);
+                const result = await response.json();
+                if (result.status === "success" && result.data) {
+                    allData = result.data;
+                    updateStats();
+                    renderTable();
+                    statusBanner.classList.add('hidden');
+                } else {
+                    throw new Error("Invalid data format");
+                }
+            } catch (error) {
+                console.error("Error loading data:", error);
+                statusBanner.classList.remove('bg-amber-50', 'text-amber-800', 'border-amber-200');
+                statusBanner.classList.add('bg-rose-50', 'text-rose-700', 'border-rose-200');
+                statusBanner.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> <span>ไม่สามารถโหลดข้อมูลได้ กรุณากดปุ่ม "รีเฟรชข้อมูล" ด้านบนอีกครั้ง</span>';
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total-houses').innerText = allData.length.toLocaleString();
+            let totalRev = 0, monthlyRev = 0, monthlyCount = 0, yearlyRev = 0, yearlyCount = 0;
+
+            allData.forEach(item => {
+                const fee = Number(item.feeAmount) || 0;
+                totalRev += fee;
+                if (item.paymentType === 'monthly' || item.paymentType ===
