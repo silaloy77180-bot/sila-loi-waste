@@ -1,483 +1,391 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบลงทะเบียนขยะ ตำบลศิลาลอย</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Prompt', 'Sarabun', sans-serif; background-color: #f8fafc; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบจัดการขยะ ตำบลศิลาลอย</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: 'Sarabun', sans-serif; }
+  </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
+<body class="bg-slate-100 text-slate-800">
 
-    <!-- GOOGLE SCRIPT URL CONFIG -->
-    <script>
-       const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw01amYiV8v-fau5VFqOYg1s_ew7WPCW4vRM_Yp0tZ0LAQsUsO4_jw0VnSeva9aHD8N/exec";
-    </script>
+  <!-- ================= หน้าจอเข้าสู่ระบบ (Login Modal Overlay) ================= -->
+  <div id="loginOverlay" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100">
+      <div class="text-center mb-6">
+        <div class="inline-flex bg-emerald-100 text-emerald-600 p-4 rounded-2xl text-3xl mb-3 shadow-inner">
+          <i class="fa-solid fa-user-shield"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-800">เข้าสู่ระบบผู้ดูแล</h2>
+        <p class="text-sm text-slate-500 mt-1">ระบบจัดการขยะ ตำบลศิลาลอย</p>
+      </div>
 
-    <!-- MAIN APP WRAPPER -->
-    <div id="main-app" class="min-h-screen flex flex-col">
-        <header class="bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 text-white shadow-lg sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                        <i class="fa-solid fa-leaf text-xl text-emerald-300"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-base sm:text-lg">ระบบจัดการขยะ ตำบลศิลาลอย</h1>
-                        <p class="text-[11px] text-emerald-100 hidden sm:block">บริหารจัดการจัดเก็บค่าขยะและรหัสถังขยะ ทั้ง 9 หมู่บ้าน</p>
-                    </div>
-                </div>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1.5 text-slate-700">เลือกสิทธิ์ผู้ใช้งาน *</label>
+          <select id="adminRole" required class="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
+            <option value="">-- เลือกสิทธิ์ Admin --</option>
+            <option value="Admin 1">Admin 1 (ผู้ดูแลระบบหลัก)</option>
+            <option value="Admin 2">Admin 2 (เจ้าหน้าที่บันทึกข้อมูล)</option>
+          </select>
+        </div>
 
-                <div class="flex items-center gap-3">
-                    <button onclick="loadDataFromSheet()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs transition">
-                        <i class="fa-solid fa-rotate mr-1"></i> รีเฟรชข้อมูล
-                    </button>
-                    <div class="bg-white/10 px-3 py-1.5 rounded-full flex items-center gap-2 text-xs">
-                        <i class="fa-solid fa-user-shield text-emerald-300"></i>
-                        <span class="font-medium">ผู้ดูแลระบบ</span>
-                    </div>
-                </div>
-            </div>
-        </header>
+        <div>
+          <label class="block text-sm font-medium mb-1.5 text-slate-700">รหัสผ่าน *</label>
+          <input type="password" id="adminPassword" required placeholder="กรอกรหัสผ่านเข้าสู่ระบบ" class="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
+        </div>
 
-        <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
-            <!-- LOADING BANNER -->
-            <div id="loading-status" class="mb-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2">
-                <i class="fa-solid fa-spinner fa-spin"></i>
-                <span>กำลังเชื่อมต่อและดึงข้อมูลจาก Google Sheets...</span>
-            </div>
+        <div id="loginError" class="text-red-500 text-xs hidden text-center bg-red-50 py-2 rounded-lg">
+          รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง
+        </div>
 
-            <!-- STAT CARDS -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase">ครัวเรือนลงทะเบียน</p>
-                        <h3 id="stat-total-houses" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
-                        <p class="text-xs text-emerald-600 mt-1"><i class="fa-solid fa-house"></i> ครอบคลุม 9 หมู่บ้าน</p>
-                    </div>
-                    <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-dumpster"></i>
-                    </div>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase">รายได้จัดเก็บรวม</p>
-                        <h3 id="stat-total-revenue" class="text-2xl font-bold text-emerald-600 mt-1">฿0</h3>
-                        <p class="text-xs text-slate-500 mt-1">ยอดรวมทั้งหมด</p>
-                    </div>
-                    <div class="w-10 h-10 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-coins"></i>
-                    </div>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase">ยอดรวมรายเดือน</p>
-                        <h3 id="stat-monthly-revenue" class="text-2xl font-bold text-cyan-600 mt-1">฿0</h3>
-                        <p class="text-xs text-slate-500 mt-1"><span id="stat-monthly-count">0</span> รายการ</p>
-                    </div>
-                    <div class="w-10 h-10 bg-cyan-100 text-cyan-600 rounded-xl flex items-center justify-center text-lg">
-                        <i class="fa-regular fa-calendar-alt"></i>
-                    </div>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase">ยอดรวมรายปี</p>
-                        <h3 id="stat-yearly-revenue" class="text-2xl font-bold text-blue-600 mt-1">฿0</h3>
-                        <p class="text-xs text-slate-500 mt-1"><span id="stat-yearly-count">0</span> รายการ</p>
-                    </div>
-                    <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-calendar-check"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TABS -->
-            <div class="flex border-b border-slate-200 mb-6 bg-white rounded-t-xl px-4 pt-2 overflow-x-auto">
-                <button onclick="switchTab('tab-list')" id="tab-btn-list" class="tab-btn active px-4 py-3 font-semibold text-sm border-b-2 border-emerald-600 text-emerald-600 flex items-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-list-check"></i> รายชื่อผู้ลงทะเบียน
-                </button>
-                <button onclick="switchTab('tab-register')" id="tab-btn-register" class="tab-btn px-4 py-3 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-user-plus"></i> ลงทะเบียนใหม่
-                </button>
-                <button onclick="switchTab('tab-dashboard')" id="tab-btn-dashboard" class="tab-btn px-4 py-3 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2 whitespace-nowrap">
-                    <i class="fa-solid fa-chart-pie"></i> สรุปผล 9 หมู่บ้าน
-                </button>
-            </div>
-
-            <!-- TAB 1: LIST -->
-            <div id="tab-list" class="tab-content">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row gap-4 justify-between items-center">
-                        <div class="w-full md:w-96 relative">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
-                            <input type="text" id="search-input" onkeyup="renderTable()" placeholder="ค้นหาชื่อ, เบอร์โทร, บ้านเลขที่, เลขถัง..." class="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-sm outline-none">
-                        </div>
-                        <div class="w-full md:w-auto flex flex-wrap items-center gap-2 justify-end">
-                            <select id="filter-village" onchange="renderTable()" class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm outline-none">
-                                <option value="">-- แสดงทุกหมู่บ้าน --</option>
-                                <option value="1">หมู่ 1 บ้านห้วยขวาง</option>
-                                <option value="2">หมู่ 2 บ้านนาปุ่ม</option>
-                                <option value="3">หมู่ 3 บ้านหนองคาง</option>
-                                <option value="4">หมู่ 4 บ้านหนองหญ้าปล้อง</option>
-                                <option value="5">หมู่ 5 บ้านลาดวิถี</option>
-                                <option value="6">หมู่ 6 บ้านเขาโป่ง</option>
-                                <option value="7">หมู่ 7 บ้านหนองกลางดง</option>
-                                <option value="8">หมู่ 8 บ้านเกาะนาน้อย</option>
-                                <option value="9">หมู่ 9 บ้านเขาน้อยห้วยตามา</option>
-                            </select>
-                            <button onclick="exportToCSV()" class="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-sm font-medium rounded-lg">
-                                <i class="fa-solid fa-file-excel mr-1"></i> Export CSV
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-slate-600">
-                            <thead class="text-xs text-slate-700 uppercase bg-slate-100 border-b">
-                                <tr>
-                                    <th class="px-4 py-3 text-center">ลำดับ</th>
-                                    <th class="px-4 py-3">เลขถังขยะ</th>
-                                    <th class="px-4 py-3">ชื่อ - นามสกุล</th>
-                                    <th class="px-4 py-3">เบอร์โทรศัพท์</th>
-                                    <th class="px-4 py-3 text-center">บ้านเลขที่</th>
-                                    <th class="px-4 py-3 text-center">หมู่ที่ / หมู่บ้าน</th>
-                                    <th class="px-4 py-3 text-center">ประเภทชำระ</th>
-                                    <th class="px-4 py-3 text-right">จำนวนเงิน</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body"></tbody>
-                        </table>
-                    </div>
-
-                    <div class="px-4 py-3 bg-slate-50 border-t flex justify-between items-center text-xs text-slate-500">
-                        <span>แสดงทั้งหมด <strong id="showing-count">0</strong> รายการ</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 2: FORM -->
-            <div id="tab-register" class="tab-content hidden">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <div class="border-b pb-4 mb-6">
-                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-file-pen text-emerald-600"></i> แบบฟอร์มลงทะเบียนถังขยะ ตำบลศิลาลอย
-                        </h2>
-                        <p class="text-xs text-slate-500">กรอกข้อมูลผู้ชำระค่าบริการจัดเก็บขยะมูลฝอย</p>
-                    </div>
-
-                    <form id="waste-form" onsubmit="handleSaveData(event)" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">1. ชื่อ-นามสกุล <span class="text-rose-500">*</span></label>
-                                <input type="text" id="fullname" required placeholder="นาย/นาง/นางสาว ชื่อ นามสกุล" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">2. เบอร์โทรศัพท์</label>
-                                <input type="tel" id="phone" placeholder="08X-XXX-XXXX" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">3. บ้านเลขที่ <span class="text-rose-500">*</span></label>
-                                <input type="text" id="house-no" required placeholder="เช่น 123/4" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">4. หมู่ที่ / หมู่บ้าน <span class="text-rose-500">*</span></label>
-                                <select id="village" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
-                                    <option value="">-- เลือกหมู่บ้าน --</option>
-                                    <option value="1">หมู่ 1 บ้านห้วยขวาง</option>
-                                    <option value="2">หมู่ 2 บ้านนาปุ่ม</option>
-                                    <option value="3">หมู่ 3 บ้านหนองคาง</option>
-                                    <option value="4">หมู่ 4 บ้านหนองหญ้าปล้อง</option>
-                                    <option value="5">หมู่ 5 บ้านลาดวิถี</option>
-                                    <option value="6">หมู่ 6 บ้านเขาโป่ง</option>
-                                    <option value="7">หมู่ 7 บ้านหนองกลางดง</option>
-                                    <option value="8">หมู่ 8 บ้านเกาะนาน้อย</option>
-                                    <option value="9">หมู่ 9 บ้านเขาน้อยห้วยตามา</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">5. เลขถังขยะ / รหัสถัง <span class="text-rose-500">*</span></label>
-                                <div class="relative">
-                                    <input type="text" id="bin-code" required placeholder="เช่น SLL-M1-001" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm outline-none uppercase focus:ring-2 focus:ring-emerald-500">
-                                    <button type="button" onclick="generateBinCode()" class="absolute right-1.5 top-1.5 bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1.5 rounded font-medium">สุ่มรหัส</button>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">6. ประเภทการชำระเงิน <span class="text-rose-500">*</span></label>
-                                <select id="payment-type" onchange="calculateFee()" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500">
-                                    <option value="monthly">รายเดือน (40 บาท/เดือน)</option>
-                                    <option value="yearly">รายปี (480 บาท/ปี)</option>
-                                    <option value="custom">ระบุเอง (Custom)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">จำนวนเงินค่าขยะ (บาท) <span class="text-rose-500">*</span></label>
-                                <input type="number" id="fee-amount" required min="0" value="40" class="w-full px-3.5 py-2.5 bg-slate-100 font-bold text-emerald-700 border border-slate-300 rounded-lg text-sm outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">วันที่ลงทะเบียน</label>
-                                <input type="date" id="reg-date" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm outline-none">
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                            <button type="button" onclick="resetForm()" class="px-5 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium rounded-lg text-sm">ล้างข้อมูล</button>
-                            <button type="submit" id="save-btn" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm shadow">
-                                <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกข้อมูล
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- TAB 3: DASHBOARD -->
-            <div id="tab-dashboard" class="tab-content hidden space-y-6">
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h3 class="font-bold text-lg mb-4 text-slate-800"><i class="fa-solid fa-chart-pie text-emerald-600 mr-2"></i> สรุปข้อมูลภาพรวม 9 หมู่บ้าน</h3>
-                    <p class="text-sm text-slate-500 mb-6">แสดงสถิติจำนวนครัวเรือนและยอดจัดเก็บรายได้แยกตามรายหมู่บ้าน</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="village-stats-grid">
-                        <!-- จะถูกเติมข้อมูลด้วย JavaScript อัตโนมัติ -->
-                    </div>
-                </div>
-            </div>
-        </main>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 px-4 rounded-xl transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 mt-2">
+          <i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ
+        </button>
+      </form>
     </div>
+  </div>
 
-    <script>
-        let allData = [];
-        const villageNames = {
-            "1": "หมู่ 1 บ้านห้วยขวาง",
-            "2": "หมู่ 2 บ้านนาปุ่ม",
-            "3": "หมู่ 3 บ้านหนองคาง",
-            "4": "หมู่ 4 บ้านหนองหญ้าปล้อง",
-            "5": "หมู่ 5 บ้านลาดวิถี",
-            "6": "หมู่ 6 บ้านเขาโป่ง",
-            "7": "หมู่ 7 บ้านหนองกลางดง",
-            "8": "หมู่ 8 บ้านเกาะนาน้อย",
-            "9": "หมู่ 9 บ้านเขาน้อยห้วยตามา"
-        };
+  <!-- ================= ส่วนเนื้อหาหลักของระบบ (ซ่อนไว้ก่อนจนกว่าจะ Login สำเร็จ) ================= -->
+  <div id="mainAppContent" class="hidden">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-emerald-700 to-teal-600 text-white shadow-md">
+      <div class="max-w-7xl mx-auto px-4 py-5 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <div class="bg-white/20 p-3 rounded-xl">
+            <i class="fa-solid fa-recycle text-2xl"></i>
+          </div>
+          <div>
+            <h1 class="text-xl md:text-2xl font-bold">ระบบจัดการขยะ ตำบลศิลาลอย</h1>
+            <p class="text-emerald-100 text-sm">บริหารจัดการจัดเก็บค่าขยะและรหัสถังขยะ ทั้ง 9 หมู่บ้าน</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="bg-white/15 px-3 py-1.5 rounded-lg text-sm flex items-center gap-2">
+            <i class="fa-solid fa-user-check"></i>
+            <span id="currentRoleDisplay">ผู้ดูแลระบบ</span>
+          </div>
+          <button onclick="logout()" title="ออกจากระบบ" class="bg-red-500/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm transition">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+        </div>
+      </div>
+    </header>
 
-        window.onload = function() {
-            const today = new Date().toISOString().split('T')[0];
-            const dateInput = document.getElementById('reg-date');
-            if(dateInput) dateInput.value = today;
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
-            loadDataFromSheet();
-        };
+      <!-- สถานะการโหลด -->
+      <div id="loadingBar" class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl flex items-center gap-3">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+        <span>กำลังเชื่อมต่อและดึงข้อมูลจาก Google Sheets...</span>
+      </div>
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-emerald-600', 'text-emerald-600');
-                btn.classList.add('border-transparent', 'text-slate-500');
-            });
-            const activeBtn = document.getElementById('tab-btn-' + tabId.replace('tab-', ''));
-            if(activeBtn) {
-                activeBtn.classList.add('border-emerald-600', 'text-emerald-600');
-                activeBtn.classList.remove('border-transparent', 'text-slate-500');
-            }
-        }
+      <!-- การ์ดสรุปยอด -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center">
+          <div>
+            <p class="text-sm text-slate-500">ครัวเรือนลงทะเบียน</p>
+            <h3 id="statTotalHouse" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+            <p class="text-xs text-emerald-600 mt-1"><i class="fa-solid fa-map-pin"></i> ครอบคลุม 9 หมู่บ้าน</p>
+          </div>
+          <div class="bg-emerald-50 text-emerald-600 p-3.5 rounded-xl text-xl"><i class="fa-solid fa-house-user"></i></div>
+        </div>
 
-        function calculateFee() {
-            const type = document.getElementById('payment-type').value;
-            const feeInput = document.getElementById('fee-amount');
-            if(type === 'monthly') feeInput.value = 40;
-            else if(type === 'yearly') feeInput.value = 480;
-            else feeInput.value = '';
-        }
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center">
+          <div>
+            <p class="text-sm text-slate-500">รายได้จัดเก็บรวม</p>
+            <h3 id="statTotalAmount" class="text-2xl font-bold text-emerald-600 mt-1">฿0</h3>
+            <p class="text-xs text-slate-400 mt-1">ยอดรวมทั้งหมด</p>
+          </div>
+          <div class="bg-teal-50 text-teal-600 p-3.5 rounded-xl text-xl"><i class="fa-solid fa-sack-dollar"></i></div>
+        </div>
 
-        async function loadDataFromSheet() {
-            const statusBanner = document.getElementById('loading-status');
-            statusBanner.classList.remove('hidden', 'bg-rose-50', 'text-rose-700', 'border-rose-200');
-            statusBanner.classList.add('bg-amber-50', 'text-amber-800', 'border-amber-200');
-            statusBanner.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังเชื่อมต่อและดึงข้อมูลจาก Google Sheets...</span>';
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center">
+          <div>
+            <p class="text-sm text-slate-500">ยอดรวมรายเดือน</p>
+            <h3 id="statMonthlyAmount" class="text-2xl font-bold text-blue-600 mt-1">฿0</h3>
+            <p class="text-xs text-slate-400 mt-1"><span id="statMonthlyCount">0</span> รายการ</p>
+          </div>
+          <div class="bg-blue-50 text-blue-600 p-3.5 rounded-xl text-xl"><i class="fa-solid fa-calendar-day"></i></div>
+        </div>
 
-            try {
-                const response = await fetch(GOOGLE_SCRIPT_URL);
-                const result = await response.json();
-                if (result.status === "success" && result.data) {
-                    allData = result.data;
-                    updateStats();
-                    renderTable();
-                    renderDashboard();
-                    statusBanner.classList.add('hidden');
-                } else {
-                    throw new Error("Invalid data format");
-                }
-            } catch (error) {
-                console.error("Error loading data:", error);
-                statusBanner.classList.remove('bg-amber-50', 'text-amber-800', 'border-amber-200');
-                statusBanner.classList.add('bg-rose-50', 'text-rose-700', 'border-rose-200');
-                statusBanner.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> <span>ไม่สามารถโหลดข้อมูลได้ กรุณากดปุ่ม "รีเฟรชข้อมูล" ด้านบนอีกครั้ง</span>';
-            }
-        }
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center">
+          <div>
+            <p class="text-sm text-slate-500">ยอดรวมรายปี</p>
+            <h3 id="statYearlyAmount" class="text-2xl font-bold text-purple-600 mt-1">฿0</h3>
+            <p class="text-xs text-slate-400 mt-1"><span id="statYearlyCount">0</span> รายการ</p>
+          </div>
+          <div class="bg-purple-50 text-purple-600 p-3.5 rounded-xl text-xl"><i class="fa-solid fa-calendar-check"></i></div>
+        </div>
+      </div>
 
-        function updateStats() {
-            document.getElementById('stat-total-houses').innerText = allData.length.toLocaleString();
-            let totalRev = 0, monthlyRev = 0, monthlyCount = 0, yearlyRev = 0, yearlyCount = 0;
+      <!-- แบบฟอร์มลงทะเบียน -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-file-circle-plus text-emerald-600"></i> แบบฟอร์มลงทะเบียนถังขยะ ตำบลศิลาลอย
+        </h2>
+        <p class="text-sm text-slate-500 mb-4">กรอกข้อมูลผู้ชำระค่าบริการจัดเก็บขยะมูลฝอย</p>
 
-            allData.forEach(item => {
-                const fee = Number(item.feeAmount) || 0;
-                totalRev += fee;
-                if (item.paymentType === 'monthly' || item.paymentType === 'รายเดือน') {
-                    monthlyRev += fee;
-                    monthlyCount++;
-                } else {
-                    yearlyRev += fee;
-                    yearlyCount++;
-                }
-            });
+        <form id="addForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">เลขถังขยะ *</label>
+            <input type="text" id="binId" required placeholder="เช่น SL-001" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">ชื่อ - นามสกุล *</label>
+            <input type="text" id="fullName" required placeholder="ระบุชื่อ-นามสกุล" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">เบอร์โทรศัพท์</label>
+            <input type="tel" id="phone" placeholder="08X-XXX-XXXX" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">บ้านเลขที่ *</label>
+            <input type="text" id="houseNo" required placeholder="เช่น 12/3" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">หมู่ที่ / หมู่บ้าน *</label>
+            <select id="village" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+              <option value="">-- เลือกหมู่บ้าน --</option>
+              <option value="หมู่ 1 บ้านห้วยขวาง">หมู่ 1 บ้านห้วยขวาง</option>
+              <option value="หมู่ 2 บ้านนาปุ่ม">หมู่ 2 บ้านนาปุ่ม</option>
+              <option value="หมู่ 3 บ้านหนองคาง">หมู่ 3 บ้านหนองคาง</option>
+              <option value="หมู่ 4 บ้านหนองหญ้าปล้อง">หมู่ 4 บ้านหนองหญ้าปล้อง</option>
+              <option value="หมู่ 5 บ้านลาดวิถี">หมู่ 5 บ้านลาดวิถี</option>
+              <option value="หมู่ 6 บ้านเขาโป่ง">หมู่ 6 บ้านเขาโป่ง</option>
+              <option value="หมู่ 7 บ้านหนองกลางดง">หมู่ 7 บ้านหนองกลางดง</option>
+              <option value="หมู่ 8 บ้านเกาะนาน้อย">หมู่ 8 บ้านเกาะนาน้อย</option>
+              <option value="หมู่ 9 บ้านเขาน้อยห้วยตามา">หมู่ 9 บ้านเขาน้อยห้วยตามา</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">ประเภทชำระ *</label>
+            <select id="payType" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+              <option value="รายเดือน">รายเดือน</option>
+              <option value="รายปี">รายปี</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">จำนวนเงิน (บาท) *</label>
+            <input type="number" id="amount" required placeholder="เช่น 20 หรือ 240" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div class="flex items-end">
+            <button type="submit" id="btnSubmit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-save"></i> บันทึกข้อมูล
+            </button>
+          </div>
+        </form>
+      </div>
 
-            document.getElementById('stat-total-revenue').innerText = "฿" + totalRev.toLocaleString();
-            document.getElementById('stat-monthly-revenue').innerText = "฿" + monthlyRev.toLocaleString();
-            document.getElementById('stat-monthly-count').innerText = monthlyCount.toLocaleString();
-            document.getElementById('stat-yearly-revenue').innerText = "฿" + yearlyRev.toLocaleString();
-            document.getElementById('stat-yearly-count').innerText = yearlyCount.toLocaleString();
-        }
+      <!-- ตารางแสดงข้อมูล + ค้นหา + แก้ไข/ลบ -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div class="flex flex-col md:flex-row justify-between gap-4 mb-4">
+          <div class="relative flex-1">
+            <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400"></i>
+            <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="ค้นหาเลขถังขยะ, ชื่อ-นามสกุล, บ้านเลขที่..." class="w-full pl-10 pr-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div class="w-full md:w-64">
+            <select id="filterVillage" onchange="renderTable()" class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="">-- แสดงทุกหมู่บ้าน --</option>
+              <option value="หมู่ 1 บ้านห้วยขวาง">หมู่ 1 บ้านห้วยขวาง</option>
+              <option value="หมู่ 2 บ้านนาปุ่ม">หมู่ 2 บ้านนาปุ่ม</option>
+              <option value="หมู่ 3 บ้านหนองคาง">หมู่ 3 บ้านหนองคาง</option>
+              <option value="หมู่ 4 บ้านหนองหญ้าปล้อง">หมู่ 4 บ้านหนองหญ้าปล้อง</option>
+              <option value="หมู่ 5 บ้านลาดวิถี">หมู่ 5 บ้านลาดวิถี</option>
+              <option value="หมู่ 6 บ้านเขาโป่ง">หมู่ 6 บ้านเขาโป่ง</option>
+              <option value="หมู่ 7 บ้านหนองกลางดง">หมู่ 7 บ้านหนองกลางดง</option>
+              <option value="หมู่ 8 บ้านเกาะนาน้อย">หมู่ 8 บ้านเกาะนาน้อย</option>
+              <option value="หมู่ 9 บ้านเขาน้อยห้วยตามา">หมู่ 9 บ้านเขาน้อยห้วยตามา</option>
+            </select>
+          </div>
+        </div>
 
-        function renderTable() {
-            const keyword = document.getElementById('search-input').value.toLowerCase();
-            const villageFilter = document.getElementById('filter-village').value;
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = "";
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700 text-sm">
+                <th class="p-3 rounded-tl-lg">ลำดับ</th>
+                <th class="p-3">เลขถังขยะ</th>
+                <th class="p-3">ชื่อ - นามสกุล</th>
+                <th class="p-3">เบอร์โทรศัพท์</th>
+                <th class="p-3">บ้านเลขที่</th>
+                <th class="p-3">หมู่ที่ / หมู่บ้าน</th>
+                <th class="p-3">ประเภทชำระ</th>
+                <th class="p-3 text-right">จำนวนเงิน</th>
+                <th class="p-3 text-center rounded-tr-lg">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+          </table>
+        </div>
 
-            let filtered = allData.filter(item => {
-                const matchKeyword = (item.fullname && item.fullname.toLowerCase().includes(keyword)) ||
-                                   (item.phone && item.phone.toLowerCase().includes(keyword)) ||
-                                   (item.houseNo && String(item.houseNo).toLowerCase().includes(keyword)) ||
-                                   (item.binCode && item.binCode.toLowerCase().includes(keyword));
-                const matchVillage = villageFilter === "" || String(item.village).trim() === String(villageFilter).trim();
-                return matchKeyword && matchVillage;
-            });
+        <div class="mt-4 text-sm text-slate-500">
+          แสดงทั้งหมด <strong id="totalCount">0</strong> รายการ
+        </div>
+      </div>
 
-            document.getElementById('showing-count').innerText = filtered.length.toLocaleString();
+      <!-- ส่วนสรุปข้อมูลภาพรวม 9 หมู่บ้าน -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2 mb-1">
+          <i class="fa-solid fa-chart-pie text-emerald-600"></i> สรุปข้อมูลภาพรวม 9 หมู่บ้าน
+        </h3>
+        <p class="text-sm text-slate-500 mb-4">แสดงสถิติจำนวนครัวเรือนและยอดจัดเก็บรายได้แยกตามรายหมู่บ้าน</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="villageSummaryContainer">
+          <!-- สร้างผ่าน Javascript อัตโนมัติ -->
+        </div>
+      </div>
+    </main>
+  </div>
 
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-400">ไม่พบข้อมูลที่ค้นหา</td></tr>`;
-                return;
-            }
+  <!-- Modal แก้ไขข้อมูล -->
+  <div id="editModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl">
+      <div class="flex justify-between items-center border-b pb-3 mb-4">
+        <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-pen-to-square text-amber-500"></i> แก้ไขข้อมูลถังขยะ</h3>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
 
-            let rowsHTML = "";
-            filtered.forEach((item, index) => {
-                const payLabel = item.paymentType === 'monthly' ? 'รายเดือน' : (item.paymentType === 'yearly' ? 'รายปี' : item.paymentType);
-                const vText = villageNames[String(item.village).trim()] || (item.village ? `หมู่ ${item.village}` : '-');
-                rowsHTML += `
-                    <tr class="bg-white border-b hover:bg-slate-50">
-                        <td class="px-4 py-3 text-center font-medium">${index + 1}</td>
-                        <td class="px-4 py-3 font-semibold text-emerald-700">${item.binCode || '-'}</td>
-                        <td class="px-4 py-3">${item.fullname || '-'}</td>
-                        <td class="px-4 py-3">${item.phone || '-'}</td>
-                        <td class="px-4 py-3 text-center font-medium text-slate-800">${item.houseNo || '-'}</td>
-                        <td class="px-4 py-3 text-center text-slate-700">${vText}</td>
-                        <td class="px-4 py-3 text-center"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium">${payLabel}</span></td>
-                        <td class="px-4 py-3 text-right font-bold text-slate-700">฿${Number(item.feeAmount || 40).toLocaleString()}</td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = rowsHTML;
-        }
+      <form id="editForm" class="space-y-3">
+        <input type="hidden" id="editId">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-1">เลขถังขยะ *</label>
+            <input type="text" id="editBinId" required class="w-full border rounded-lg px-3 py-2">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">บ้านเลขที่ *</label>
+            <input type="text" id="editHouseNo" required class="w-full border rounded-lg px-3 py-2">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">ชื่อ - นามสกุล *</label>
+          <input type="text" id="editFullName" required class="w-full border rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">เบอร์โทรศัพท์</label>
+          <input type="tel" id="editPhone" class="w-full border rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">หมู่ที่ / หมู่บ้าน *</label>
+          <select id="editVillage" required class="w-full border rounded-lg px-3 py-2">
+            <option value="หมู่ 1 บ้านห้วยขวาง">หมู่ 1 บ้านห้วยขวาง</option>
+            <option value="หมู่ 2 บ้านนาปุ่ม">หมู่ 2 บ้านนาปุ่ม</option>
+            <option value="หมู่ 3 บ้านหนองคาง">หมู่ 3 บ้านหนองคาง</option>
+            <option value="หมู่ 4 บ้านหนองหญ้าปล้อง">หมู่ 4 บ้านหนองหญ้าปล้อง</option>
+            <option value="หมู่ 5 บ้านลาดวิถี">หมู่ 5 บ้านลาดวิถี</option>
+            <option value="หมู่ 6 บ้านเขาโป่ง">หมู่ 6 บ้านเขาโป่ง</option>
+            <option value="หมู่ 7 บ้านหนองกลางดง">หมู่ 7 บ้านหนองกลางดง</option>
+            <option value="หมู่ 8 บ้านเกาะนาน้อย">หมู่ 8 บ้านเกาะนาน้อย</option>
+            <option value="หมู่ 9 บ้านเขาน้อยห้วยตามา">หมู่ 9 บ้านเขาน้อยห้วยตามา</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-1">ประเภทชำระ *</label>
+            <select id="editPayType" required class="w-full border rounded-lg px-3 py-2">
+              <option value="รายเดือน">รายเดือน</option>
+              <option value="รายปี">รายปี</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">จำนวนเงิน (บาท) *</label>
+            <input type="number" id="editAmount" required class="w-full border rounded-lg px-3 py-2">
+          </div>
+        </div>
 
-        function renderDashboard() {
-            const grid = document.getElementById('village-stats-grid');
-            if(!grid) return;
-            grid.innerHTML = "";
+        <div class="flex justify-end gap-2 pt-4 border-t mt-4">
+          <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-lg border text-slate-600 hover:bg-slate-50">ยกเลิก</button>
+          <button type="submit" id="btnSaveEdit" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-semibold">บันทึกการแก้ไข</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-            for (let i = 1; i <= 9; i++) {
-                const vItems = allData.filter(item => String(item.village).trim() === String(i));
-                const vCount = vItems.length;
-                const vRev = vItems.reduce((sum, item) => sum + (Number(item.feeAmount) || 0), 0);
-                const vName = villageNames[String(i)] || `หมู่ ${i}`;
+  <script>
+    // 🔴 1. นำ URL ของ Google Apps Script Web App มาวางตรงนี้
+    const SCRIPT_URL = "วาง_URL_GOOGLE_APPS_SCRIPT_ของคุณที่นี่";
 
-                grid.innerHTML += `
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
-                        <div>
-                            <h4 class="font-bold text-slate-800 text-sm mb-1">${vName}</h4>
-                            <p class="text-xs text-slate-500">ลงทะเบียน: <strong class="text-slate-700">${vCount.toLocaleString()}</strong> ครัวเรือน</p>
-                        </div>
-                        <div class="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center">
-                            <span class="text-xs text-slate-500">ยอดจัดเก็บ:</span>
-                            <span class="font-bold text-emerald-600 text-base">฿${vRev.toLocaleString()}</span>
-                        </div>
-                    </div>
-                `;
-            }
-        }
+    // 🔴 2. กำหนดรหัสผ่านสำหรับแต่ละสิทธิ์ (สามารถเปลี่ยนรหัสผ่านได้ที่นี่)
+    const PASSWORDS = {
+      "Admin 1": "admin1234", // รหัสผ่านของ Admin 1
+      "Admin 2": "staff5678"  // รหัสผ่านของ Admin 2
+    };
 
-       function generateBinCode() {
-    const v = document.getElementById('village').value;
-    if (!v) {
-        alert('กรุณาเลือกหมู่บ้านก่อนสุ่มรหัสถังขยะ');
-        return;
+    let allRecords = [];
+
+    // จัดการระบบ Login
+    document.getElementById("loginForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const role = document.getElementById("adminRole").value;
+      const pwd = document.getElementById("adminPassword").value;
+      const errorDiv = document.getElementById("loginError");
+
+      if (PASSWORDS[role] && PASSWORDS[role] === pwd) {
+        // เข้าสู่ระบบสำเร็จ
+        document.getElementById("loginOverlay").classList.add("hidden");
+        document.getElementById("mainAppContent").classList.remove("hidden");
+        document.getElementById("currentRoleDisplay").innerText = role;
+        
+        // บันทึกสถานะ Login ลง Session Storage
+        sessionStorage.setItem("isLoggedIn", "true");
+        sessionStorage.setItem("adminRole", role);
+
+        // ดึงข้อมูลจาก Google Sheets
+        fetchData();
+      } else {
+        errorDiv.classList.remove("hidden");
+      }
+    });
+
+    // ตรวจสอบว่าเคย Login อยู่แล้วหรือไม่
+    window.onload = () => {
+      if (sessionStorage.getItem("isLoggedIn") === "true") {
+        document.getElementById("loginOverlay").classList.add("hidden");
+        document.getElementById("mainAppContent").classList.remove("hidden");
+        document.getElementById("currentRoleDisplay").innerText = sessionStorage.getItem("adminRole");
+        fetchData();
+      }
+    };
+
+    function logout() {
+      sessionStorage.clear();
+      location.reload();
     }
-    const randomNum = Math.floor(100 + Math.random() * 900);
-    document.getElementById('bin-code').value = `SLL-M${v}-${randomNum}`;
-}
 
-        async function handleSaveData(e) {
-            e.preventDefault();
-            const btn = document.getElementById('save-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังบันทึก...';
-
-            const data = {
-                regDate: document.getElementById('reg-date').value,
-                village: document.getElementById('village').value,
-                houseNo: document.getElementById('house-no').value,
-                fullname: document.getElementById('fullname').value,
-                phone: document.getElementById('phone').value,
-                feeAmount: document.getElementById('fee-amount').value,
-                binCode: document.getElementById('bin-code').value,
-                paymentType: document.getElementById('payment-type').value
-            };
-
-            try {
-                const res = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "save", data: data })
-                });
-                const result = await res.json();
-                if(result.status === "success") {
-                    alert("บันทึกข้อมูลสำเร็จ!");
-                    resetForm();
-                    switchTab('tab-list');
-                    loadDataFromSheet();
-                } else {
-                    alert("เกิดข้อผิดพลาดในการบันทึก");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกข้อมูล';
-            }
+    // ดึงข้อมูลจาก Google Apps Script
+    async function fetchData() {
+      const loading = document.getElementById("loadingBar");
+      loading.classList.remove("hidden");
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const json = await res.json();
+        if (json.status === "success") {
+          allRecords = json.data;
+          updateStats();
+          renderTable();
+          renderVillageSummary();
         }
+      } catch (err) {
+        console.error(err);
+        alert("ไม่สามารถดึงข้อมูลได้ กรุณาตรวจสอบ SCRIPT_URL");
+      } finally {
+        loading.classList.add("hidden");
+      }
+    }
 
-        function exportToCSV() {
-            if (allData.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก");
-            let csv = "\uFEFFลำดับ,เลขถังขยะ,ชื่อ-นามสกุล,เบอร์โทร,บ้านเลขที่,หมู่ที่,จำนวนเงิน\n";
-            allData.forEach((item, i) => {
-                csv += `${i+1},"${item.binCode}","${item.fullname}","${item.phone}","${item.houseNo}","${item.village}",${item.feeAmount}\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "ข้อมูลขยะ_อบต_ศิลาลอย.csv";
-            a.click();
-        }
+    // อัปเดตการ์ดสรุปยอดภาพรวม
+    function updateStats() {
+      let totalAmount = 0, monthlyAmount = 0, monthlyCount = 0, yearlyAmount = 0, yearlyCount = 0;
 
-        function resetForm() {
-            document.getElementById('waste-form').reset();
-            document.getElementById('fee-amount').value = "40";
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('reg-date').value = today;
-        }
-    </script>
-</body>
-</html>
+      allRecords.forEach(item => {
+        const amt = Number(item.amount || 0);
+        totalAmount += amt;
+        if (item.payType === "รายเดือน") {
+          monthlyAmount += amt;
+          monthlyCount++;
+        } else
