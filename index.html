@@ -29,8 +29,8 @@
           <label class="block text-sm font-medium mb-1.5 text-slate-700">เลือกสิทธิ์ผู้ใช้งาน *</label>
           <select id="adminRole" required class="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
             <option value="">-- เลือกสิทธิ์ Admin --</option>
-            <option value="Admin 1">Admin 1 (ระบบฉัน)</option>
-            <option value="Admin 2">Admin 2 (ระบบเธอ)</option>
+            <option value="Admin 1 (ระบบฉัน)">Admin 1 (ระบบฉัน)</option>
+            <option value="Admin 2 (ระบบเธอ)">Admin 2 (ระบบเธอ)</option>
           </select>
         </div>
 
@@ -305,13 +305,13 @@
   </div>
 
   <script>
-    // URL ของ Google Apps Script Web App ของคุณ
+    // URL ของ Google Apps Script Web App
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw01amYiV8v-fau5VFqOYg1s_ew7WPCW4vRM_Yp0tZ0LAQsUsO4_jw0VnSeva9aHD8N/exec";
 
-    // กำหนดรหัสผ่านสำหรับแต่ละสิทธิ์
+    // รหัสผ่านตามที่คุณระบุ
     const PASSWORDS = {
-      "Admin 1": "admin1234",
-      "Admin 2": "staff5678"
+      "Admin 1 (ระบบฉัน)": "032684111",
+      "Admin 2 (ระบบเธอ)": "032684112"
     };
 
     let allRecords = [];
@@ -368,7 +368,7 @@
         }
       } catch (err) {
         console.error(err);
-        alert("ไม่สามารถดึงข้อมูลได้ กรุณาตรวจสอบว่าตั้งค่าสิทธิ์ Apps Script เป็น 'ทุกคน (Anyone)' แล้วหรือยัง");
+        alert("ไม่สามารถดึงข้อมูลได้ กรุณาตรวจสอบการตั้งค่าสิทธิ์ Apps Script");
       } finally {
         loading.classList.add("hidden");
       }
