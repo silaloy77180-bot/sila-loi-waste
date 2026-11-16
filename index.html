@@ -247,7 +247,6 @@
         };
 
         window.onload = function() {
-            // ตั้งค่าวันที่ปัจจุบันในฟอร์ม
             const today = new Date().toISOString().split('T')[0];
             const dateInput = document.getElementById('reg-date');
             if(dateInput) dateInput.value = today;
@@ -309,4 +308,134 @@
             allData.forEach(item => {
                 const fee = Number(item.feeAmount) || 0;
                 totalRev += fee;
-                if (item.paymentType === 'monthly' || item.paymentType ===
+                if (item.paymentType === 'monthly' || item.paymentType === 'รายเดือน') {
+                    monthlyRev += fee;
+                    monthlyCount++;
+                } else {
+                    yearlyRev += fee;
+                    yearlyCount++;
+                }
+            });
+
+            document.getElementById('stat-total-revenue').innerText = "฿" + totalRev.toLocaleString();
+            document.getElementById('stat-monthly-revenue').innerText = "฿" + monthlyRev.toLocaleString();
+            document.getElementById('stat-monthly-count').innerText = monthlyCount.toLocaleString();
+            document.getElementById('stat-yearly-revenue').innerText = "฿" + yearlyRev.toLocaleString();
+            document.getElementById('stat-yearly-count').innerText = yearlyCount.toLocaleString();
+        }
+
+        function renderTable() {
+            const keyword = document.getElementById('search-input').value.toLowerCase();
+            const villageFilter = document.getElementById('filter-village').value;
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = "";
+
+            let filtered = allData.filter(item => {
+                const matchKeyword = (item.fullname && item.fullname.toLowerCase().includes(keyword)) ||
+                                   (item.phone && item.phone.toLowerCase().includes(keyword)) ||
+                                   (item.houseNo && String(item.houseNo).toLowerCase().includes(keyword)) ||
+                                   (item.binCode && item.binCode.toLowerCase().includes(keyword));
+                const matchVillage = villageFilter === "" || String(item.village) === String(villageFilter);
+                return matchKeyword && matchVillage;
+            });
+
+            document.getElementById('showing-count').innerText = filtered.length.toLocaleString();
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-400">ไม่พบข้อมูลที่ค้นหา</td></tr>`;
+                return;
+            }
+
+            let rowsHTML = "";
+            filtered.forEach((item, index) => {
+                const payLabel = item.paymentType === 'monthly' ? 'รายเดือน' : (item.paymentType === 'yearly' ? 'รายปี' : item.paymentType);
+                const vText = villageNames[String(item.village)] || (item.village ? `หมู่ ${item.village}` : '-');
+                rowsHTML += `
+                    <tr class="bg-white border-b hover:bg-slate-50">
+                        <td class="px-4 py-3 text-center font-medium">${index + 1}</td>
+                        <td class="px-4 py-3 font-semibold text-emerald-700">${item.binCode || '-'}</td>
+                        <td class="px-4 py-3">${item.fullname || '-'}</td>
+                        <td class="px-4 py-3">${item.phone || '-'}</td>
+                        <td class="px-4 py-3 text-center font-medium text-slate-800">${item.houseNo || '-'}</td>
+                        <td class="px-4 py-3 text-center text-slate-700">${vText}</td>
+                        <td class="px-4 py-3 text-center"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium">${payLabel}</span></td>
+                        <td class="px-4 py-3 text-right font-bold text-slate-700">฿${Number(item.feeAmount || 40).toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = rowsHTML;
+        }
+
+        function generateBinCode() {
+            const v = document.getElementById('village').value;
+            if (!v) {
+                alert('กรุณาเลือกหมู่บ้านก่อนสุ่มรหัสถังขยะ');
+                return;
+            }
+            const randomNum = Math.floor(100 + Math.random() * 900);
+            document.getElementById('bin-code').value = `SLL-M${v}-${randomNum}`;
+        }
+
+        async function handleSaveData(e) {
+            e.preventDefault();
+            const btn = document.getElementById('save-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังบันทึก...';
+
+            const data = {
+                regDate: document.getElementById('reg-date').value,
+                village: document.getElementById('village').value,
+                houseNo: document.getElementById('house-no').value,
+                fullname: document.getElementById('fullname').value,
+                phone: document.getElementById('phone').value,
+                feeAmount: document.getElementById('fee-amount').value,
+                binCode: document.getElementById('bin-code').value,
+                paymentType: document.getElementById('payment-type').value
+            };
+
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "save", data: data })
+                });
+                const result = await res.json();
+                if(result.status === "success") {
+                    alert("บันทึกข้อมูลสำเร็จ!");
+                    resetForm();
+                    switchTab('tab-list');
+                    loadDataFromSheet();
+                } else {
+                    alert("เกิดข้อผิดพลาดในการบันทึก");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกข้อมูล';
+            }
+        }
+
+        function exportToCSV() {
+            if (allData.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก");
+            let csv = "\uFEFFลำดับ,เลขถังขยะ,ชื่อ-นามสกุล,เบอร์โทร,บ้านเลขที่,หมู่ที่,จำนวนเงิน\n";
+            allData.forEach((item, i) => {
+                csv += `${i+1},"${item.binCode}","${item.fullname}","${item.phone}","${item.houseNo}","${item.village}",${item.feeAmount}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "ข้อมูลขยะ_อบต_ศิลาลอย.csv";
+            a.click();
+        }
+
+        function resetForm() {
+            document.getElementById('waste-form').reset();
+            document.getElementById('fee-amount').value = "40";
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('reg-date').value = today;
+        }
+    </script>
+</body>
+</html>
