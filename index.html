@@ -408,15 +408,15 @@
             }
         }
 
-        function generateBinCode() {
-            const v = document.getElementById('village').value;
-            if (!v) {
-                alert('กรุณาเลือกหมู่บ้านก่อนสุ่มรหัสถังขยะ');
-                return;
-            }
-            const randomNum = Math.floor(100 + Math.random() * 900);
-            document.getElementById('bin-code').value = `SLL-M${v}-${randomNum}`;
-        }
+       function generateBinCode() {
+    const v = document.getElementById('village').value;
+    if (!v) {
+        alert('กรุณาเลือกหมู่บ้านก่อนสุ่มรหัสถังขยะ');
+        return;
+    }
+    const randomNum = Math.floor(100 + Math.random() * 900);
+    document.getElementById('bin-code').value = `SLL-M${v}-${randomNum}`;
+}
 
         async function handleSaveData(e) {
             e.preventDefault();
