@@ -274,7 +274,8 @@
                                     <th class="px-4 py-3">เลขถังขยะ</th>
                                     <th class="px-4 py-3">ชื่อ - นามสกุล</th>
                                     <th class="px-4 py-3">เบอร์โทรศัพท์</th>
-                                    <th class="px-4 py-3 text-center">บ้านเลขที่ / หมู่</th>
+                                    <th class="px-4 py-3 text-center">บ้านเลขที่</th>
+                                    <th class="px-4 py-3 text-center">หมู่</th>
                                     <th class="px-4 py-3 text-center">ประเภทชำระ</th>
                                     <th class="px-4 py-3 text-right">จำนวนเงิน</th>
                                     <th class="px-4 py-3 text-center">จัดการ</th>
@@ -382,9 +383,9 @@
 
             let filtered = allData.filter(item => {
                 const matchKeyword = (item.fullname && item.fullname.toLowerCase().includes(keyword)) ||
-                                     (item.phone && item.phone.toLowerCase().includes(keyword)) ||
-                                     (item.houseNo && item.houseNo.toLowerCase().includes(keyword)) ||
-                                     (item.binCode && item.binCode.toLowerCase().includes(keyword));
+                                   (item.phone && item.phone.toLowerCase().includes(keyword)) ||
+                                   (item.houseNo && item.houseNo.toLowerCase().includes(keyword)) ||
+                                   (item.binCode && item.binCode.toLowerCase().includes(keyword));
                 const matchVillage = villageFilter === "" || item.village == villageFilter;
                 return matchKeyword && matchVillage;
             });
