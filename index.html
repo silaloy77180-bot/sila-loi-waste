@@ -81,7 +81,6 @@
     <!-- Sidebar เมนูด้านข้างสไตล์ไฮเทค -->
     <aside class="w-full md:w-64 tech-card border-r border-slate-800 flex flex-col justify-between shrink-0">
       <div>
-        <!-- Logo Header -->
         <div class="p-5 border-b border-slate-800 flex items-center space-x-3">
           <div class="bg-emerald-500/20 text-emerald-400 p-2.5 rounded-xl border border-emerald-500/30">
             <i class="fa-solid fa-atom text-xl animate-pulse"></i>
@@ -92,7 +91,6 @@
           </div>
         </div>
 
-        <!-- Menu Links -->
         <nav class="p-4 space-y-1.5">
           <button onclick="switchPage('dashboard')" id="menu-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition bg-emerald-600 text-white shadow-lg shadow-emerald-600/20">
             <i class="fa-solid fa-chart-pie w-5 text-center"></i> ภาพรวมระบบ (Dashboard)
@@ -106,7 +104,6 @@
         </nav>
       </div>
 
-      <!-- User Profile & Logout at Sidebar Footer -->
       <div class="p-4 border-t border-slate-800 space-y-3">
         <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex items-center gap-2.5">
           <div class="bg-emerald-500/20 text-emerald-400 p-2 rounded-lg border border-emerald-500/30"><i class="fa-solid fa-shield-halved"></i></div>
@@ -124,20 +121,17 @@
     <!-- Content Area ด้านขวา -->
     <div class="flex-1 flex flex-col min-w-0">
       
-      <!-- Top Bar -->
       <header class="tech-card border-b border-slate-800 h-16 px-6 flex items-center justify-between sticky top-0 z-30">
         <div class="flex items-center gap-3">
           <h2 id="pageTitle" class="text-lg font-bold text-white tracking-wide">ภาพรวมระบบ (Dashboard)</h2>
         </div>
         <div id="loadingBar" class="text-xs text-emerald-400 bg-emerald-950/60 px-3 py-1.5 rounded-lg border border-emerald-800/60 flex items-center gap-2 hidden">
-          <i class="fa-solid fa-circle-notch fa-spin"></i> กำลังซิงค์ข้อมูล...
+          <i class="fa-solid fa-circle-notch fa-spin"></i> กำลังซิงค์ข้อมูลอย่างรวดเร็ว...
         </div>
       </header>
 
-      <!-- Main Scrollable Body -->
       <main class="p-6 space-y-6 flex-1">
 
-        <!-- Banner วิวอนิเมะสิ่งแวดล้อมโลกอนาคต -->
         <div class="anime-hero-bg rounded-3xl p-6 md:p-8 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div class="space-y-1">
             <span class="bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs px-3 py-1 rounded-full font-semibold">
@@ -150,7 +144,7 @@
             <div class="text-3xl text-emerald-400"><i class="fa-solid fa-satellite-dish"></i></div>
             <div>
               <p class="text-xs text-slate-400">สถานะเครือข่าย</p>
-              <p class="text-sm font-bold text-emerald-400">ONLINE (9 โซน)</p>
+              <p class="text-sm font-bold text-emerald-400">ONLINE (TURBO SPEED)</p>
             </div>
           </div>
         </div>
@@ -249,7 +243,6 @@
 
         <!-- ================= PAGE 2: MANAGEMENT & REGISTRATION ================= -->
         <div id="page-management" class="page-content space-y-6 hidden">
-          <!-- แบบฟอร์มลงทะเบียน -->
           <div class="tech-card p-6 rounded-2xl">
             <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-1">
               <i class="fa-solid fa-file-circle-plus text-emerald-400"></i> แบบฟอร์มลงทะเบียนถังขยะ ตำบลศิลาลอย
@@ -311,7 +304,6 @@
             </form>
           </div>
 
-          <!-- ตารางแสดงข้อมูล + ค้นหา + แก้ไข/ลบ -->
           <div class="tech-card p-6 rounded-2xl">
             <div class="flex flex-col md:flex-row justify-between gap-4 mb-5">
               <div class="relative flex-1">
@@ -368,9 +360,7 @@
             </h3>
             <p class="text-sm text-slate-400">รายละเอียดจำนวนครัวเรือนและยอดจัดเก็บรายได้แยกตามรายหมู่บ้าน</p>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2" id="villageCardsGrid">
-              <!-- การ์ดหมู่บ้านจะถูกสร้างด้วย JavaScript -->
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2" id="villageCardsGrid"></div>
           </div>
         </div>
 
@@ -523,9 +513,11 @@
       location.reload();
     }
 
-    async function fetchData() {
+    // ฟังก์ชันดึงข้อมูล (เปิดเบื้องหลังแบบไม่กวนผู้ใช้)
+    async function fetchData(isBackground = false) {
       const loading = document.getElementById("loadingBar");
-      loading.classList.remove("hidden");
+      if (!isBackground) loading.classList.remove("hidden");
+      
       try {
         const res = await fetch(SCRIPT_URL);
         const json = await res.json();
@@ -536,13 +528,13 @@
           renderVillageCards();
           renderTable();
         } else {
-          alert("แจ้งเตือนจากระบบ: " + json.message);
+          if (!isBackground) alert("แจ้งเตือนจากระบบ: " + json.message);
         }
       } catch (err) {
         console.error(err);
-        alert("ไม่สามารถดึงข้อมูลได้ กรุณาตรวจสอบการตั้งค่าสิทธิ์ Apps Script");
+        if (!isBackground) alert("ไม่สามารถดึงข้อมูลได้ กรุณาตรวจสอบการตั้งค่าสิทธิ์ Apps Script");
       } finally {
-        loading.classList.add("hidden");
+        if (!isBackground) loading.classList.add("hidden");
       }
     }
 
@@ -683,12 +675,12 @@
       document.getElementById("totalCount").innerText = filtered.length;
     }
 
-    // ฟังก์ชันบันทึกข้อมูลรายการใหม่ (เชื่อมต่อ POST ไปยัง Google Apps Script)
+    // ฟังก์ชันบันทึกรายการใหม่ (เพิ่มความเร็วแบบทันทีด้วย Optimistic UI)
     document.getElementById("addForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("btnSubmit");
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึกด่วน...';
 
       const payload = {
         action: "add",
@@ -703,11 +695,31 @@
         amount: document.getElementById("amount").value
       };
 
-      await sendPostRequest(payload);
+      // เพิ่มข้อมูลเข้าตารางทันทีชั่วคราวก่อนเพื่อให้ไวที่สุด
+      allRecords.unshift({
+        id: "temp_" + Date.now(),
+        date: payload.date,
+        binId: payload.binId,
+        fullName: payload.fullName,
+        phone: payload.phone,
+        houseNo: payload.houseNo,
+        village: payload.village,
+        payType: payload.payType,
+        amount: payload.amount
+      });
+      updateStats();
+      renderVerticalBarChart();
+      renderVillageCards();
+      renderTable();
+
       document.getElementById("addForm").reset();
       setDefaultDate();
+
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-solid fa-save"></i> บันทึกข้อมูลลง Google Sheets';
+
+      // ส่งข้อมูลไปบันทึกจริงที่ Google Sheets เบื้องหลังแบบเงียบๆ
+      sendPostRequestSilent(payload);
     });
 
     function openEditModal(id) {
@@ -739,7 +751,7 @@
       e.preventDefault();
       const btn = document.getElementById("btnSaveEdit");
       btn.disabled = true;
-      btn.innerText = "กำลังอัปเดต...";
+      btn.innerText = "กำลังอัปเดตด่วน...";
 
       const payload = {
         action: "edit",
@@ -755,24 +767,35 @@
         amount: document.getElementById("editAmount").value
       };
 
-      await sendPostRequest(payload);
       closeEditModal();
       btn.disabled = false;
       btn.innerText = "บันทึกการแก้ไข";
+
+      // ส่งแก้ไขไปหลังบ้านแบบเบื้องหลัง
+      sendPostRequestSilent(payload);
     });
 
     async function deleteRecord(id, label) {
       if (!confirm(`ยืนยันการลบข้อมูล "${label}" ใช่หรือไม่?`)) {
         return;
       }
-      await sendPostRequest({ 
+      
+      // ลบออกจากหน้าจอทันทีเพื่อความรวดเร็ว
+      allRecords = allRecords.filter(r => String(r.id) !== String(id));
+      updateStats();
+      renderVerticalBarChart();
+      renderVillageCards();
+      renderTable();
+
+      sendPostRequestSilent({ 
         action: "delete", 
         id: id,
         adminRole: sessionStorage.getItem("adminRole") || "Admin"
       });
     }
 
-    async function sendPostRequest(payload) {
+    // ฟังก์ชันส่งข้อมูลเบื้องหลังแบบไม่ให้หน้าเว็บสะดุด
+    async function sendPostRequestSilent(payload) {
       try {
         const res = await fetch(SCRIPT_URL, {
           method: "POST",
@@ -783,13 +806,15 @@
         });
         const result = await res.json();
         if (result.status === "success") {
-          await fetchData();
+          // ดึงข้อมูลจริงล่าสุดมาซิงค์เงียบๆ เบื้องหลัง
+          fetchData(true);
         } else {
           alert("เกิดข้อผิดพลาด: " + result.message);
+          fetchData(true);
         }
       } catch (err) {
         console.error(err);
-        alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการตั้งค่าสิทธิ์ Apps Script");
+        alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
       }
     }
   </script>
