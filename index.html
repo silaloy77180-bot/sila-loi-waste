@@ -9,6 +9,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
+    /* สไตล์ภาพพื้นหลังอนิเมะวิวสิ่งแวดล้อมสะอาดตา */
+    .anime-hero-bg {
+      background: linear-gradient(rgba(6, 78, 59, 0.75), rgba(15, 23, 42, 0.85)), 
+                  url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1600&q=80');
+      background-size: cover;
+      background-position: center;
+    }
   </style>
 </head>
 <body class="text-slate-800">
@@ -111,6 +118,24 @@
 
       <!-- Main Scrollable Body -->
       <main class="p-6 space-y-6 flex-1">
+
+        <!-- Banner วิวอนิเมะสิ่งแวดล้อม -->
+        <div class="anime-hero-bg rounded-3xl p-6 md:p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div class="space-y-1">
+            <span class="bg-emerald-500/30 border border-emerald-400/40 text-emerald-200 text-xs px-3 py-1 rounded-full font-semibold">
+              <i class="fa-solid fa-leaf mr-1"></i> Smart Eco Community
+            </span>
+            <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mt-2">ยินดีต้อนรับสู่ระบบจัดการขยะ ตำบลศิลาลอย</h2>
+            <p class="text-emerald-100 text-sm max-w-xl">ร่วมสร้างสรรค์สิ่งแวดล้อมที่สะอาดและน่าอยู่ ผ่านการบริหารจัดการจัดเก็บค่าขยะและรหัสถังขยะ ทั้ง 9 หมู่บ้านอย่างมีประสิทธิภาพ</p>
+          </div>
+          <div class="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl flex items-center gap-3 shrink-0">
+            <div class="text-3xl text-emerald-300"><i class="fa-solid fa-earth-asia"></i></div>
+            <div>
+              <p class="text-xs text-emerald-200">พื้นที่เป้าหมาย</p>
+              <p class="text-sm font-bold">9 หมู่บ้าน ตำบลศิลาลอย</p>
+            </div>
+          </div>
+        </div>
 
         <!-- ================= PAGE 1: DASHBOARD ================= -->
         <div id="page-dashboard" class="page-content space-y-6">
@@ -417,7 +442,6 @@
 
     let allRecords = [];
 
-    // ฟังก์ชันสลับหน้าเนื้อหา (Tabs / Pages)
     function switchPage(pageId) {
       document.querySelectorAll(".page-content").forEach(el => el.classList.add("hidden"));
       document.getElementById("page-" + pageId).classList.remove("hidden");
