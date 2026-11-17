@@ -185,6 +185,31 @@
         </form>
       </div>
 
+      <!-- ส่วนหัวข้อเลือกดูภาพรวมรายหมู่บ้าน (แบบมีปุ่มกดเข้าไปดู) -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+          <div>
+            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-chart-pie text-emerald-600"></i> สรุปภาพรวมและกราฟแยกตามรายหมู่บ้าน
+            </h3>
+            <p class="text-sm text-slate-500">คลิกเลือกหมู่บ้านด้านล่างเพื่อดูกราฟสถิติและยอดจัดเก็บแบบเจาะลึก</p>
+          </div>
+        </div>
+
+        <!-- ปุ่มกดเลือกหมู่บ้าน (Tabs) -->
+        <div class="flex flex-wrap gap-2 pt-2" id="villageTabsContainer">
+          <button onclick="selectVillageTab('')" class="village-tab px-4 py-2 rounded-xl text-sm font-semibold transition bg-emerald-600 text-white shadow-sm" data-village="">
+            <i class="fa-solid fa-globe mr-1"></i> ภาพรวมทั้งหมด 9 หมู่
+          </button>
+          <!-- ปุ่มหมู่ 1-9 จะถูกสร้างด้วย JavaScript อัตโนมัติ -->
+        </div>
+
+        <!-- กล่องแสดงกราฟและสถิติของหมู่บ้านที่เลือก -->
+        <div id="selectedVillageChartBox" class="bg-slate-50 border border-slate-200 p-6 rounded-2xl mt-4 space-y-4">
+          <!-- เนื้อหากราฟจะแสดงที่นี่ -->
+        </div>
+      </div>
+
       <!-- ตารางแสดงข้อมูล + ค้นหา + แก้ไข/ลบ -->
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div class="flex flex-col md:flex-row justify-between gap-4 mb-4">
@@ -193,7 +218,7 @@
             <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="ค้นหาวันลงทะเบียน, เลขถังขยะ, ชื่อ-นามสกุล, บ้านเลขที่..." class="w-full pl-10 pr-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
           </div>
           <div class="w-full md:w-64">
-            <select id="filterVillage" onchange="renderTable()" class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500">
+            <select id="filterVillage" onchange="syncVillageFilter()" class="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500">
               <option value="">-- แสดงทุกหมู่บ้าน --</option>
               <option value="หมู่ 1 บ้านห้วยขวาง">หมู่ 1 บ้านห้วยขวาง</option>
               <option value="หมู่ 2 บ้านนาปุ่ม">หมู่ 2 บ้านนาปุ่ม</option>
@@ -231,16 +256,6 @@
         <div class="mt-4 text-sm text-slate-500 flex justify-between items-center">
           <span>แสดงทั้งหมด <strong id="totalCount">0</strong> รายการ</span>
         </div>
-      </div>
-
-      <!-- ส่วนสรุปข้อมูลภาพรวม 9 หมู่บ้านในรูปแบบกราฟแท่ง -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2 mb-1">
-          <i class="fa-solid fa-chart-column text-emerald-600"></i> กราฟสรุปภาพรวมการจัดเก็บรายหมู่บ้าน (ทั้ง 9 หมู่บ้าน)
-        </h3>
-        <p class="text-sm text-slate-500 mb-6">แสดงสถิติจำนวนครัวเรือนและยอดจัดเก็บรายได้เปรียบเทียบในรูปแบบกราฟแท่ง</p>
-        
-        <div class="space-y-4" id="villageSummaryContainer"></div>
       </div>
     </main>
   </div>
@@ -324,6 +339,13 @@
     };
 
     let allRecords = [];
+    let currentSelectedVillage = "";
+
+    const villagesList = [
+      "หมู่ 1 บ้านห้วยขวาง", "หมู่ 2 บ้านนาปุ่ม", "หมู่ 3 บ้านหนองคาง",
+      "หมู่ 4 บ้านหนองหญ้าปล้อง", "หมู่ 5 บ้านลาดวิถี", "หมู่ 6 บ้านเขาโป่ง",
+      "หมู่ 7 บ้านหนองกลางดง", "หมู่ 8 บ้านเกาะนาน้อย", "หมู่ 9 บ้านเขาน้อยห้วยตามา"
+    ];
 
     function setDefaultDate() {
       const now = new Date();
@@ -351,6 +373,7 @@
         sessionStorage.setItem("adminRole", role);
 
         setDefaultDate();
+        initVillageTabs();
         fetchData();
       } else {
         errorDiv.classList.remove("hidden");
@@ -359,6 +382,7 @@
 
     window.onload = () => {
       setDefaultDate();
+      initVillageTabs();
       if (sessionStorage.getItem("isLoggedIn") === "true") {
         document.getElementById("loginOverlay").classList.add("hidden");
         document.getElementById("mainAppContent").classList.remove("hidden");
@@ -372,6 +396,43 @@
       location.reload();
     }
 
+    // สร้างปุ่มแท็บหมู่บ้านอัตโนมัติ
+    function initVillageTabs() {
+      const container = document.getElementById("villageTabsContainer");
+      villagesList.forEach((v, index) => {
+        const btn = document.createElement("button");
+        btn.className = "village-tab px-3.5 py-2 rounded-xl text-sm font-semibold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 shadow-sm";
+        btn.setAttribute("data-village", v);
+        btn.innerHTML = `<i class="fa-solid fa-map-pin text-emerald-600 mr-1"></i> หมู่ ${index + 1}`;
+        btn.onclick = () => selectVillageTab(v);
+        container.appendChild(btn);
+      });
+    }
+
+    // ฟังก์ชันเมื่อคลิกเลือกแท็บหมู่บ้าน
+    function selectVillageTab(villageName) {
+      currentSelectedVillage = villageName;
+      
+      // เปลี่ยนสีปุ่ม Active
+      document.querySelectorAll(".village-tab").forEach(btn => {
+        if (btn.getAttribute("data-village") === villageName) {
+          btn.className = "village-tab px-3.5 py-2 rounded-xl text-sm font-semibold transition bg-emerald-600 text-white shadow-sm";
+        } else {
+          btn.className = "village-tab px-3.5 py-2 rounded-xl text-sm font-semibold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 shadow-sm";
+        }
+      });
+
+      // ซิงค์กับช่อง Dropdown กรองตารางด้านล่างด้วย
+      document.getElementById("filterVillage").value = villageName;
+      renderTable();
+      renderSelectedVillageDashboard();
+    }
+
+    function syncVillageFilter() {
+      const val = document.getElementById("filterVillage").value;
+      selectVillageTab(val);
+    }
+
     async function fetchData() {
       const loading = document.getElementById("loadingBar");
       loading.classList.remove("hidden");
@@ -382,7 +443,7 @@
           allRecords = json.data;
           updateStats();
           renderTable();
-          renderVillageChart();
+          renderSelectedVillageDashboard();
         } else {
           alert("แจ้งเตือนจากระบบ: " + json.message);
         }
@@ -417,46 +478,78 @@
       document.getElementById("statYearlyCount").innerText = yearlyCount;
     }
 
-    // ฟังก์ชันสร้างกราฟแท่งสรุปภาพรวม 9 หมู่บ้าน
-    function renderVillageChart() {
-      const container = document.getElementById("villageSummaryContainer");
-      container.innerHTML = "";
+    // แสดงกราฟและสถิติของหมู่บ้านที่ถูกเลือก
+    function renderSelectedVillageDashboard() {
+      const box = document.getElementById("selectedVillageChartBox");
+      
+      let targetRecords = allRecords;
+      let titleName = "ภาพรวมทุกหมู่บ้าน (ทั้งตำบลศิลาลอย)";
+      
+      if (currentSelectedVillage) {
+        targetRecords = allRecords.filter(item => item.village === currentSelectedVillage);
+        titleName = currentSelectedVillage;
+      }
 
-      const villages = [
-        "หมู่ 1 บ้านห้วยขวาง", "หมู่ 2 บ้านนาปุ่ม", "หมู่ 3 บ้านหนองคาง",
-        "หมู่ 4 บ้านหนองหญ้าปล้อง", "หมู่ 5 บ้านลาดวิถี", "หมู่ 6 บ้านเขาโป่ง",
-        "หมู่ 7 บ้านหนองกลางดง", "หมู่ 8 บ้านเกาะนาน้อย", "หมู่ 9 บ้านเขาน้อยห้วยตามา"
-      ];
+      let totalAmt = targetRecords.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+      let monthlyRecs = targetRecords.filter(item => item.payType === "รายเดือน");
+      let yearlyRecs = targetRecords.filter(item => item.payType === "รายปี");
+      
+      let monthlyAmt = monthlyRecs.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+      let yearlyAmt = yearlyRecs.reduce((sum, item) => sum + Number(item.amount || 0), 0);
 
-      // หาค่าสูงสุดเพื่อเทียบสัดส่วนความกว้างของกราฟแท่ง
-      let maxCount = 1;
-      villages.forEach(v => {
-        const count = allRecords.filter(item => item.village === v).length;
-        if (count > maxCount) maxCount = count;
-      });
+      // สร้างกราฟแท่งเปรียบเทียบรายเดือน vs รายปี
+      let maxVal = Math.max(monthlyAmt, yearlyAmt, 1);
+      let mPercent = Math.round((monthlyAmt / (monthlyAmt + yearlyAmt || 1)) * 100) || 0;
+      let yPercent = 100 - mPercent;
 
-      villages.forEach(v => {
-        const vRecords = allRecords.filter(item => item.village === v);
-        const count = vRecords.length;
-        const vTotalAmount = vRecords.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-        const percent = Math.round((count / maxCount) * 100);
+      box.innerHTML = `
+        <div class="flex justify-between items-center border-b pb-3">
+          <h4 class="font-bold text-emerald-800 text-base"><i class="fa-solid fa-chart-column mr-2"></i> ${titleName}</h4>
+          <span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-semibold">ลงทะเบียน ${targetRecords.length.toLocaleString()} ครัวเรือน</span>
+        </div>
 
-        const barWrapper = document.createElement("div");
-        barWrapper.className = "bg-slate-50 border border-slate-100 p-4 rounded-xl space-y-2";
-        barWrapper.innerHTML = `
-          <div class="flex justify-between items-center text-sm">
-            <span class="font-semibold text-slate-800"><i class="fa-solid fa-map-pin text-emerald-600 mr-1.5"></i> ${v}</span>
-            <div class="text-right">
-              <span class="text-slate-600 font-medium">${count} ครัวเรือน</span>
-              <span class="text-emerald-600 font-bold ml-3">฿${vTotalAmount.toLocaleString()}</span>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <p class="text-xs text-slate-500">ยอดจัดเก็บรวมของส่วนนี้</p>
+            <h4 class="text-xl font-bold text-emerald-600 mt-1">฿${totalAmt.toLocaleString()}</h4>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <p class="text-xs text-slate-500">ยอดรายเดือน (${monthlyRecs.length} รายการ)</p>
+            <h4 class="text-xl font-bold text-blue-600 mt-1">฿${monthlyAmt.toLocaleString()}</h4>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <p class="text-xs text-slate-500">ยอดรายปี (${yearlyRecs.length} รายการ)</p>
+            <h4 class="text-xl font-bold text-purple-600 mt-1">฿${yearlyAmt.toLocaleString()}</h4>
+          </div>
+        </div>
+
+        <!-- กราฟแท่งเปรียบเทียบประเภทชำระ -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3 mt-4">
+          <p class="text-xs font-bold text-slate-600 uppercase tracking-wider"><i class="fa-solid fa-chart-bar mr-1"></i> สัดส่วนประเภทการชำระเงิน (รายเดือน vs รายปี)</p>
+          
+          <div class="space-y-2">
+            <div>
+              <div class="flex justify-between text-xs font-semibold mb-1">
+                <span class="text-blue-600">รายเดือน (฿${monthlyAmt.toLocaleString()})</span>
+                <span>${mPercent}%</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                <div class="bg-blue-500 h-3 rounded-full transition-all duration-500" style="width: ${mPercent}%"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs font-semibold mb-1">
+                <span class="text-purple-600">รายปี (฿${yearlyAmt.toLocaleString()})</span>
+                <span>${yPercent}%</span>
+              </div>
+              <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                <div class="bg-purple-500 h-3 rounded-full transition-all duration-500" style="width: ${yPercent}%"></div>
+              </div>
             </div>
           </div>
-          <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
-            <div class="bg-emerald-600 h-3 rounded-full transition-all duration-500" style="width: ${percent}%"></div>
-          </div>
-        `;
-        container.appendChild(barWrapper);
-      });
+        </div>
+      `;
     }
 
     function renderTable() {
