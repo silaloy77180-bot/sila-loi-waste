@@ -38,7 +38,7 @@
 </head>
 <body class="text-slate-100">
 
-  <!-- ================= หน้าจอเข้าสู่ระบบ ================= -->
+  <!-- หน้าจอเข้าสู่ระบบ -->
   <div id="loginOverlay" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
     <div class="tech-card rounded-3xl max-w-md w-full p-8 shadow-2xl">
       <div class="text-center mb-6">
@@ -75,9 +75,8 @@
     </div>
   </div>
 
-  <!-- ================= โครงสร้างหลัก ================= -->
+  <!-- โครงสร้างหลัก -->
   <div id="mainAppContent" class="hidden min-h-screen flex flex-col md:flex-row">
-    
     <aside class="w-full md:w-64 tech-card border-r border-slate-800 flex flex-col justify-between shrink-0">
       <div>
         <div class="p-5 border-b border-slate-800 flex items-center space-x-3">
@@ -332,6 +331,7 @@
                     <th class="p-3.5 font-semibold">หมู่ที่ / หมู่บ้าน</th>
                     <th class="p-3.5 font-semibold">ประเภทชำระ</th>
                     <th class="p-3.5 font-semibold text-right">จำนวนเงิน</th>
+                    <th class="p-3.5 font-semibold text-center">จัดการ</th>
                   </tr>
                 </thead>
                 <tbody id="tableBody" class="divide-y divide-slate-800 text-sm"></tbody>
@@ -351,12 +351,81 @@
               <i class="fa-solid fa-map-location-dot text-emerald-400"></i> สรุปข้อมูลรายหมู่บ้าน (ทั้ง 9 หมู่)
             </h3>
             <p class="text-sm text-slate-400">รายละเอียดจำนวนครัวเรือนและยอดจัดเก็บรายได้แยกตามรายหมู่บ้าน</p>
-            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2" id="villageCardsGrid"></div>
           </div>
         </div>
-
       </main>
+    </div>
+  </div>
+
+  <!-- Modal แก้ไขข้อมูล -->
+  <div id="editModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="tech-card rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+        <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-pen-to-square text-amber-400 mr-2"></i> แก้ไขข้อมูลถังขยะ</h3>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+
+      <form id="editForm" class="space-y-3">
+        <input type="hidden" id="editRowNumber">
+        <input type="hidden" id="editId">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-1 text-slate-300">วันลงทะเบียน *</label>
+            <input type="text" id="editRegDate" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1 text-slate-300">เลขถังขยะ *</label>
+            <input type="text" id="editBinId" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-1 text-slate-300">บ้านเลขที่ *</label>
+            <input type="text" id="editHouseNo" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1 text-slate-300">เบอร์โทรศัพท์</label>
+            <input type="tel" id="editPhone" class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1 text-slate-300">ชื่อ - นามสกุล *</label>
+          <input type="text" id="editFullName" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1 text-slate-300">หมู่ที่ / หมู่บ้าน *</label>
+          <select id="editVillage" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+            <option value="หมู่ 1 บ้านห้วยขวาง">หมู่ 1 บ้านห้วยขวาง</option>
+            <option value="หมู่ 2 บ้านนาปุ่ม">หมู่ 2 บ้านนาปุ่ม</option>
+            <option value="หมู่ 3 บ้านหนองคาง">หมู่ 3 บ้านหนองคาง</option>
+            <option value="หมู่ 4 บ้านหนองหญ้าปล้อง">หมู่ 4 บ้านหนองหญ้าปล้อง</option>
+            <option value="หมู่ 5 บ้านลาดวิถี">หมู่ 5 บ้านลาดวิถี</option>
+            <option value="หมู่ 6 บ้านเขาโป่ง">หมู่ 6 บ้านเขาโป่ง</option>
+            <option value="หมู่ 7 บ้านหนองกลางดง">หมู่ 7 บ้านหนองกลางดง</option>
+            <option value="หมู่ 8 บ้านเกาะนาน้อย">หมู่ 8 บ้านเกาะนาน้อย</option>
+            <option value="หมู่ 9 บ้านเขาน้อยห้วยตามา">หมู่ 9 บ้านเขาน้อยห้วยตามา</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-1 text-slate-300">ประเภทชำระ *</label>
+            <select id="editPayType" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+              <option value="รายเดือน">รายเดือน</option>
+              <option value="รายปี">รายปี</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1 text-slate-300">จำนวนเงิน (บาท) *</label>
+            <input type="number" id="editAmount" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-4 border-t border-slate-800 mt-4">
+          <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 font-medium">ยกเลิก</button>
+          <button type="submit" id="btnSaveEdit" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold shadow-lg">บันทึกการแก้ไข</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -463,13 +532,15 @@
       let totalAmount = 0, monthlyAmount = 0, monthlyCount = 0, yearlyAmount = 0, yearlyCount = 0;
 
       allRecords.forEach(item => {
-        const amt = Number(item.amount || 0);
-        totalAmount += amt;
+        const amt = parseFloat(item.amount);
+        const validAmt = isNaN(amt) ? 0 : amt;
+        totalAmount += validAmt;
+
         if (item.payType === "รายเดือน") {
-          monthlyAmount += amt;
+          monthlyAmount += validAmt;
           monthlyCount++;
         } else if (item.payType === "รายปี") {
-          yearlyAmount += amt;
+          yearlyAmount += validAmt;
           yearlyCount++;
         }
       });
@@ -502,7 +573,7 @@
 
       allRecords.forEach(item => {
         for (let i = 1; i <= 9; i++) {
-          if (item.village && item.village.includes(`หมู่ ${i}`)) {
+          if (item.village && String(item.village).includes(`หมู่ ${i}`)) {
             villageCounts[`หมู่ ${i}`]++;
           }
         }
@@ -518,8 +589,8 @@
         let colDiv = document.createElement("div");
         colDiv.className = "flex flex-col items-center h-full justify-end group";
         colDiv.innerHTML = `
-          <span class="text-[10px] text-emerald-400 mb-1 opacity-0 group-hover:opacity-100 transition">${count}</span>
-          <div class="w-full bg-emerald-500/20 rounded-t-lg border-t border-x border-emerald-500/40 relative overflow-hidden transition-all duration-500 group-hover:bg-emerald-500/40" style="height: ${heightPercent}%"></div>
+          <span class="text-[10px] text-emerald-400 mb-1 transition">${count}</span>
+          <div class="w-full bg-emerald-500/30 rounded-t-lg border-t border-x border-emerald-500/50 relative overflow-hidden transition-all duration-500 group-hover:bg-emerald-500/50" style="height: ${heightPercent}%"></div>
           <span class="text-[11px] text-slate-400 mt-2 font-medium">ม.${i}</span>
         `;
         container.appendChild(colDiv);
@@ -536,9 +607,10 @@
         "หมู่ 7 บ้านหนองกลางดง", "หมู่ 8 บ้านเกาะนาน้อย", "หมู่ 9 บ้านเขาน้อยห้วยตามา"
       ];
 
-      villages.forEach(vName => {
-        let vRecords = allRecords.filter(r => r.village === vName);
-        let vAmount = vRecords.reduce((sum, r) => sum + Number(r.amount || 0), 0);
+      villages.forEach((vName, idx) => {
+        let vNum = `หมู่ ${idx + 1}`;
+        let vRecords = allRecords.filter(r => r.village && String(r.village).includes(vNum));
+        let vAmount = vRecords.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
 
         let card = document.createElement("div");
         card.className = "bg-slate-900/90 border border-slate-800 p-4 rounded-xl space-y-2";
@@ -566,7 +638,7 @@
                           (item.fullName + "").toLowerCase().includes(search) ||
                           (item.houseNo + "").toLowerCase().includes(search) ||
                           (item.regDate + "").toLowerCase().includes(search);
-        let matchV = filterV === "" || item.village === filterV;
+        let matchV = filterV === "" || (item.village && String(item.village).includes(filterV.split(" ")[0] + " " + filterV.split(" ")[1]));
         return matchSearch && matchV;
       });
 
@@ -576,19 +648,47 @@
         tr.className = "hover:bg-slate-900/50 transition border-b border-slate-800/60";
         tr.innerHTML = `
           <td class="p-3.5 text-slate-400">${index + 1}</td>
-          <td class="p-3.5 text-slate-300">${item.regDate}</td>
-          <td class="p-3.5 font-semibold text-emerald-400">${item.binId}</td>
-          <td class="p-3.5 text-white">${item.fullName}</td>
+          <td class="p-3.5 text-slate-300">${item.regDate || '-'}</td>
+          <td class="p-3.5 font-semibold text-emerald-400">${item.binId || '-'}</td>
+          <td class="p-3.5 text-white">${item.fullName || '-'}</td>
           <td class="p-3.5 text-slate-300">${item.phone || '-'}</td>
-          <td class="p-3.5 text-slate-300">${item.houseNo}</td>
-          <td class="p-3.5 text-slate-300">${item.village}</td>
-          <td class="p-3.5"><span class="px-2 py-1 rounded text-xs ${item.payType === 'รายปี' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-sky-500/20 text-sky-400 border border-sky-500/30'}">${item.payType}</span></td>
-          <td class="p-3.5 text-right font-bold text-emerald-300">฿${Number(item.amount || 0).toLocaleString()}</td>
+          <td class="p-3.5 text-slate-300">${item.houseNo || '-'}</td>
+          <td class="p-3.5 text-slate-300">${item.village || '-'}</td>
+          <td class="p-3.5"><span class="px-2 py-1 rounded text-xs ${item.payType === 'รายปี' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-sky-500/20 text-sky-400 border border-sky-500/30'}">${item.payType || '-'}</span></td>
+          <td class="p-3.5 text-right font-bold text-emerald-300">฿${(parseFloat(item.amount) || 0).toLocaleString()}</td>
+          <td class="p-3.5 text-center">
+            <button onclick='openEditModal(${JSON.stringify(item).replace(/'/g, "&apos;")})' class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-lg text-xs transition">
+              <i class="fa-solid fa-pen"></i> แก้ไข
+            </button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
 
       document.getElementById("totalCount").innerText = filtered.length;
+    }
+
+    function openEditModal(item) {
+      document.getElementById("editRowNumber").value = item.rowNumber || "";
+      document.getElementById("editId").value = item.id || "";
+      document.getElementById("editRegDate").value = item.regDate || "";
+      document.getElementById("editBinId").value = item.binId || "";
+      document.getElementById("editFullName").value = item.fullName || "";
+      document.getElementById("editPhone").value = item.phone || "";
+      document.getElementById("editHouseNo").value = item.houseNo || "";
+      document.getElementById("editVillage").value = item.village || "";
+      document.getElementById("editPayType").value = item.payType || "รายเดือน";
+      document.getElementById("editAmount").value = item.amount || 0;
+
+      const modal = document.getElementById("editModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeEditModal() {
+      const modal = document.getElementById("editModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
     }
 
     document.getElementById("addForm").addEventListener("submit", async (e) => {
@@ -624,6 +724,43 @@
       } finally {
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-save"></i> บันทึกข้อมูลลง Google Sheets`;
+      }
+    });
+
+    document.getElementById("editForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("btnSaveEdit");
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> กำลังบันทึก...`;
+
+      const payload = {
+        action: "edit",
+        rowNumber: document.getElementById("editRowNumber").value,
+        id: document.getElementById("editId").value,
+        regDate: document.getElementById("editRegDate").value,
+        binId: document.getElementById("editBinId").value,
+        fullName: document.getElementById("editFullName").value,
+        phone: document.getElementById("editPhone").value,
+        houseNo: document.getElementById("editHouseNo").value,
+        village: document.getElementById("editVillage").value,
+        payType: document.getElementById("editPayType").value,
+        amount: Number(document.getElementById("editAmount").value)
+      };
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        alert("บันทึกการแก้ไขสำเร็จ!");
+        closeEditModal();
+        fetchData();
+      } catch (err) {
+        console.error(err);
+        alert("เกิดข้อผิดพลาดในการแก้ไขข้อมูล");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `บันทึกการแก้ไข`;
       }
     });
   </script>
