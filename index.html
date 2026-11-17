@@ -305,10 +305,8 @@
   </div>
 
   <script>
-    // URL ของ Google Apps Script Web App
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw01amYiV8v-fau5VFqOYg1s_ew7WPCW4vRM_Yp0tZ0LAQsUsO4_jw0VnSeva9aHD8N/exec";
 
-    // รหัสผ่านตามที่คุณระบุ
     const PASSWORDS = {
       "Admin 1 (ระบบฉัน)": "032684111",
       "Admin 2 (ระบบเธอ)": "032684112"
@@ -316,7 +314,6 @@
 
     let allRecords = [];
 
-    // จัดการระบบ Login
     document.getElementById("loginForm").addEventListener("submit", (e) => {
       e.preventDefault();
       const role = document.getElementById("adminRole").value;
@@ -351,7 +348,6 @@
       location.reload();
     }
 
-    // ดึงข้อมูลจาก Google Apps Script
     async function fetchData() {
       const loading = document.getElementById("loadingBar");
       loading.classList.remove("hidden");
@@ -374,7 +370,6 @@
       }
     }
 
-    // อัปเดตการ์ดสรุปยอด
     function updateStats() {
       let totalAmount = 0, monthlyAmount = 0, monthlyCount = 0, yearlyAmount = 0, yearlyCount = 0;
 
@@ -398,7 +393,6 @@
       document.getElementById("statYearlyCount").innerText = yearlyCount;
     }
 
-    // สรุปยอดแยกตาม 9 หมู่บ้าน
     function renderVillageSummary() {
       const container = document.getElementById("villageSummaryContainer");
       container.innerHTML = "";
@@ -428,7 +422,6 @@
       });
     }
 
-    // แสดงผลตาราง
     function renderTable() {
       const keyword = document.getElementById("searchInput").value.toLowerCase();
       const villageFilter = document.getElementById("filterVillage").value;
@@ -461,10 +454,10 @@
           </td>
           <td class="p-3 text-right font-semibold">฿${Number(item.amount).toLocaleString()}</td>
           <td class="p-3 text-center whitespace-nowrap">
-            <button onclick="openEditModal('${item.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-700 px-2.5 py-1 rounded-lg text-xs font-medium mr-1 transition" title="แก้ไขโดย: ${item.updatedBy || '-'} (${item.updatedAt || '-'})">
+            <button onclick="openEditModal('${item.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-700 px-2.5 py-1 rounded-lg text-xs font-medium mr-1 transition">
               <i class="fa-solid fa-pen"></i> แก้ไข
             </button>
-            <button onclick="deleteRecord('${item.id}', '${item.binId}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2.5 py-1 rounded-lg text-xs font-medium transition">
+            <button onclick="deleteRecord('${item.id}', '${item.binId || item.fullName}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2.5 py-1 rounded-lg text-xs font-medium transition">
               <i class="fa-solid fa-trash"></i> ลบ
             </button>
           </td>
@@ -475,7 +468,6 @@
       document.getElementById("totalCount").innerText = filtered.length;
     }
 
-    // 1. บันทึกรายการใหม่
     document.getElementById("addForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("btnSubmit");
@@ -500,7 +492,6 @@
       btn.innerHTML = '<i class="fa-solid fa-save"></i> บันทึกข้อมูล';
     });
 
-    // 2. เปิดหน้าต่างแก้ไข
     function openEditModal(id) {
       const record = allRecords.find(r => String(r.id) === String(id));
       if (!record) return;
@@ -525,7 +516,6 @@
       modal.classList.remove("flex");
     }
 
-    // บันทึกการแก้ไข
     document.getElementById("editForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("btnSaveEdit");
@@ -551,9 +541,8 @@
       btn.innerText = "บันทึกการแก้ไข";
     });
 
-    // 3. ลบรายการ
-    async function deleteRecord(id, binId) {
-      if (!confirm(`ยืนยันการลบข้อมูลเลขถังขยะ "${binId}" ใช่หรือไม่?`)) {
+    async function deleteRecord(id, label) {
+      if (!confirm(`ยืนยันการลบข้อมูล "${label}" ใช่หรือไม่?`)) {
         return;
       }
       await sendPostRequest({ 
@@ -563,7 +552,6 @@
       });
     }
 
-    // ส่งคำสั่ง POST
     async function sendPostRequest(payload) {
       try {
         const res = await fetch(SCRIPT_URL, {
