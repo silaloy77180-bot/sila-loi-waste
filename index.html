@@ -12,7 +12,6 @@
       font-family: 'Sarabun', sans-serif; 
       background-color: #030712; 
       color: #f3f4f6;
-      /* ลวดลายตารางอิเล็กทรอนิกส์เรืองแสงแนวโลกอนาคต */
       background-image: 
         linear-gradient(to right, rgba(16, 185, 129, 0.05) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
@@ -26,7 +25,6 @@
       border: 1px solid rgba(16, 185, 129, 0.3);
       box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
     }
-    /* เอฟเฟกต์เรืองแสงไฮเทค */
     .tech-card {
       background: rgba(15, 23, 42, 0.85);
       border: 1px solid rgba(16, 185, 129, 0.2);
@@ -159,7 +157,6 @@
 
         <!-- ================= PAGE 1: DASHBOARD ================= -->
         <div id="page-dashboard" class="page-content space-y-6">
-          <!-- การ์ดสรุปตัวเลข -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="tech-card p-5 rounded-2xl flex justify-between items-center">
               <div>
@@ -198,7 +195,6 @@
             </div>
           </div>
 
-          <!-- กราฟแสดงสถิติ -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="tech-card p-6 rounded-2xl lg:col-span-2 flex flex-col justify-between">
               <div>
@@ -687,6 +683,7 @@
       document.getElementById("totalCount").innerText = filtered.length;
     }
 
+    // ฟังก์ชันบันทึกข้อมูลรายการใหม่ (เชื่อมต่อ POST ไปยัง Google Apps Script)
     document.getElementById("addForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("btnSubmit");
