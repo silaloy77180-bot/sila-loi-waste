@@ -126,7 +126,7 @@
           <h2 id="pageTitle" class="text-lg font-bold text-white tracking-wide">ภาพรวมระบบ (Dashboard)</h2>
         </div>
         <div id="loadingBar" class="text-xs text-emerald-400 bg-emerald-950/60 px-3 py-1.5 rounded-lg border border-emerald-800/60 flex items-center gap-2 hidden">
-          <i class="fa-solid fa-circle-notch fa-spin"></i> กำลังซิงค์ข้อมูลอย่างรวดเร็ว...
+          <i class="fa-solid fa-circle-notch fa-spin"></i> กำลังซิงค์ข้อมูล...
         </div>
       </header>
 
@@ -513,7 +513,6 @@
       location.reload();
     }
 
-    // ฟังก์ชันดึงข้อมูล (เปิดเบื้องหลังแบบไม่กวนผู้ใช้)
     async function fetchData(isBackground = false) {
       const loading = document.getElementById("loadingBar");
       if (!isBackground) loading.classList.remove("hidden");
@@ -675,7 +674,7 @@
       document.getElementById("totalCount").innerText = filtered.length;
     }
 
-    // ฟังก์ชันบันทึกรายการใหม่ (เพิ่มความเร็วแบบทันทีด้วย Optimistic UI)
+    // ฟังก์ชันบันทึกรายการใหม่
     document.getElementById("addForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("btnSubmit");
@@ -695,7 +694,6 @@
         amount: document.getElementById("amount").value
       };
 
-      // เพิ่มข้อมูลเข้าตารางทันทีชั่วคราวก่อนเพื่อให้ไวที่สุด
       allRecords.unshift({
         id: "temp_" + Date.now(),
         date: payload.date,
@@ -718,23 +716,26 @@
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-solid fa-save"></i> บันทึกข้อมูลลง Google Sheets';
 
-      // ส่งข้อมูลไปบันทึกจริงที่ Google Sheets เบื้องหลังแบบเงียบๆ
       sendPostRequestSilent(payload);
     });
 
+    // เปิด Modal แก้ไขข้อมูล (รองรับการเทียบ ID ทุกรูปแบบ)
     function openEditModal(id) {
-      const record = allRecords.find(r => String(r.id) === String(id));
-      if (!record) return;
+      const record = allRecords.find(r => String(r.id).trim() === String(id).trim());
+      if (!record) {
+        alert("ไม่พบข้อมูลที่ต้องการแก้ไข");
+        return;
+      }
 
       document.getElementById("editId").value = record.id;
       document.getElementById("editRegDate").value = record.date || "";
-      document.getElementById("editBinId").value = record.binId;
-      document.getElementById("editFullName").value = record.fullName;
+      document.getElementById("editBinId").value = record.binId || "";
+      document.getElementById("editFullName").value = record.fullName || "";
       document.getElementById("editPhone").value = record.phone || "";
-      document.getElementById("editHouseNo").value = record.houseNo;
-      document.getElementById("editVillage").value = record.village;
-      document.getElementById("editPayType").value = record.payType;
-      document.getElementById("editAmount").value = record.amount;
+      document.getElementById("editHouseNo").value = record.houseNo || "";
+      document.getElementById("editVillage").value = record.village || "";
+      document.getElementById("editPayType").value = record.payType || "รายเดือน";
+      document.getElementById("editAmount").value = record.amount || "";
 
       const modal = document.getElementById("editModal");
       modal.classList.remove("hidden");
@@ -747,16 +748,18 @@
       modal.classList.remove("flex");
     }
 
+    // บันทึกการแก้ไข (อัปเดตหน้าจอทันที + ส่งไปหลังบ้าน)
     document.getElementById("editForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("btnSaveEdit");
       btn.disabled = true;
       btn.innerText = "กำลังอัปเดตด่วน...";
 
+      const targetId = document.getElementById("editId").value;
       const payload = {
         action: "edit",
         adminRole: sessionStorage.getItem("adminRole") || "Admin",
-        id: document.getElementById("editId").value,
+        id: targetId,
         date: document.getElementById("editRegDate").value,
         binId: document.getElementById("editBinId").value,
         fullName: document.getElementById("editFullName").value,
@@ -767,11 +770,30 @@
         amount: document.getElementById("editAmount").value
       };
 
+      // อัปเดตข้อมูลบนตารางหน้าจอทันทีแบบรวดเร็ว
+      const index = allRecords.findIndex(r => String(r.id).trim() === String(targetId).trim());
+      if (index !== -1) {
+        allRecords[index] = {
+          ...allRecords[index],
+          date: payload.date,
+          binId: payload.binId,
+          fullName: payload.fullName,
+          phone: payload.phone,
+          houseNo: payload.houseNo,
+          village: payload.village,
+          payType: payload.payType,
+          amount: payload.amount
+        };
+        updateStats();
+        renderVerticalBarChart();
+        renderVillageCards();
+        renderTable();
+      }
+
       closeEditModal();
       btn.disabled = false;
       btn.innerText = "บันทึกการแก้ไข";
 
-      // ส่งแก้ไขไปหลังบ้านแบบเบื้องหลัง
       sendPostRequestSilent(payload);
     });
 
@@ -780,8 +802,7 @@
         return;
       }
       
-      // ลบออกจากหน้าจอทันทีเพื่อความรวดเร็ว
-      allRecords = allRecords.filter(r => String(r.id) !== String(id));
+      allRecords = allRecords.filter(r => String(r.id).trim() !== String(id).trim());
       updateStats();
       renderVerticalBarChart();
       renderVillageCards();
@@ -794,7 +815,6 @@
       });
     }
 
-    // ฟังก์ชันส่งข้อมูลเบื้องหลังแบบไม่ให้หน้าเว็บสะดุด
     async function sendPostRequestSilent(payload) {
       try {
         const res = await fetch(SCRIPT_URL, {
@@ -806,7 +826,6 @@
         });
         const result = await res.json();
         if (result.status === "success") {
-          // ดึงข้อมูลจริงล่าสุดมาซิงค์เงียบๆ เบื้องหลัง
           fetchData(true);
         } else {
           alert("เกิดข้อผิดพลาด: " + result.message);
