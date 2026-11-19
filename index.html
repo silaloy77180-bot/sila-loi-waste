@@ -368,7 +368,7 @@
             <div class="flex flex-col md:flex-row justify-between gap-4 mb-5">
               <div class="relative flex-1">
                 <i class="fa-solid fa-search absolute left-3.5 top-3.5 text-slate-400"></i>
-                <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="ค้นหาวันลงทะเบียน, เลขถังขยะ, ชื่อ-นามสกุล, บ้านเลขที่, ประเภท..." class="w-full pl-10 pr-4 py-2.5 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
+                <input type="text" id="searchInput" oninput="scheduleTableRender()" placeholder="ค้นหาวันลงทะเบียน, เลขถังขยะ, ชื่อ-นามสกุล, บ้านเลขที่, ประเภท..." class="w-full pl-10 pr-4 py-2.5 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
               </div>
               <div class="w-full md:w-56">
                 <select id="filterCustomerType" onchange="renderTable()" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
@@ -420,8 +420,9 @@
               </table>
             </div>
 
-            <div class="mt-4 text-sm text-slate-400 flex justify-between items-center px-1">
+            <div class="mt-4 text-sm text-slate-400 flex flex-wrap justify-between items-center gap-2 px-1">
               <span>แสดงทั้งหมด <strong id="totalCount" class="text-emerald-400">0</strong> รายการ</span>
+              <div id="tablePagination" class="flex items-center gap-2"></div>
             </div>
           </div>
         </div>
@@ -560,7 +561,7 @@
     </div>
   </div>
 
-  <!-- Modal ขอยกเลิกการลงทะเบียน (เพิ่มวันที่ยกเลิก) -->
+  <!-- Modal ขอยกเลิกการลงทะเบียน -->
   <div id="cancelRegModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="tech-card rounded-2xl max-w-md w-full p-6 shadow-2xl border border-rose-500/40">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
@@ -647,7 +648,8 @@
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw01amYiV8v-fau5VFqOYg1s_ew7WPCW4vRM_Yp0tZ0LAQsUsO4_jw0VnSeva9aHD8N/exec";
-    const CACHE_KEY = "sila_loi_waste_cache_v5";
+    const CACHE_KEY = "sila_loi_waste_cache_v6";
+    const PAGE_SIZE = 50;
 
     const PASSWORDS = {
       "Admin 1": "032684111",
@@ -676,6 +678,14 @@
       { num: "9", full: "หมู่ 9 บ้านเขาน้อยห้วยตามา" }
     ];
 
+    let allRecords = [];
+    let allLogs = [];
+    let currentPage = "dashboard";
+    let currentTablePage = 1;
+    let selectedModalPrice = null;
+    let searchTimer = null;
+    let isFetching = false;
+
     function sendToAppsScript(payloadObj) {
       return fetch(SCRIPT_URL, {
         method: "POST",
@@ -692,7 +702,7 @@
         inp.classList.toggle("hidden", !isOther);
         inp.required = isOther;
         if (!isOther) inp.value = "";
-      } else if (mode === "edit") {
+      } else {
         const sel = document.getElementById("editCustomerTypeSelect");
         const inp = document.getElementById("editCustomerTypeOther");
         const isOther = sel.value === "อื่นๆ";
@@ -705,17 +715,10 @@
     function getResolvedCustomerType(mode) {
       if (mode === "add") {
         const selVal = document.getElementById("customerTypeSelect").value;
-        if (selVal === "อื่นๆ") {
-          return document.getElementById("customerTypeOther").value.trim() || "อื่นๆ";
-        }
-        return selVal;
-      } else {
-        const selVal = document.getElementById("editCustomerTypeSelect").value;
-        if (selVal === "อื่นๆ") {
-          return document.getElementById("editCustomerTypeOther").value.trim() || "อื่นๆ";
-        }
-        return selVal;
+        return selVal === "อื่นๆ" ? (document.getElementById("customerTypeOther").value.trim() || "อื่นๆ") : selVal;
       }
+      const selVal = document.getElementById("editCustomerTypeSelect").value;
+      return selVal === "อื่นๆ" ? (document.getElementById("editCustomerTypeOther").value.trim() || "อื่นๆ") : selVal;
     }
 
     function getVillageDisplay(rawV) {
@@ -752,21 +755,31 @@
       return `${dd}/${mm}/${yyyy}`;
     }
 
-    let allRecords = [];
-    let allLogs = [];
-    let selectedModalPrice = null;
+    function getThaiDateToday() {
+      const now = new Date();
+      return now.getDate() + "." + (now.getMonth() + 1) + "." + (now.getFullYear() + 543);
+    }
 
-    function refreshAllViews() {
-      renderDashboard();
-      renderTable();
-      renderVillageAnalytics();
-      renderHistoryTable();
+    function saveCacheSafe() {
       try {
         sessionStorage.setItem(CACHE_KEY, JSON.stringify({ records: allRecords, logs: allLogs }));
       } catch (e) {}
     }
 
+    function renderActivePageOnly() {
+      if (currentPage === "dashboard") {
+        renderDashboard();
+      } else if (currentPage === "management") {
+        renderTable();
+      } else if (currentPage === "analytics") {
+        renderVillageAnalytics();
+      } else if (currentPage === "history") {
+        renderHistoryTable();
+      }
+    }
+
     function switchPage(pageId) {
+      currentPage = pageId;
       document.querySelectorAll(".page-content").forEach(el => el.classList.add("hidden"));
       document.getElementById("page-" + pageId).classList.remove("hidden");
 
@@ -785,11 +798,7 @@
         history: "ประวัติการขอยกเลิกการลงทะเบียนและแก้ไขข้อมูล"
       };
       document.getElementById("pageTitle").innerText = titles[pageId] || "ระบบจัดการขยะ ตำบลศิลาลอย";
-    }
-
-    function getThaiDateToday() {
-      const now = new Date();
-      return now.getDate() + "." + (now.getMonth() + 1) + "." + (now.getFullYear() + 543);
+      renderActivePageOnly();
     }
 
     function showLoading(show) {
@@ -838,35 +847,45 @@
     });
 
     async function loadData(forceAlert = false) {
+      if (isFetching) return;
+
       const cachedRaw = sessionStorage.getItem(CACHE_KEY);
-      if (cachedRaw && !forceAlert) {
+      if (cachedRaw && !forceAlert && allRecords.length === 0) {
         try {
           const cached = JSON.parse(cachedRaw);
           if (Array.isArray(cached.records) && cached.records.length > 0) {
             allRecords = cached.records;
             allLogs = cached.logs || [];
-            refreshAllViews();
+            renderActivePageOnly();
           }
         } catch (e) {}
       }
 
+      isFetching = true;
       showLoading(true);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
       try {
-        const res = await fetch(SCRIPT_URL + "?t=" + Date.now());
+        const res = await fetch(SCRIPT_URL + "?t=" + Date.now(), { signal: controller.signal });
         const json = await res.json();
         if (json.status === "success") {
-          allRecords = json.data || [];
-          allLogs = json.logs || [];
-          refreshAllViews();
+          allRecords = Array.isArray(json.data) ? json.data : [];
+          allLogs = Array.isArray(json.logs) ? json.logs : [];
+          saveCacheSafe();
+          renderActivePageOnly();
         } else if (forceAlert) {
           alert("โหลดข้อมูลไม่สำเร็จ: " + (json.message || "ไม่ทราบสาเหตุ"));
         }
       } catch (err) {
-        console.error(err);
         if (forceAlert) {
-          alert("เกิดข้อผิดพลาดในการเชื่อมต่อ Google Apps Script");
+          alert(err.name === "AbortError"
+            ? "การเชื่อมต่อฐานข้อมูลใช้เวลานานเกินกำหนด กรุณาลองใหม่อีกครั้ง"
+            : "เกิดข้อผิดพลาดในการเชื่อมต่อ Google Apps Script");
         }
       } finally {
+        clearTimeout(timeoutId);
+        isFetching = false;
         showLoading(false);
       }
     }
@@ -890,12 +909,10 @@
     }
 
     function renderDashboard() {
-      const activeRecords = allRecords.filter(r => String(r.status || "ปกติ") !== "ยกเลิก");
-      const dedupLogs = getDeduplicatedLogs();
-
       let totalHouseholds = 0;
       let totalEstablishments = 0;
       let totalAmount = 0;
+      let activeCount = 0;
 
       const cardCounts = {
         "ครัวเรือน": 0,
@@ -922,7 +939,11 @@
 
       const priceMap = {};
 
-      activeRecords.forEach(r => {
+      for (let i = 0; i < allRecords.length; i++) {
+        const r = allRecords[i];
+        if (String(r.status || "ปกติ") === "ยกเลิก") continue;
+
+        activeCount += 1;
         const amt = Number(r.amount) || 0;
         const vNum = getVillageNum(r.village);
         const cType = String(r.customerType || "ครัวเรือน").trim() || "ครัวเรือน";
@@ -956,12 +977,14 @@
         }
         priceMap[amt].count += 1;
         priceMap[amt].total += amt;
-      });
+      }
+
+      const dedupLogs = getDeduplicatedLogs();
 
       document.getElementById("statTotalHouseholds").innerText = totalHouseholds.toLocaleString() + " ราย";
       document.getElementById("statTotalEstablishments").innerText = totalEstablishments.toLocaleString() + " แห่ง";
       document.getElementById("statTotalAmount").innerText = "฿" + totalAmount.toLocaleString();
-      document.getElementById("statTotalActive").innerText = activeRecords.length.toLocaleString();
+      document.getElementById("statTotalActive").innerText = activeCount.toLocaleString();
       document.getElementById("statTotalLogs").innerText = dedupLogs.length.toLocaleString() + " ครั้ง";
 
       const orderedCards = [
@@ -982,11 +1005,9 @@
         </div>
       `).join("");
 
-      const summaryBody = document.getElementById("dashboardVillageSummaryBody");
-      summaryBody.innerHTML = "";
-      VILLAGES.forEach(v => {
+      document.getElementById("dashboardVillageSummaryBody").innerHTML = VILLAGES.map(v => {
         const st = villageStats[v.num];
-        summaryBody.innerHTML += `
+        return `
           <tr class="hover:bg-slate-900/60 transition">
             <td class="p-3 font-medium text-white">${st.name}</td>
             <td class="p-3 text-center text-emerald-400 font-semibold">${st.households.toLocaleString()}</td>
@@ -995,22 +1016,20 @@
             <td class="p-3 text-right text-amber-300 font-bold">฿${st.amount.toLocaleString()}</td>
           </tr>
         `;
-      });
+      }).join("");
 
       const maxVal = Math.max(1, ...VILLAGES.map(v => villageStats[v.num].totalCount));
-      const barContainer = document.getElementById("verticalBarChartContainer");
-      barContainer.innerHTML = "";
-      VILLAGES.forEach(v => {
+      document.getElementById("verticalBarChartContainer").innerHTML = VILLAGES.map(v => {
         const count = villageStats[v.num].totalCount;
         const heightPct = Math.max(6, Math.round((count / maxVal) * 100));
-        barContainer.innerHTML += `
+        return `
           <div class="flex flex-col items-center justify-end h-full group">
             <span class="text-[11px] font-bold text-emerald-300 mb-1">${count}</span>
-            <div class="w-full max-w-[34px] rounded-t-lg bg-gradient-to-t from-emerald-600 to-teal-400 transition-all duration-500 group-hover:brightness-125" style="height: ${heightPct}%"></div>
+            <div class="w-full max-w-[34px] rounded-t-lg bg-gradient-to-t from-emerald-600 to-teal-400 transition-all duration-300 group-hover:brightness-125" style="height: ${heightPct}%"></div>
             <span class="text-[11px] text-slate-400 mt-2">ม.${v.num}</span>
           </div>
         `;
-      });
+      }).join("");
 
       const totalTypeCount = totalHouseholds + totalEstablishments;
       const pctH = totalTypeCount > 0 ? Math.round((totalHouseholds / totalTypeCount) * 100) : 0;
@@ -1036,24 +1055,35 @@
       }
     }
 
-    function renderTable() {
+    function scheduleTableRender() {
+      currentTablePage = 1;
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => renderTable(), 180);
+    }
+
+    function goToTablePage(pageNum) {
+      currentTablePage = pageNum;
+      renderTable();
+    }
+
+    function getFilteredRecords() {
       const q = (document.getElementById("searchInput").value || "").trim().toLowerCase();
       const vFilter = document.getElementById("filterVillage").value;
       const typeFilter = document.getElementById("filterCustomerType").value;
 
-      const filtered = allRecords.filter(r => {
+      return allRecords.filter(r => {
         const vNum = getVillageNum(r.village);
-        const matchV = !vFilter || vFilter === "หมู่ " + vNum;
-        const cType = String(r.customerType || "ครัวเรือน").trim();
+        if (vFilter && vFilter !== "หมู่ " + vNum) return false;
 
-        let matchType = true;
+        const cType = String(r.customerType || "ครัวเรือน").trim();
         if (typeFilter === "อื่นๆ") {
-          matchType = !PRESET_TYPES.includes(cType);
-        } else if (typeFilter) {
-          matchType = cType === typeFilter;
+          if (PRESET_TYPES.includes(cType)) return false;
+        } else if (typeFilter && cType !== typeFilter) {
+          return false;
         }
 
-        const matchQ = !q ||
+        if (!q) return true;
+        return (
           String(r.regDate || "").toLowerCase().includes(q) ||
           String(r.binId || "").toLowerCase().includes(q) ||
           String(r.fullName || "").toLowerCase().includes(q) ||
@@ -1061,20 +1091,31 @@
           String(r.phone || "").toLowerCase().includes(q) ||
           String(r.village || "").toLowerCase().includes(q) ||
           cType.toLowerCase().includes(q) ||
-          String(r.amount || "").toLowerCase().includes(q);
-        return matchV && matchType && matchQ;
+          String(r.amount || "").toLowerCase().includes(q)
+        );
       });
+    }
+
+    function renderTable() {
+      const filtered = getFilteredRecords();
+      const totalItems = filtered.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+      if (currentTablePage > totalPages) currentTablePage = totalPages;
+
+      const startIdx = (currentTablePage - 1) * PAGE_SIZE;
+      const pageItems = filtered.slice(startIdx, startIdx + PAGE_SIZE);
 
       const tbody = document.getElementById("tableBody");
-      tbody.innerHTML = "";
-      document.getElementById("totalCount").innerText = filtered.length.toLocaleString();
+      document.getElementById("totalCount").innerText = totalItems.toLocaleString();
 
-      if (filtered.length === 0) {
+      if (pageItems.length === 0) {
         tbody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">ไม่พบข้อมูลที่ค้นหา</td></tr>`;
+        document.getElementById("tablePagination").innerHTML = "";
         return;
       }
 
-      filtered.forEach((r, idx) => {
+      tbody.innerHTML = pageItems.map((r, i) => {
+        const globalIdx = startIdx + i + 1;
         const isCancelled = String(r.status || "ปกติ") === "ยกเลิก";
         const cType = String(r.customerType || "ครัวเรือน").trim();
         const typeBadge = cType === "ครัวเรือน"
@@ -1085,9 +1126,9 @@
           ? `<span class="px-2 py-0.5 rounded-full text-xs bg-rose-500/20 text-rose-300 border border-rose-500/30">ยกเลิก</span>`
           : `<span class="px-2 py-0.5 rounded-full text-xs bg-slate-800 text-slate-200 border border-slate-700">ปกติ</span>`;
 
-        tbody.innerHTML += `
+        return `
           <tr class="hover:bg-slate-900/60 transition ${isCancelled ? "opacity-60" : ""}">
-            <td class="p-3 text-slate-400">${idx + 1}</td>
+            <td class="p-3 text-slate-400">${globalIdx}</td>
             <td class="p-3 whitespace-nowrap">${r.regDate || "-"}</td>
             <td class="p-3 whitespace-nowrap font-mono text-emerald-300">${r.binId || "-"}</td>
             <td class="p-3 font-medium text-white">${r.fullName || "-"}</td>
@@ -1099,32 +1140,35 @@
             <td class="p-3 text-right font-bold text-amber-300 whitespace-nowrap">฿${Number(r.amount || 0).toLocaleString()}</td>
             <td class="p-3 text-center whitespace-nowrap">
               <div class="inline-flex items-center gap-1.5">
-                <button type="button" onclick="openEditModal(${r.id})" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold" title="แก้ไขข้อมูล">
+                <button type="button" onclick="openEditModal(${r.id})" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold">
                   <i class="fa-solid fa-pen"></i> แก้ไข
                 </button>
                 ${!isCancelled ? `
-                <button type="button" onclick="openCancelRegModal(${r.id})" class="px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-semibold" title="ขอยกเลิกการลงทะเบียน">
+                <button type="button" onclick="openCancelRegModal(${r.id})" class="px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-semibold">
                   <i class="fa-solid fa-ban"></i> ขอยกเลิก
                 </button>` : ""}
               </div>
             </td>
           </tr>
         `;
-      });
+      }).join("");
+
+      document.getElementById("tablePagination").innerHTML = `
+        <button type="button" ${currentTablePage <= 1 ? "disabled" : ""} onclick="goToTablePage(${currentTablePage - 1})" class="px-3 py-1 rounded-lg bg-slate-800 disabled:opacity-40 text-white text-xs">ก่อนหน้า</button>
+        <span class="text-xs text-slate-300">หน้า ${currentTablePage} / ${totalPages}</span>
+        <button type="button" ${currentTablePage >= totalPages ? "disabled" : ""} onclick="goToTablePage(${currentTablePage + 1})" class="px-3 py-1 rounded-lg bg-slate-800 disabled:opacity-40 text-white text-xs">ถัดไป</button>
+      `;
     }
 
     function renderVillageAnalytics() {
       const activeRecords = allRecords.filter(r => String(r.status || "ปกติ") !== "ยกเลิก");
-      const grid = document.getElementById("villageCardsGrid");
-      grid.innerHTML = "";
-
-      VILLAGES.forEach(v => {
+      document.getElementById("villageCardsGrid").innerHTML = VILLAGES.map(v => {
         const list = activeRecords.filter(r => getVillageNum(r.village) === v.num);
         const households = list.filter(r => (r.customerType || "ครัวเรือน") === "ครัวเรือน").length;
-        const establishments = list.filter(r => (r.customerType || "ครัวเรือน") !== "ครัวเรือน").length;
+        const establishments = list.length - households;
         const sumAmt = list.reduce((acc, item) => acc + (Number(item.amount) || 0), 0);
 
-        grid.innerHTML += `
+        return `
           <div class="bg-slate-900/90 border border-slate-800 hover:border-emerald-500/40 rounded-2xl p-5 transition space-y-3">
             <div class="flex justify-between items-start">
               <h4 class="font-bold text-white text-base">${v.full}</h4>
@@ -1146,12 +1190,11 @@
             </div>
           </div>
         `;
-      });
+      }).join("");
     }
 
     function renderHistoryTable() {
       const tbody = document.getElementById("historyTableBody");
-      tbody.innerHTML = "";
       const dedupLogs = getDeduplicatedLogs();
 
       if (!dedupLogs || dedupLogs.length === 0) {
@@ -1159,13 +1202,13 @@
         return;
       }
 
-      dedupLogs.forEach((log, idx) => {
+      tbody.innerHTML = dedupLogs.map((log, idx) => {
         const isCancel = String(log.actionType || "").includes("ยกเลิก");
         const badgeClass = isCancel
           ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
           : "bg-amber-500/20 text-amber-300 border-amber-500/40";
 
-        tbody.innerHTML += `
+        return `
           <tr class="hover:bg-slate-900/60 transition">
             <td class="p-3 whitespace-nowrap text-xs text-slate-300">${log.timestamp || "-"}</td>
             <td class="p-3 whitespace-nowrap">
@@ -1179,13 +1222,13 @@
             <td class="p-3 text-slate-200">${log.detail || "-"}</td>
             <td class="p-3 whitespace-nowrap text-cyan-300 font-semibold">${log.admin || "-"}</td>
             <td class="p-3 text-center whitespace-nowrap">
-              <button type="button" onclick="deleteHistoryItem(${idx})" class="px-2.5 py-1.5 rounded-lg bg-red-600/20 hover:bg-red-600/35 text-red-300 border border-red-500/40 text-xs font-semibold" title="ลบรายการประวัตินี้">
+              <button type="button" onclick="deleteHistoryItem(${idx})" class="px-2.5 py-1.5 rounded-lg bg-red-600/20 hover:bg-red-600/35 text-red-300 border border-red-500/40 text-xs font-semibold">
                 <i class="fa-solid fa-trash"></i> ลบ
               </button>
             </td>
           </tr>
         `;
-      });
+      }).join("");
     }
 
     async function deleteHistoryItem(dedupIdx) {
@@ -1202,7 +1245,8 @@
         String(item.houseNo || "") === String(targetLog.houseNo || "") &&
         String(item.actionType || "") === String(targetLog.actionType || "")
       ));
-      refreshAllViews();
+      saveCacheSafe();
+      renderHistoryTable();
 
       try {
         await sendToAppsScript({
@@ -1212,7 +1256,6 @@
           fullName: targetLog.fullName || "",
           houseNo: targetLog.houseNo || ""
         });
-        loadData(false);
       } catch (err) {
         alert("เกิดข้อผิดพลาดในการลบประวัติในชีต");
       }
@@ -1224,8 +1267,6 @@
       btn.disabled = true;
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...`;
 
-      const customerType = getResolvedCustomerType("add");
-
       const payload = {
         action: "add",
         regDate: document.getElementById("regDate").value.trim(),
@@ -1234,7 +1275,7 @@
         phone: document.getElementById("phone").value.trim() || "-",
         houseNo: document.getElementById("houseNo").value.trim(),
         village: document.getElementById("village").value,
-        customerType: customerType,
+        customerType: getResolvedCustomerType("add"),
         amount: Number(document.getElementById("amount").value) || 0,
         status: "ปกติ",
         adminRole: getCurrentAdmin()
@@ -1242,20 +1283,14 @@
 
       try {
         await sendToAppsScript(payload);
-
         const maxId = allRecords.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0);
-        allRecords.push({
-          ...payload,
-          id: maxId + 1,
-          rowNumber: allRecords.length + 2,
-          sheetName: ""
-        });
+        allRecords.push({ ...payload, id: maxId + 1, rowNumber: allRecords.length + 2, sheetName: "" });
+        saveCacheSafe();
 
         document.getElementById("addForm").reset();
         document.getElementById("regDate").value = getThaiDateToday();
         toggleCustomTypeInput("add");
-        refreshAllViews();
-        loadData(false);
+        renderActivePageOnly();
       } catch (err) {
         alert("เกิดข้อผิดพลาดในการส่งข้อมูล");
       } finally {
@@ -1316,7 +1351,6 @@
       const targetId = Number(document.getElementById("editId").value);
       const detailText = document.getElementById("editDetailReason").value.trim() || "แก้ไขข้อมูลผู้ลงทะเบียน";
       const adminName = getCurrentAdmin();
-      const customerType = getResolvedCustomerType("edit");
 
       const payload = {
         action: "edit",
@@ -1328,7 +1362,7 @@
         phone: document.getElementById("editPhone").value.trim() || "-",
         fullName: document.getElementById("editFullName").value.trim(),
         village: document.getElementById("editVillage").value,
-        customerType: customerType,
+        customerType: getResolvedCustomerType("edit"),
         amount: Number(document.getElementById("editAmount").value) || 0,
         status: "ปกติ",
         detail: detailText,
@@ -1337,7 +1371,6 @@
 
       try {
         await sendToAppsScript(payload);
-
         allRecords = allRecords.map(r => Number(r.id) === targetId ? { ...r, ...payload } : r);
         allLogs.unshift({
           timestamp: getNowThaiTimestamp(),
@@ -1350,10 +1383,10 @@
           detail: detailText,
           admin: adminName
         });
+        saveCacheSafe();
 
         closeEditModal();
-        refreshAllViews();
-        loadData(false);
+        renderActivePageOnly();
       } catch (err) {
         alert("เกิดข้อผิดพลาดในการบันทึกการแก้ไข");
       } finally {
@@ -1424,8 +1457,8 @@
 
       try {
         await sendToAppsScript(payload);
-
         allRecords = allRecords.map(r => Number(r.id) === targetId ? { ...r, status: "ยกเลิก" } : r);
+
         const vKey = String(vNum).trim();
         const hKey = String(houseNo).trim().toLowerCase();
         const nKey = String(fullName).trim().toLowerCase();
@@ -1448,10 +1481,10 @@
           detail: reason,
           admin: adminName
         });
+        saveCacheSafe();
 
         closeCancelRegModal();
-        refreshAllViews();
-        loadData(false);
+        renderActivePageOnly();
       } catch (err) {
         alert("เกิดข้อผิดพลาดในการขอยกเลิก");
       } finally {
@@ -1468,21 +1501,17 @@
       document.getElementById("priceModalTitle").innerHTML = `<i class="fa-solid fa-users text-emerald-400"></i> รายชื่อผู้ชำระอัตรา ฿${selectedModalPrice.toLocaleString()}`;
       document.getElementById("priceModalSubtitle").innerText = `ทั้งหมด ${list.length.toLocaleString()} ราย | ยอดรวม ฿${totalAmt.toLocaleString()}`;
 
-      const tbody = document.getElementById("priceModalTableBody");
-      tbody.innerHTML = "";
-      list.forEach((r, idx) => {
-        tbody.innerHTML += `
-          <tr class="hover:bg-slate-900/60">
-            <td class="p-3 text-slate-400">${idx + 1}</td>
-            <td class="p-3 font-mono text-emerald-300">${r.binId || "-"}</td>
-            <td class="p-3 font-medium text-white">${r.fullName || "-"}</td>
-            <td class="p-3">${r.customerType || "ครัวเรือน"}</td>
-            <td class="p-3">${r.houseNo || "-"}</td>
-            <td class="p-3">${getVillageDisplay(r.village)}</td>
-            <td class="p-3 text-right font-bold text-amber-300">฿${Number(r.amount || 0).toLocaleString()}</td>
-          </tr>
-        `;
-      });
+      document.getElementById("priceModalTableBody").innerHTML = list.map((r, idx) => `
+        <tr class="hover:bg-slate-900/60">
+          <td class="p-3 text-slate-400">${idx + 1}</td>
+          <td class="p-3 font-mono text-emerald-300">${r.binId || "-"}</td>
+          <td class="p-3 font-medium text-white">${r.fullName || "-"}</td>
+          <td class="p-3">${r.customerType || "ครัวเรือน"}</td>
+          <td class="p-3">${r.houseNo || "-"}</td>
+          <td class="p-3">${getVillageDisplay(r.village)}</td>
+          <td class="p-3 text-right font-bold text-amber-300">฿${Number(r.amount || 0).toLocaleString()}</td>
+        </tr>
+      `).join("");
 
       const modal = document.getElementById("priceListModal");
       modal.classList.remove("hidden");
@@ -1498,9 +1527,9 @@
     function goToManagementWithPrice() {
       if (selectedModalPrice !== null) {
         document.getElementById("searchInput").value = String(selectedModalPrice);
+        currentTablePage = 1;
         closePriceModal();
         switchPage("management");
-        renderTable();
       }
     }
   </script>
