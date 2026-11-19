@@ -49,7 +49,7 @@
         <p class="text-sm text-emerald-400/80 mt-1">SYSTEM SECURE LOGIN - ศิลาลอย</p>
       </div>
 
-      <form id="loginForm" class="space-y-4">
+      <form id="loginForm" action="javascript:void(0)" class="space-y-4">
         <div>
           <label class="block text-sm font-medium mb-1.5 text-slate-300">เลือกสิทธิ์ผู้ใช้งาน *</label>
           <select id="adminRole" required class="w-full border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
@@ -260,7 +260,7 @@
             </h2>
             <p class="text-sm text-slate-400 mb-5">กรอกข้อมูลผู้ชำระค่าบริการจัดเก็บขยะมูลฝอย</p>
 
-            <form id="addForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <form id="addForm" action="javascript:void(0)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">วันลงทะเบียน *</label>
                 <input type="text" id="regDate" required class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
@@ -385,7 +385,7 @@
         <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
       </div>
 
-      <form id="editForm" class="space-y-3">
+      <form id="editForm" action="javascript:void(0)" class="space-y-3">
         <input type="hidden" id="editRowNumber">
         <input type="hidden" id="editSheetName">
         <input type="hidden" id="editId">
@@ -560,6 +560,8 @@
 
     document.getElementById("loginForm").addEventListener("submit", (e) => {
       e.preventDefault();
+      e.stopPropagation();
+
       const role = document.getElementById("adminRole").value;
       const pwd = document.getElementById("adminPassword").value;
       const errorDiv = document.getElementById("loginError");
@@ -569,30 +571,43 @@
         document.getElementById("loginOverlay").classList.add("hidden");
         document.getElementById("mainAppContent").classList.remove("hidden");
         document.getElementById("currentRoleDisplay").innerText = role;
-        
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("adminRole", role);
+
+        try {
+          localStorage.setItem("isLoggedIn", "true");
+          localStorage.setItem("adminRole", role);
+        } catch (err) {
+          console.warn("Storage warning:", err);
+        }
 
         setDefaultDate();
         fetchData();
       } else {
+        errorDiv.innerText = "รหัสผ่านไม่ถูกต้อง หรือยังไม่ได้เลือกสิทธิ์ Admin";
         errorDiv.classList.remove("hidden");
       }
     });
 
     window.onload = () => {
       setDefaultDate();
-      if (localStorage.getItem("isLoggedIn") === "true") {
-        document.getElementById("loginOverlay").classList.add("hidden");
-        document.getElementById("mainAppContent").classList.remove("hidden");
-        document.getElementById("currentRoleDisplay").innerText = localStorage.getItem("adminRole") || "ผู้ดูแลระบบ";
-        fetchData();
+      try {
+        if (localStorage.getItem("isLoggedIn") === "true") {
+          document.getElementById("loginOverlay").classList.add("hidden");
+          document.getElementById("mainAppContent").classList.remove("hidden");
+          document.getElementById("currentRoleDisplay").innerText = localStorage.getItem("adminRole") || "ผู้ดูแลระบบ";
+          fetchData();
+        }
+      } catch (err) {
+        console.warn("Storage warning:", err);
       }
     };
 
     function logout() {
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("adminRole");
+      try {
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("adminRole");
+      } catch (err) {
+        console.warn("Storage warning:", err);
+      }
       location.reload();
     }
 
