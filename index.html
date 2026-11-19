@@ -8,17 +8,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { 
-      font-family: 'Sarabun', sans-serif; 
-      background-color: #030712; 
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background-color: #030712;
       color: #f3f4f6;
-      background-image: 
+      background-image:
         linear-gradient(to right, rgba(16, 185, 129, 0.05) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
       background-size: 32px 32px;
     }
     .anime-hero-bg {
-      background: linear-gradient(rgba(3, 7, 18, 0.8), rgba(6, 78, 59, 0.9)), 
+      background: linear-gradient(rgba(3, 7, 18, 0.8), rgba(6, 78, 59, 0.9)),
                   url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1600&q=80');
       background-size: cover;
       background-position: center;
@@ -54,8 +54,8 @@
           <label class="block text-sm font-medium mb-1.5 text-slate-300">เลือกสิทธิ์ผู้ใช้งาน *</label>
           <select id="adminRole" required class="w-full border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
             <option value="">-- เลือกสิทธิ์ Admin --</option>
-            <option value="Admin 1 (ระบบฉัน)">Admin 1 (ระบบฉัน)</option>
-            <option value="Admin 2 (ระบบเธอ)">Admin 2 (ระบบเธอ)</option>
+            <option value="Admin 1">Admin 1</option>
+            <option value="Admin 2">Admin 2</option>
           </select>
         </div>
 
@@ -99,6 +99,9 @@
           <button type="button" onclick="switchPage('analytics')" id="menu-analytics" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition text-slate-400 hover:bg-slate-800 hover:text-white">
             <i class="fa-solid fa-map-location-dot w-5 text-center"></i> สรุปรายหมู่บ้าน
           </button>
+          <button type="button" onclick="switchPage('history')" id="menu-history" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition text-slate-400 hover:bg-slate-800 hover:text-white">
+            <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i> ประวัติแก้ไข & ยกเลิก
+          </button>
         </nav>
       </div>
 
@@ -107,7 +110,7 @@
           <div class="bg-emerald-500/20 text-emerald-400 p-2 rounded-lg border border-emerald-500/30"><i class="fa-solid fa-shield-halved"></i></div>
           <div class="overflow-hidden">
             <p class="text-[10px] text-slate-400 uppercase font-semibold">ผู้ใช้งานปัจจุบัน</p>
-            <p id="currentRoleDisplay" class="text-xs font-bold text-emerald-400 truncate">ผู้ดูแลระบบ</p>
+            <p id="currentRoleDisplay" class="text-xs font-bold text-emerald-400 truncate">Admin 1</p>
           </div>
         </div>
         <button type="button" onclick="logout()" class="w-full bg-red-950/40 hover:bg-red-900/60 text-red-400 px-4 py-2.5 rounded-xl text-xs font-semibold transition border border-red-800/50 flex items-center justify-center gap-2">
@@ -149,38 +152,64 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="tech-card p-5 rounded-2xl flex justify-between items-center">
               <div>
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">ครัวเรือนลงทะเบียน</p>
-                <h3 id="statTotalHouse" class="text-2xl font-bold text-white mt-1">0</h3>
-                <p class="text-xs text-emerald-400 mt-1"><i class="fa-solid fa-map-pin"></i> ครอบคลุม 9 หมู่บ้าน</p>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">จำนวนครัวเรือน</p>
+                <h3 id="statTotalHouseholds" class="text-2xl font-bold text-emerald-400 mt-1">0 ราย</h3>
+                <p class="text-xs text-slate-400 mt-1">แยกจากบริษัทชัดเจน</p>
               </div>
               <div class="bg-emerald-500/20 text-emerald-400 p-3.5 rounded-xl text-xl border border-emerald-500/30"><i class="fa-solid fa-house-user"></i></div>
+            </div>
+
+            <div class="tech-card p-5 rounded-2xl flex justify-between items-center">
+              <div>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">จำนวนบริษัท / สถานประกอบการ</p>
+                <h3 id="statTotalCompanies" class="text-2xl font-bold text-cyan-400 mt-1">0 แห่ง</h3>
+                <p class="text-xs text-slate-400 mt-1">นับเฉพาะสถานะปกติ</p>
+              </div>
+              <div class="bg-cyan-500/20 text-cyan-400 p-3.5 rounded-xl text-xl border border-cyan-500/30"><i class="fa-solid fa-building"></i></div>
             </div>
 
             <div class="bg-gradient-to-r from-emerald-800 to-teal-800 text-white p-5 rounded-2xl shadow-lg border border-emerald-500/40 flex justify-between items-center">
               <div>
                 <p class="text-xs font-semibold text-emerald-200 uppercase tracking-wider">รายได้จัดเก็บรวม</p>
                 <h3 id="statTotalAmount" class="text-2xl font-bold mt-1 text-emerald-300">฿0</h3>
-                <p class="text-xs text-emerald-200 mt-1">ยอดรวมทั้งหมดทุกหมู่บ้าน</p>
+                <p class="text-xs text-emerald-200 mt-1">รวมทั้งหมด <span id="statTotalActive">0</span> ราย</p>
               </div>
               <div class="bg-white/10 text-white p-3.5 rounded-xl text-xl border border-white/20"><i class="fa-solid fa-sack-dollar"></i></div>
             </div>
 
             <div class="tech-card p-5 rounded-2xl flex justify-between items-center">
               <div>
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">ยอดรวมรายเดือน</p>
-                <h3 id="statMonthlyAmount" class="text-2xl font-bold text-sky-400 mt-1">฿0</h3>
-                <p class="text-xs text-slate-400 mt-1"><span id="statMonthlyCount">0</span> รายการ</p>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">ประวัติแก้ไข & ยกเลิก</p>
+                <h3 id="statTotalLogs" class="text-2xl font-bold text-amber-400 mt-1">0 ครั้ง</h3>
+                <p class="text-xs text-slate-400 mt-1">บันทึกในระบบอัตโนมัติ</p>
               </div>
-              <div class="bg-sky-500/20 text-sky-400 p-3.5 rounded-xl text-xl border border-sky-500/30"><i class="fa-solid fa-calendar-day"></i></div>
+              <div class="bg-amber-500/20 text-amber-400 p-3.5 rounded-xl text-xl border border-amber-500/30"><i class="fa-solid fa-clipboard-list"></i></div>
             </div>
+          </div>
 
-            <div class="tech-card p-5 rounded-2xl flex justify-between items-center">
+          <!-- ตารางสรุปยอดราคา และแยกจำนวนครัวเรือนกับบริษัท ทั้ง 9 หมู่ -->
+          <div class="tech-card p-6 rounded-2xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
               <div>
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">ยอดรวมรายปี</p>
-                <h3 id="statYearlyAmount" class="text-2xl font-bold text-purple-400 mt-1">฿0</h3>
-                <p class="text-xs text-slate-400 mt-1"><span id="statYearlyCount">0</span> รายการ</p>
+                <h3 class="font-bold text-white text-base">
+                  <i class="fa-solid fa-table text-emerald-400 mr-2"></i> สรุปยอดราคา และแยกจำนวนครัวเรือนกับบริษัท (รายหมู่)
+                </h3>
+                <p class="text-xs text-slate-400">คำนวณเฉพาะผู้ลงทะเบียนสถานะปกติ (ไม่รวมรายการที่ขอยกเลิก)</p>
               </div>
-              <div class="bg-purple-500/20 text-purple-400 p-3.5 rounded-xl text-xl border border-purple-500/30"><i class="fa-solid fa-calendar-check"></i></div>
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-slate-800">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-900 text-slate-300 text-xs uppercase tracking-wider border-b border-slate-800">
+                    <th class="p-3.5 font-semibold">หมู่ที่ / หมู่บ้าน</th>
+                    <th class="p-3.5 font-semibold text-center">ครัวเรือน (ราย)</th>
+                    <th class="p-3.5 font-semibold text-center">บริษัท (แห่ง)</th>
+                    <th class="p-3.5 font-semibold text-center">รวมผู้ใช้งาน</th>
+                    <th class="p-3.5 font-semibold text-right">ยอดเงินรวม (บาท)</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardVillageSummaryBody" class="divide-y divide-slate-800 text-sm"></tbody>
+              </table>
             </div>
           </div>
 
@@ -189,8 +218,8 @@
               <div>
                 <div class="flex justify-between items-center mb-4">
                   <div>
-                    <h3 class="font-bold text-white text-base"><i class="fa-solid fa-chart-column text-emerald-400 mr-2"></i> สถิติครัวเรือนแยกตามรายหมู่บ้าน (หมู่ 1 - 9)</h3>
-                    <p class="text-xs text-slate-400">เปรียบเทียบจำนวนครัวเรือนที่ลงทะเบียนในแต่ละหมู่</p>
+                    <h3 class="font-bold text-white text-base"><i class="fa-solid fa-chart-column text-emerald-400 mr-2"></i> สถิติผู้ลงทะเบียนแยกตามรายหมู่บ้าน (หมู่ 1 - 9)</h3>
+                    <p class="text-xs text-slate-400">เปรียบเทียบจำนวนรายที่ใช้งานปกติในแต่ละหมู่</p>
                   </div>
                 </div>
                 <div class="grid grid-cols-9 gap-2 items-end h-56 pt-6 pb-2 border-b border-slate-800" id="verticalBarChartContainer"></div>
@@ -199,27 +228,27 @@
 
             <div class="tech-card p-6 rounded-2xl flex flex-col justify-between">
               <div>
-                <h3 class="font-bold text-white text-base mb-1"><i class="fa-solid fa-chart-pie text-emerald-400 mr-2"></i> สัดส่วนประเภทการชำระ</h3>
-                <p class="text-xs text-slate-400 mb-4">สัดส่วนรายได้ระหว่างรายเดือนและรายปี</p>
-                
+                <h3 class="font-bold text-white text-base mb-1"><i class="fa-solid fa-chart-pie text-emerald-400 mr-2"></i> สัดส่วนประเภทผู้ลงทะเบียน</h3>
+                <p class="text-xs text-slate-400 mb-4">เปรียบเทียบจำนวนครัวเรือนและบริษัท</p>
+
                 <div class="space-y-4 pt-2">
                   <div>
                     <div class="flex justify-between text-xs font-semibold mb-1">
-                      <span class="text-sky-400">ชำระรายเดือน</span>
-                      <span id="pctMonthly" class="text-slate-300">0%</span>
+                      <span class="text-emerald-400">ครัวเรือน</span>
+                      <span id="pctHouseholds" class="text-slate-300">0%</span>
                     </div>
                     <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
-                      <div id="barMonthly" class="bg-sky-500 h-3 rounded-full transition-all duration-500 shadow-sm shadow-sky-500/50" style="width: 0%"></div>
+                      <div id="barHouseholds" class="bg-emerald-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
                     </div>
                   </div>
 
                   <div>
                     <div class="flex justify-between text-xs font-semibold mb-1">
-                      <span class="text-purple-400">ชำระรายปี</span>
-                      <span id="pctYearly" class="text-slate-300">0%</span>
+                      <span class="text-cyan-400">บริษัท / สถานประกอบการ</span>
+                      <span id="pctCompanies" class="text-slate-300">0%</span>
                     </div>
                     <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
-                      <div id="barYearly" class="bg-purple-500 h-3 rounded-full transition-all duration-500 shadow-sm shadow-purple-500/50" style="width: 0%"></div>
+                      <div id="barCompanies" class="bg-cyan-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
                     </div>
                   </div>
                 </div>
@@ -271,7 +300,7 @@
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">ชื่อ - นามสกุล *</label>
-                <input type="text" id="fullName" required placeholder="ระบุชื่อ-นามสกุล" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+                <input type="text" id="fullName" required placeholder="ระบุชื่อ-นามสกุล หรือชื่อบริษัท" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">เบอร์โทรศัพท์</label>
@@ -297,10 +326,10 @@
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-medium mb-1 text-slate-300">ประเภทชำระ *</label>
-                <select id="payType" required class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
-                  <option value="รายเดือน">รายเดือน</option>
-                  <option value="รายปี">รายปี</option>
+                <label class="block text-sm font-medium mb-1 text-slate-300">ประเภทผู้ลงทะเบียน *</label>
+                <select id="customerType" required class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+                  <option value="ครัวเรือน">ครัวเรือน</option>
+                  <option value="บริษัท">บริษัท</option>
                 </select>
               </div>
               <div>
@@ -320,6 +349,13 @@
               <div class="relative flex-1">
                 <i class="fa-solid fa-search absolute left-3.5 top-3.5 text-slate-400"></i>
                 <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="ค้นหาวันลงทะเบียน, เลขถังขยะ, ชื่อ-นามสกุล, บ้านเลขที่..." class="w-full pl-10 pr-4 py-2.5 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
+              </div>
+              <div class="w-full md:w-48">
+                <select id="filterCustomerType" onchange="renderTable()" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
+                  <option value="">-- ทุกประเภท --</option>
+                  <option value="ครัวเรือน">ครัวเรือน</option>
+                  <option value="บริษัท">บริษัท</option>
+                </select>
               </div>
               <div class="w-full md:w-64">
                 <select id="filterVillage" onchange="renderTable()" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
@@ -348,7 +384,8 @@
                     <th class="p-3.5 font-semibold">เบอร์โทรศัพท์</th>
                     <th class="p-3.5 font-semibold">บ้านเลขที่</th>
                     <th class="p-3.5 font-semibold">หมู่ที่ / หมู่บ้าน</th>
-                    <th class="p-3.5 font-semibold">ประเภทชำระ</th>
+                    <th class="p-3.5 font-semibold">ประเภท</th>
+                    <th class="p-3.5 font-semibold">สถานะ</th>
                     <th class="p-3.5 font-semibold text-right">จำนวนเงิน</th>
                     <th class="p-3.5 font-semibold text-center">จัดการ</th>
                   </tr>
@@ -369,8 +406,43 @@
             <h3 class="font-bold text-white text-lg flex items-center gap-2">
               <i class="fa-solid fa-map-location-dot text-emerald-400"></i> สรุปข้อมูลรายหมู่บ้าน (ทั้ง 9 หมู่)
             </h3>
-            <p class="text-sm text-slate-400">รายละเอียดจำนวนครัวเรือนและยอดจัดเก็บรายได้แยกตามรายหมู่บ้าน</p>
+            <p class="text-sm text-slate-400">รายละเอียดจำนวนครัวเรือน จำนวนบริษัท และยอดจัดเก็บรายได้แยกตามรายหมู่บ้าน</p>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2" id="villageCardsGrid"></div>
+          </div>
+        </div>
+
+        <!-- HISTORY PAGE -->
+        <div id="page-history" class="page-content space-y-6 hidden">
+          <div class="tech-card p-6 rounded-2xl space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 class="font-bold text-white text-lg flex items-center gap-2">
+                  <i class="fa-solid fa-clock-rotate-left text-amber-400"></i> ประวัติการขอยกเลิกการลงทะเบียนและแก้ไขข้อมูล
+                </h3>
+                <p class="text-sm text-slate-400">บันทึกทุกครั้งที่มีการแก้ไขหรือขอยกเลิกโดย Admin 1 และ Admin 2</p>
+              </div>
+              <button type="button" onclick="loadData()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold border border-slate-700 flex items-center gap-2 w-fit">
+                <i class="fa-solid fa-rotate"></i> รีเฟรชประวัติ
+              </button>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-slate-800">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-900 text-slate-300 text-xs uppercase tracking-wider border-b border-slate-800">
+                    <th class="p-3.5 font-semibold">วันที่-เวลา</th>
+                    <th class="p-3.5 font-semibold">รายการ</th>
+                    <th class="p-3.5 font-semibold">หมู่</th>
+                    <th class="p-3.5 font-semibold">เลขถัง</th>
+                    <th class="p-3.5 font-semibold">บ้านเลขที่</th>
+                    <th class="p-3.5 font-semibold">ชื่อ - นามสกุล</th>
+                    <th class="p-3.5 font-semibold">รายละเอียด / เหตุผล</th>
+                    <th class="p-3.5 font-semibold">ผู้ดำเนินการ</th>
+                  </tr>
+                </thead>
+                <tbody id="historyTableBody" class="divide-y divide-slate-800 text-sm"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </main>
@@ -413,37 +485,75 @@
           <label class="block text-sm font-medium mb-1 text-slate-300">ชื่อ - นามสกุล *</label>
           <input type="text" id="editFullName" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
         </div>
-        <div>
-          <label class="block text-sm font-medium mb-1 text-slate-300">หมู่ที่ / หมู่บ้าน *</label>
-          <select id="editVillage" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
-            <option value="หมู่ 1 บ้านห้วยขวาง">หมู่ 1 บ้านห้วยขวาง</option>
-            <option value="หมู่ 2 บ้านนาปุ่ม">หมู่ 2 บ้านนาปุ่ม</option>
-            <option value="หมู่ 3 บ้านหนองคาง">หมู่ 3 บ้านหนองคาง</option>
-            <option value="หมู่ 4 บ้านหนองหญ้าปล้อง">หมู่ 4 บ้านหนองหญ้าปล้อง</option>
-            <option value="หมู่ 5 บ้านลาดวิถี">หมู่ 5 บ้านลาดวิถี</option>
-            <option value="หมู่ 6 บ้านเขาโป่ง">หมู่ 6 บ้านเขาโป่ง</option>
-            <option value="หมู่ 7 บ้านหนองกลางดง">หมู่ 7 บ้านหนองกลางดง</option>
-            <option value="หมู่ 8 บ้านเกาะนาน้อย">หมู่ 8 บ้านเกาะนาน้อย</option>
-            <option value="หมู่ 9 บ้านเขาน้อยห้วยตามา">หมู่ 9 บ้านเขาน้อยห้วยตามา</option>
-          </select>
-        </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-medium mb-1 text-slate-300">ประเภทชำระ *</label>
-            <select id="editPayType" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
-              <option value="รายเดือน">รายเดือน</option>
-              <option value="รายปี">รายปี</option>
+            <label class="block text-sm font-medium mb-1 text-slate-300">หมู่ที่ / หมู่บ้าน *</label>
+            <select id="editVillage" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+              <option value="หมู่ 1 บ้านห้วยขวาง">หมู่ 1 บ้านห้วยขวาง</option>
+              <option value="หมู่ 2 บ้านนาปุ่ม">หมู่ 2 บ้านนาปุ่ม</option>
+              <option value="หมู่ 3 บ้านหนองคาง">หมู่ 3 บ้านหนองคาง</option>
+              <option value="หมู่ 4 บ้านหนองหญ้าปล้อง">หมู่ 4 บ้านหนองหญ้าปล้อง</option>
+              <option value="หมู่ 5 บ้านลาดวิถี">หมู่ 5 บ้านลาดวิถี</option>
+              <option value="หมู่ 6 บ้านเขาโป่ง">หมู่ 6 บ้านเขาโป่ง</option>
+              <option value="หมู่ 7 บ้านหนองกลางดง">หมู่ 7 บ้านหนองกลางดง</option>
+              <option value="หมู่ 8 บ้านเกาะนาน้อย">หมู่ 8 บ้านเกาะนาน้อย</option>
+              <option value="หมู่ 9 บ้านเขาน้อยห้วยตามา">หมู่ 9 บ้านเขาน้อยห้วยตามา</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1 text-slate-300">จำนวนเงิน (บาท) *</label>
-            <input type="number" id="editAmount" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+            <label class="block text-sm font-medium mb-1 text-slate-300">ประเภทผู้ลงทะเบียน *</label>
+            <select id="editCustomerType" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+              <option value="ครัวเรือน">ครัวเรือน</option>
+              <option value="บริษัท">บริษัท</option>
+            </select>
           </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1 text-slate-300">จำนวนเงิน (บาท) *</label>
+          <input type="number" id="editAmount" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1 text-amber-300">รายละเอียดการแก้ไข (บันทึกประวัติ) *</label>
+          <input type="text" id="editDetailReason" required placeholder="เช่น เปลี่ยนเลขถัง / แก้ไขชื่อ-สกุล / ปรับค่าบริการ" class="w-full border border-amber-700/60 rounded-xl px-3 py-2 bg-slate-900 text-white">
         </div>
 
         <div class="flex justify-end gap-2 pt-4 border-t border-slate-800 mt-4">
           <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 font-medium">ยกเลิก</button>
           <button type="submit" id="btnSaveEdit" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold shadow-lg">บันทึกการแก้ไข</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal ขอยกเลิกการลงทะเบียน -->
+  <div id="cancelRegModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="tech-card rounded-2xl max-w-md w-full p-6 shadow-2xl border border-rose-500/40">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+        <h3 class="text-lg font-bold text-rose-400"><i class="fa-solid fa-ban mr-2"></i> ขอยกเลิกการลงทะเบียน</h3>
+        <button type="button" onclick="closeCancelRegModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+
+      <form id="cancelRegForm" action="javascript:void(0)" class="space-y-4">
+        <input type="hidden" id="cancelRowNumber">
+        <input type="hidden" id="cancelSheetName">
+        <input type="hidden" id="cancelVillageNum">
+        <input type="hidden" id="cancelBinId">
+        <input type="hidden" id="cancelHouseNo">
+        <input type="hidden" id="cancelFullName">
+
+        <div class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 text-sm space-y-1">
+          <p class="text-slate-400 text-xs">ผู้ลงทะเบียนที่จะขอยกเลิก</p>
+          <p id="cancelTargetSummary" class="font-bold text-white">-</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1 text-rose-300">เหตุผลการขอยกเลิกการลงทะเบียน *</label>
+          <textarea id="cancelReason" rows="3" required placeholder="ระบุเหตุผล เช่น ย้ายออก / รื้อถอน / เสียชีวิต / แจ้งยกเลิก..." class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+          <button type="button" onclick="closeCancelRegModal()" class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-sm">ปิด</button>
+          <button type="submit" id="btnConfirmCancel" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold shadow-lg">ยืนยันขอยกเลิก</button>
         </div>
       </form>
     </div>
@@ -472,9 +582,9 @@
                 <th class="p-3 font-semibold">ลำดับ</th>
                 <th class="p-3 font-semibold">เลขถังขยะ</th>
                 <th class="p-3 font-semibold">ชื่อ - นามสกุล</th>
+                <th class="p-3 font-semibold">ประเภท</th>
                 <th class="p-3 font-semibold">บ้านเลขที่</th>
                 <th class="p-3 font-semibold">หมู่ที่ / หมู่บ้าน</th>
-                <th class="p-3 font-semibold">ประเภทชำระ</th>
                 <th class="p-3 font-semibold text-right">จำนวนเงิน</th>
               </tr>
             </thead>
@@ -498,8 +608,8 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw01amYiV8v-fau5VFqOYg1s_ew7WPCW4vRM_Yp0tZ0LAQsUsO4_jw0VnSeva9aHD8N/exec";
 
     const PASSWORDS = {
-      "Admin 1 (ระบบฉัน)": "032684111",
-      "Admin 2 (ระบบเธอ)": "032684112"
+      "Admin 1": "032684111",
+      "Admin 2": "032684112"
     };
 
     const VILLAGES = [
@@ -526,7 +636,12 @@
       return m ? m[0] : "";
     }
 
+    function getCurrentAdmin() {
+      return sessionStorage.getItem("silaRole") || document.getElementById("currentRoleDisplay")?.innerText || "Admin 1";
+    }
+
     let allRecords = [];
+    let allLogs = [];
     let selectedModalPrice = null;
 
     function switchPage(pageId) {
@@ -537,227 +652,555 @@
         btn.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition text-slate-400 hover:bg-slate-800 hover:text-white";
       });
       const activeBtn = document.getElementById("menu-" + pageId);
-      activeBtn.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition bg-emerald-600 text-white shadow-lg shadow-emerald-600/20";
+      if (activeBtn) {
+        activeBtn.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition bg-emerald-600 text-white shadow-lg shadow-emerald-600/20";
+      }
 
       const titles = {
-        "dashboard": "ภาพรวมระบบ (Dashboard)",
-        "management": "ลงทะเบียน & จัดการข้อมูลขยะ",
-        "analytics": "สรุปข้อมูลแยกตามรายหมู่บ้าน"
+        dashboard: "ภาพรวมระบบ (Dashboard)",
+        management: "ลงทะเบียน & จัดการข้อมูล",
+        analytics: "สรุปรายหมู่บ้าน",
+        history: "ประวัติการขอยกเลิกการลงทะเบียนและแก้ไขข้อมูล"
       };
-      document.getElementById("pageTitle").innerText = titles[pageId] || "ระบบจัดการขยะ";
+      document.getElementById("pageTitle").innerText = titles[pageId] || "ระบบจัดการขยะ ตำบลศิลาลอย";
     }
 
-    function setDefaultDate() {
+    function getThaiDateToday() {
       const now = new Date();
-      const d = now.getDate();
-      const m = now.getMonth() + 1;
-      const y = now.getFullYear() + 543;
-      const dateInput = document.getElementById("regDate");
-      if (dateInput && !dateInput.value) {
-        dateInput.value = `${d}.${m}.${y}`;
-      }
+      return now.getDate() + "." + (now.getMonth() + 1) + "." + (now.getFullYear() + 543);
     }
 
-    document.getElementById("loginForm").addEventListener("submit", (e) => {
+    function showLoading(show) {
+      const el = document.getElementById("loadingBar");
+      if (el) el.classList.toggle("hidden", !show);
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
       e.preventDefault();
-      e.stopPropagation();
-
       const role = document.getElementById("adminRole").value;
-      const pwd = document.getElementById("adminPassword").value;
-      const errorDiv = document.getElementById("loginError");
+      const pass = document.getElementById("adminPassword").value.trim();
 
-      if (PASSWORDS[role] && PASSWORDS[role] === pwd) {
-        errorDiv.classList.add("hidden");
+      if (PASSWORDS[role] && PASSWORDS[role] === pass) {
+        sessionStorage.setItem("silaLoggedIn", "true");
+        sessionStorage.setItem("silaRole", role);
+        document.getElementById("loginError").classList.add("hidden");
         document.getElementById("loginOverlay").classList.add("hidden");
         document.getElementById("mainAppContent").classList.remove("hidden");
         document.getElementById("currentRoleDisplay").innerText = role;
-
-        try {
-          localStorage.setItem("isLoggedIn", "true");
-          localStorage.setItem("adminRole", role);
-        } catch (err) {
-          console.warn("Storage warning:", err);
+        if (!document.getElementById("regDate").value) {
+          document.getElementById("regDate").value = getThaiDateToday();
         }
-
-        setDefaultDate();
-        fetchData();
+        loadData();
       } else {
-        errorDiv.innerText = "รหัสผ่านไม่ถูกต้อง หรือยังไม่ได้เลือกสิทธิ์ Admin";
-        errorDiv.classList.remove("hidden");
+        document.getElementById("loginError").classList.remove("hidden");
       }
     });
 
-    window.onload = () => {
-      setDefaultDate();
-      try {
-        if (localStorage.getItem("isLoggedIn") === "true") {
-          document.getElementById("loginOverlay").classList.add("hidden");
-          document.getElementById("mainAppContent").classList.remove("hidden");
-          document.getElementById("currentRoleDisplay").innerText = localStorage.getItem("adminRole") || "ผู้ดูแลระบบ";
-          fetchData();
-        }
-      } catch (err) {
-        console.warn("Storage warning:", err);
-      }
-    };
-
     function logout() {
-      try {
-        localStorage.removeItem("isLoggedIn");
-        localStorage.removeItem("adminRole");
-      } catch (err) {
-        console.warn("Storage warning:", err);
-      }
-      location.reload();
+      sessionStorage.removeItem("silaLoggedIn");
+      sessionStorage.removeItem("silaRole");
+      document.getElementById("mainAppContent").classList.add("hidden");
+      document.getElementById("loginOverlay").classList.remove("hidden");
+      document.getElementById("adminPassword").value = "";
     }
 
-    async function fetchData(isBackground = false) {
-      const loading = document.getElementById("loadingBar");
-      if (!isBackground) loading.classList.remove("hidden");
-      
+    window.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("regDate").value = getThaiDateToday();
+      if (sessionStorage.getItem("silaLoggedIn") === "true") {
+        const savedRole = sessionStorage.getItem("silaRole") || "Admin 1";
+        document.getElementById("loginOverlay").classList.add("hidden");
+        document.getElementById("mainAppContent").classList.remove("hidden");
+        document.getElementById("currentRoleDisplay").innerText = savedRole;
+        loadData();
+      }
+    });
+
+    async function loadData() {
+      showLoading(true);
       try {
-        const res = await fetch(SCRIPT_URL);
+        const res = await fetch(SCRIPT_URL + "?t=" + Date.now());
         const json = await res.json();
         if (json.status === "success") {
           allRecords = json.data || [];
-          updateStats();
-          renderVerticalBarChart();
-          renderVillageCards();
+          allLogs = json.logs || [];
+          renderDashboard();
           renderTable();
+          renderVillageAnalytics();
+          renderHistoryTable();
         } else {
-          if (!isBackground) alert("แจ้งเตือนจากระบบ: " + json.message);
+          alert("โหลดข้อมูลไม่สำเร็จ: " + (json.message || "ไม่ทราบสาเหตุ"));
         }
       } catch (err) {
         console.error(err);
-        if (!isBackground) alert("ไม่สามารถดึงข้อมูลได้ กรุณาตรวจสอบการตั้งค่าสิทธิ์ Apps Script");
+        alert("เกิดข้อผิดพลาดในการเชื่อมต่อ Google Apps Script");
       } finally {
-        if (!isBackground) loading.classList.add("hidden");
+        showLoading(false);
       }
     }
 
-    function updateStats() {
-      let totalAmount = 0, monthlyAmount = 0, monthlyCount = 0, yearlyAmount = 0, yearlyCount = 0;
+    function renderDashboard() {
+      // นับเฉพาะรายการที่ยังไม่ถูก "ยกเลิก"
+      const activeRecords = allRecords.filter(r => String(r.status || "ปกติ") !== "ยกเลิก");
 
-      allRecords.forEach(item => {
-        const amt = parseFloat(item.amount);
-        const validAmt = isNaN(amt) ? 0 : amt;
-        totalAmount += validAmt;
+      let totalHouseholds = 0;
+      let totalCompanies = 0;
+      let totalAmount = 0;
 
-        if (item.payType === "รายเดือน") {
-          monthlyAmount += validAmt;
-          monthlyCount++;
-        } else if (item.payType === "รายปี") {
-          yearlyAmount += validAmt;
-          yearlyCount++;
-        }
+      const villageStats = {};
+      VILLAGES.forEach(v => {
+        villageStats[v.num] = {
+          num: v.num,
+          name: v.full,
+          households: 0,
+          companies: 0,
+          totalCount: 0,
+          amount: 0
+        };
       });
 
-      document.getElementById("statTotalHouse").innerText = allRecords.length.toLocaleString();
-      document.getElementById("statTotalAmount").innerText = "฿" + totalAmount.toLocaleString();
-      document.getElementById("statMonthlyAmount").innerText = "฿" + monthlyAmount.toLocaleString();
-      document.getElementById("statMonthlyCount").innerText = monthlyCount.toLocaleString();
-      document.getElementById("statYearlyAmount").innerText = "฿" + yearlyAmount.toLocaleString();
-      document.getElementById("statYearlyCount").innerText = yearlyCount.toLocaleString();
+      const priceMap = {};
 
-      let totalCount = monthlyCount + yearlyCount;
-      let pctM = totalCount > 0 ? Math.round((monthlyCount / totalCount) * 100) : 0;
-      let pctY = totalCount > 0 ? Math.round((yearlyCount / totalCount) * 100) : 0;
+      activeRecords.forEach(r => {
+        const amt = Number(r.amount) || 0;
+        const vNum = getVillageNum(r.village);
+        const cType = String(r.customerType || "ครัวเรือน").trim();
 
-      document.getElementById("pctMonthly").innerText = pctM + "%";
-      document.getElementById("barMonthly").style.width = pctM + "%";
-      document.getElementById("pctYearly").innerText = pctY + "%";
-      document.getElementById("barYearly").style.width = pctY + "%";
-
-      // คำนวณแยกจำนวนรายตามราคา (40 / 80 / 120 / ... ทุกราคา) แบบคลิกดูรายชื่อได้
-      const priceContainer = document.getElementById("priceBreakdownContainer");
-      if (priceContainer) {
-        if (allRecords.length === 0) {
-          priceContainer.innerHTML = '<div class="col-span-full text-center text-slate-400 text-sm py-4">ยังไม่มีข้อมูลในระบบ</div>';
+        totalAmount += amt;
+        if (cType === "บริษัท") {
+          totalCompanies += 1;
         } else {
-          const priceMap = {};
-          allRecords.forEach(item => {
-            const amt = parseFloat(item.amount);
-            const price = isNaN(amt) ? 0 : amt;
-
-            if (!priceMap[price]) {
-              priceMap[price] = { count: 0, total: 0 };
-            }
-            priceMap[price].count++;
-            priceMap[price].total += price;
-          });
-
-          const sortedPrices = Object.keys(priceMap).map(Number).sort((a, b) => a - b);
-
-          priceContainer.innerHTML = sortedPrices.map(price => {
-            const info = priceMap[price];
-            return `
-              <div onclick="openPriceModal(${price})" title="คลิกเพื่อดูรายชื่อผู้ชำระราคา ฿${price.toLocaleString()}" class="bg-slate-900/90 border border-slate-800 hover:border-emerald-400 hover:bg-slate-800/90 transition-all rounded-xl p-4 flex flex-col justify-between cursor-pointer group">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-md">
-                    ราคา ฿${price.toLocaleString()}
-                  </span>
-                  <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-slate-500 group-hover:text-emerald-400 transition"></i>
-                </div>
-                <div class="my-1">
-                  <span class="text-2xl font-bold text-white">${info.count.toLocaleString()}</span>
-                  <span class="text-xs text-slate-400 ml-1">ราย</span>
-                </div>
-                <div class="text-xs text-slate-400 pt-2 border-t border-slate-800 mt-2 flex items-center justify-between">
-                  <span>รวม <span class="text-emerald-400 font-semibold">฿${info.total.toLocaleString()}</span></span>
-                  <span class="text-[11px] text-emerald-400/80 group-hover:underline">ดูรายชื่อ</span>
-                </div>
-              </div>
-            `;
-          }).join("");
+          totalHouseholds += 1;
         }
+
+        if (villageStats[vNum]) {
+          villageStats[vNum].totalCount += 1;
+          villageStats[vNum].amount += amt;
+          if (cType === "บริษัท") {
+            villageStats[vNum].companies += 1;
+          } else {
+            villageStats[vNum].households += 1;
+          }
+        }
+
+        if (!priceMap[amt]) {
+          priceMap[amt] = { price: amt, count: 0, total: 0 };
+        }
+        priceMap[amt].count += 1;
+        priceMap[amt].total += amt;
+      });
+
+      document.getElementById("statTotalHouseholds").innerText = totalHouseholds.toLocaleString() + " ราย";
+      document.getElementById("statTotalCompanies").innerText = totalCompanies.toLocaleString() + " แห่ง";
+      document.getElementById("statTotalAmount").innerText = "฿" + totalAmount.toLocaleString();
+      document.getElementById("statTotalActive").innerText = activeRecords.length.toLocaleString();
+      document.getElementById("statTotalLogs").innerText = allLogs.length.toLocaleString() + " ครั้ง";
+
+      // ตารางสรุปยอดราคาและแยกจำนวนครัวเรือนกับบริษัทใน Dashboard
+      const summaryBody = document.getElementById("dashboardVillageSummaryBody");
+      summaryBody.innerHTML = "";
+      VILLAGES.forEach(v => {
+        const st = villageStats[v.num];
+        summaryBody.innerHTML += `
+          <tr class="hover:bg-slate-900/60 transition">
+            <td class="p-3 font-medium text-white">${st.name}</td>
+            <td class="p-3 text-center text-emerald-400 font-semibold">${st.households.toLocaleString()}</td>
+            <td class="p-3 text-center text-cyan-400 font-semibold">${st.companies.toLocaleString()}</td>
+            <td class="p-3 text-center text-slate-200">${st.totalCount.toLocaleString()}</td>
+            <td class="p-3 text-right text-amber-300 font-bold">฿${st.amount.toLocaleString()}</td>
+          </tr>
+        `;
+      });
+
+      // กราฟแท่งแนวตั้ง 9 หมู่
+      const maxVal = Math.max(1, ...VILLAGES.map(v => villageStats[v.num].totalCount));
+      const barContainer = document.getElementById("verticalBarChartContainer");
+      barContainer.innerHTML = "";
+      VILLAGES.forEach(v => {
+        const count = villageStats[v.num].totalCount;
+        const heightPct = Math.max(6, Math.round((count / maxVal) * 100));
+        barContainer.innerHTML += `
+          <div class="flex flex-col items-center justify-end h-full group">
+            <span class="text-[11px] font-bold text-emerald-300 mb-1">${count}</span>
+            <div class="w-full max-w-[34px] rounded-t-lg bg-gradient-to-t from-emerald-600 to-teal-400 transition-all duration-500 group-hover:brightness-125" style="height: ${heightPct}%"></div>
+            <span class="text-[11px] text-slate-400 mt-2">ม.${v.num}</span>
+          </div>
+        `;
+      });
+
+      // สัดส่วนครัวเรือน vs บริษัท
+      const totalTypeCount = totalHouseholds + totalCompanies;
+      const pctH = totalTypeCount > 0 ? Math.round((totalHouseholds / totalTypeCount) * 100) : 0;
+      const pctC = totalTypeCount > 0 ? 100 - pctH : 0;
+      document.getElementById("pctHouseholds").innerText = pctH + "% (" + totalHouseholds.toLocaleString() + " ราย)";
+      document.getElementById("pctCompanies").innerText = pctC + "% (" + totalCompanies.toLocaleString() + " แห่ง)";
+      document.getElementById("barHouseholds").style.width = pctH + "%";
+      document.getElementById("barCompanies").style.width = pctC + "%";
+
+      // การ์ดแยกตามอัตราค่าบริการ
+      const priceContainer = document.getElementById("priceBreakdownContainer");
+      const sortedPrices = Object.values(priceMap).sort((a, b) => a.price - b.price);
+      if (sortedPrices.length === 0) {
+        priceContainer.innerHTML = `<div class="col-span-full text-center text-slate-400 text-sm py-4">ไม่มีข้อมูลอัตราค่าบริการ</div>`;
+      } else {
+        priceContainer.innerHTML = sortedPrices.map(p => `
+          <button type="button" onclick="openPriceModal(${p.price})" class="text-left bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-emerald-400/60 rounded-xl p-3.5 transition">
+            <div class="text-xs text-slate-400">อัตราค่าบริการ</div>
+            <div class="text-lg font-bold text-emerald-400 mt-0.5">฿${Number(p.price).toLocaleString()}</div>
+            <div class="text-xs text-slate-300 mt-1">${p.count.toLocaleString()} ราย</div>
+            <div class="text-[11px] text-amber-300 mt-0.5">รวม ฿${p.total.toLocaleString()}</div>
+          </button>
+        `).join("");
       }
     }
 
-    function openPriceModal(targetPrice) {
-      selectedModalPrice = Number(targetPrice);
-      const matched = allRecords.filter(item => {
-        const amt = parseFloat(item.amount);
-        const price = isNaN(amt) ? 0 : amt;
-        return price === selectedModalPrice;
+    function renderTable() {
+      const q = (document.getElementById("searchInput").value || "").trim().toLowerCase();
+      const vFilter = document.getElementById("filterVillage").value;
+      const typeFilter = document.getElementById("filterCustomerType").value;
+
+      const filtered = allRecords.filter(r => {
+        const vNum = getVillageNum(r.village);
+        const matchV = !vFilter || vFilter === "หมู่ " + vNum;
+        const cType = String(r.customerType || "ครัวเรือน").trim();
+        const matchType = !typeFilter || cType === typeFilter;
+        const matchQ = !q ||
+          String(r.regDate || "").toLowerCase().includes(q) ||
+          String(r.binId || "").toLowerCase().includes(q) ||
+          String(r.fullName || "").toLowerCase().includes(q) ||
+          String(r.houseNo || "").toLowerCase().includes(q) ||
+          String(r.phone || "").toLowerCase().includes(q) ||
+          String(r.village || "").toLowerCase().includes(q) ||
+          String(r.amount || "").toLowerCase().includes(q);
+        return matchV && matchType && matchQ;
       });
 
-      const totalSum = matched.reduce((sum, item) => {
-        const amt = parseFloat(item.amount);
-        return sum + (isNaN(amt) ? 0 : amt);
-      }, 0);
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+      document.getElementById("totalCount").innerText = filtered.length.toLocaleString();
 
-      document.getElementById("priceModalTitle").innerHTML =
-        `<i class="fa-solid fa-users text-emerald-400"></i> รายชื่อผู้ชำระอัตรา ฿${selectedModalPrice.toLocaleString()}`;
-      document.getElementById("priceModalSubtitle").innerText =
-        `ทั้งหมด ${matched.length.toLocaleString()} ราย | ยอดรวม ฿${totalSum.toLocaleString()}`;
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">ไม่พบข้อมูลที่ค้นหา</td></tr>`;
+        return;
+      }
+
+      filtered.forEach((r, idx) => {
+        const isCancelled = String(r.status || "ปกติ") === "ยกเลิก";
+        const cType = String(r.customerType || "ครัวเรือน").trim();
+        const typeBadge = cType === "บริษัท"
+          ? `<span class="px-2 py-0.5 rounded-full text-xs bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">บริษัท</span>`
+          : `<span class="px-2 py-0.5 rounded-full text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">ครัวเรือน</span>`;
+
+        const statusBadge = isCancelled
+          ? `<span class="px-2 py-0.5 rounded-full text-xs bg-rose-500/20 text-rose-300 border border-rose-500/30">ยกเลิก</span>`
+          : `<span class="px-2 py-0.5 rounded-full text-xs bg-slate-800 text-slate-200 border border-slate-700">ปกติ</span>`;
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-900/60 transition ${isCancelled ? "opacity-60" : ""}">
+            <td class="p-3 text-slate-400">${idx + 1}</td>
+            <td class="p-3 whitespace-nowrap">${r.regDate || "-"}</td>
+            <td class="p-3 whitespace-nowrap font-mono text-emerald-300">${r.binId || "-"}</td>
+            <td class="p-3 font-medium text-white">${r.fullName || "-"}</td>
+            <td class="p-3 whitespace-nowrap">${r.phone || "-"}</td>
+            <td class="p-3 whitespace-nowrap">${r.houseNo || "-"}</td>
+            <td class="p-3 whitespace-nowrap">${getVillageDisplay(r.village)}</td>
+            <td class="p-3 whitespace-nowrap">${typeBadge}</td>
+            <td class="p-3 whitespace-nowrap">${statusBadge}</td>
+            <td class="p-3 text-right font-bold text-amber-300 whitespace-nowrap">฿${Number(r.amount || 0).toLocaleString()}</td>
+            <td class="p-3 text-center whitespace-nowrap">
+              <div class="inline-flex items-center gap-1.5">
+                <button type="button" onclick="openEditModal(${r.id})" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold" title="แก้ไขข้อมูล">
+                  <i class="fa-solid fa-pen"></i> แก้ไข
+                </button>
+                ${!isCancelled ? `
+                <button type="button" onclick="openCancelRegModal(${r.id})" class="px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-semibold" title="ขอยกเลิกการลงทะเบียน">
+                  <i class="fa-solid fa-ban"></i> ขอยกเลิก
+                </button>` : ""}
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function renderVillageAnalytics() {
+      const activeRecords = allRecords.filter(r => String(r.status || "ปกติ") !== "ยกเลิก");
+      const grid = document.getElementById("villageCardsGrid");
+      grid.innerHTML = "";
+
+      VILLAGES.forEach(v => {
+        const list = activeRecords.filter(r => getVillageNum(r.village) === v.num);
+        const households = list.filter(r => (r.customerType || "ครัวเรือน") !== "บริษัท").length;
+        const companies = list.filter(r => (r.customerType || "ครัวเรือน") === "บริษัท").length;
+        const sumAmt = list.reduce((acc, item) => acc + (Number(item.amount) || 0), 0);
+
+        grid.innerHTML += `
+          <div class="bg-slate-900/90 border border-slate-800 hover:border-emerald-500/40 rounded-2xl p-5 transition space-y-3">
+            <div class="flex justify-between items-start">
+              <h4 class="font-bold text-white text-base">${v.full}</h4>
+              <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">${list.length} ราย</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800">
+                <div class="text-slate-400">ครัวเรือน</div>
+                <div class="text-emerald-400 font-bold text-sm mt-0.5">${households.toLocaleString()} ราย</div>
+              </div>
+              <div class="bg-slate-950/70 p-2.5 rounded-xl border border-slate-800">
+                <div class="text-slate-400">บริษัท</div>
+                <div class="text-cyan-400 font-bold text-sm mt-0.5">${companies.toLocaleString()} แห่ง</div>
+              </div>
+            </div>
+            <div class="pt-2 border-t border-slate-800 flex justify-between items-center">
+              <span class="text-xs text-slate-400">ยอดรวมค่าบริการ</span>
+              <span class="text-base font-bold text-amber-300">฿${sumAmt.toLocaleString()}</span>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function renderHistoryTable() {
+      const tbody = document.getElementById("historyTableBody");
+      tbody.innerHTML = "";
+
+      if (!allLogs || allLogs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">ยังไม่มีประวัติการแก้ไขหรือขอยกเลิกการลงทะเบียน</td></tr>`;
+        return;
+      }
+
+      allLogs.forEach(log => {
+        const isCancel = String(log.actionType || "").includes("ยกเลิก");
+        const badgeClass = isCancel
+          ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
+          : "bg-amber-500/20 text-amber-300 border-amber-500/40";
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-900/60 transition">
+            <td class="p-3 whitespace-nowrap text-xs text-slate-300">${log.timestamp || "-"}</td>
+            <td class="p-3 whitespace-nowrap">
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${badgeClass}">${log.actionType || "-"}</span>
+            </td>
+            <td class="p-3 whitespace-nowrap">${log.village || "-"}</td>
+            <td class="p-3 whitespace-nowrap font-mono text-emerald-300">${log.binId || "-"}</td>
+            <td class="p-3 whitespace-nowrap">${log.houseNo || "-"}</td>
+            <td class="p-3 font-medium text-white">${log.fullName || "-"}</td>
+            <td class="p-3 text-slate-200">${log.detail || "-"}</td>
+            <td class="p-3 whitespace-nowrap text-cyan-300 font-semibold">${log.admin || "-"}</td>
+          </tr>
+        `;
+      });
+    }
+
+    // เพิ่มข้อมูลใหม่
+    document.getElementById("addForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const btn = document.getElementById("btnSubmit");
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...`;
+
+      const payload = {
+        action: "add",
+        regDate: document.getElementById("regDate").value.trim(),
+        binId: document.getElementById("binId").value.trim() || "-",
+        fullName: document.getElementById("fullName").value.trim(),
+        phone: document.getElementById("phone").value.trim() || "-",
+        houseNo: document.getElementById("houseNo").value.trim(),
+        village: document.getElementById("village").value,
+        customerType: document.getElementById("customerType").value,
+        amount: Number(document.getElementById("amount").value) || 0,
+        status: "ปกติ",
+        adminRole: getCurrentAdmin()
+      };
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.status === "success") {
+          alert("บันทึกข้อมูลเรียบร้อยแล้วครับ");
+          document.getElementById("addForm").reset();
+          document.getElementById("regDate").value = getThaiDateToday();
+          await loadData();
+        } else {
+          alert("บันทึกไม่สำเร็จ: " + (json.message || ""));
+        }
+      } catch (err) {
+        alert("เกิดข้อผิดพลาดในการส่งข้อมูล");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-save"></i> บันทึกข้อมูลลง Google Sheets`;
+      }
+    });
+
+    // เปิด Modal แก้ไข
+    function openEditModal(id) {
+      const rec = allRecords.find(r => Number(r.id) === Number(id));
+      if (!rec) return;
+
+      document.getElementById("editId").value = rec.id;
+      document.getElementById("editRowNumber").value = rec.rowNumber;
+      document.getElementById("editSheetName").value = rec.sheetName;
+      document.getElementById("editRegDate").value = rec.regDate && rec.regDate !== "-" ? rec.regDate : getThaiDateToday();
+      document.getElementById("editBinId").value = rec.binId || "-";
+      document.getElementById("editHouseNo").value = rec.houseNo && rec.houseNo !== "-" ? rec.houseNo : "";
+      document.getElementById("editPhone").value = rec.phone && rec.phone !== "-" ? rec.phone : "";
+      document.getElementById("editFullName").value = rec.fullName && rec.fullName !== "ไม่ระบุชื่อ" ? rec.fullName : "";
+      document.getElementById("editVillage").value = getVillageDisplay(rec.village);
+      document.getElementById("editCustomerType").value = rec.customerType || "ครัวเรือน";
+      document.getElementById("editAmount").value = rec.amount || 0;
+      document.getElementById("editDetailReason").value = "";
+
+      const modal = document.getElementById("editModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeEditModal() {
+      const modal = document.getElementById("editModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    document.getElementById("editForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const btn = document.getElementById("btnSaveEdit");
+      btn.disabled = true;
+      btn.innerText = "กำลังบันทึก...";
+
+      const payload = {
+        action: "edit",
+        rowNumber: document.getElementById("editRowNumber").value,
+        sheetName: document.getElementById("editSheetName").value,
+        regDate: document.getElementById("editRegDate").value.trim(),
+        binId: document.getElementById("editBinId").value.trim() || "-",
+        houseNo: document.getElementById("editHouseNo").value.trim(),
+        phone: document.getElementById("editPhone").value.trim() || "-",
+        fullName: document.getElementById("editFullName").value.trim(),
+        village: document.getElementById("editVillage").value,
+        customerType: document.getElementById("editCustomerType").value,
+        amount: Number(document.getElementById("editAmount").value) || 0,
+        status: "ปกติ",
+        detail: document.getElementById("editDetailReason").value.trim() || "แก้ไขข้อมูลผู้ลงทะเบียน",
+        adminRole: getCurrentAdmin()
+      };
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.status === "success") {
+          alert("แก้ไขข้อมูลและบันทึกประวัติเรียบร้อยแล้วครับ");
+          closeEditModal();
+          await loadData();
+        } else {
+          alert("แก้ไขไม่สำเร็จ: " + (json.message || ""));
+        }
+      } catch (err) {
+        alert("เกิดข้อผิดพลาดในการบันทึกการแก้ไข");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "บันทึกการแก้ไข";
+      }
+    });
+
+    // เปิด Modal ขอยกเลิกการลงทะเบียน
+    function openCancelRegModal(id) {
+      const rec = allRecords.find(r => Number(r.id) === Number(id));
+      if (!rec) return;
+
+      document.getElementById("cancelRowNumber").value = rec.rowNumber;
+      document.getElementById("cancelSheetName").value = rec.sheetName;
+      document.getElementById("cancelVillageNum").value = getVillageNum(rec.village) || "1";
+      document.getElementById("cancelBinId").value = rec.binId || "-";
+      document.getElementById("cancelHouseNo").value = rec.houseNo || "-";
+      document.getElementById("cancelFullName").value = rec.fullName || "-";
+      document.getElementById("cancelReason").value = "";
+      document.getElementById("cancelTargetSummary").innerText =
+        `${rec.fullName} | บ้านเลขที่ ${rec.houseNo} | ${getVillageDisplay(rec.village)} | ถัง ${rec.binId}`;
+
+      const modal = document.getElementById("cancelRegModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeCancelRegModal() {
+      const modal = document.getElementById("cancelRegModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    document.getElementById("cancelRegForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const reason = document.getElementById("cancelReason").value.trim();
+      if (!reason) {
+        alert("กรุณากรอกเหตุผลการขอยกเลิกการลงทะเบียนก่อนครับ");
+        return;
+      }
+
+      const btn = document.getElementById("btnConfirmCancel");
+      btn.disabled = true;
+      btn.innerText = "กำลังบันทึก...";
+
+      const payload = {
+        action: "cancel",
+        rowNumber: document.getElementById("cancelRowNumber").value,
+        sheetName: document.getElementById("cancelSheetName").value,
+        village: "หมู่ " + document.getElementById("cancelVillageNum").value,
+        binId: document.getElementById("cancelBinId").value,
+        houseNo: document.getElementById("cancelHouseNo").value,
+        fullName: document.getElementById("cancelFullName").value,
+        detail: reason,
+        adminRole: getCurrentAdmin()
+      };
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.status === "success") {
+          alert("บันทึกการขอยกเลิกการลงทะเบียนและลงประวัติเรียบร้อยแล้วครับ");
+          closeCancelRegModal();
+          await loadData();
+        } else {
+          alert("ดำเนินการไม่สำเร็จ: " + (json.message || ""));
+        }
+      } catch (err) {
+        alert("เกิดข้อผิดพลาดในการขอยกเลิก");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "ยืนยันขอยกเลิก";
+      }
+    });
+
+    // Modal รายชื่อตามอัตราค่าบริการ
+    function openPriceModal(price) {
+      selectedModalPrice = Number(price);
+      const list = allRecords.filter(r => String(r.status || "ปกติ") !== "ยกเลิก" && Number(r.amount) === selectedModalPrice);
+      const totalAmt = list.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+
+      document.getElementById("priceModalTitle").innerHTML = `<i class="fa-solid fa-users text-emerald-400"></i> รายชื่อผู้ชำระอัตรา ฿${selectedModalPrice.toLocaleString()}`;
+      document.getElementById("priceModalSubtitle").innerText = `ทั้งหมด ${list.length.toLocaleString()} ราย | ยอดรวม ฿${totalAmt.toLocaleString()}`;
 
       const tbody = document.getElementById("priceModalTableBody");
-      if (matched.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">ไม่พบข้อมูลผู้ชำระในราคานี้</td></tr>`;
-      } else {
-        tbody.innerHTML = matched.map((row, idx) => {
-          const binDisplay = (row.binId && String(row.binId).trim() !== "") ? row.binId : "-";
-          const houseDisplay = (row.houseNo !== undefined && row.houseNo !== null && String(row.houseNo).trim() !== "") ? row.houseNo : "-";
-          const amtNum = parseFloat(row.amount);
-          const amtDisplay = isNaN(amtNum) ? 0 : amtNum;
-
-          return `
-            <tr class="hover:bg-slate-800/50 transition">
-              <td class="p-3 text-slate-400">${idx + 1}</td>
-              <td class="p-3 font-medium text-emerald-300">${binDisplay}</td>
-              <td class="p-3 text-white font-medium">${row.fullName || "-"}</td>
-              <td class="p-3 text-slate-200">${houseDisplay}</td>
-              <td class="p-3 text-slate-300">${getVillageDisplay(row.village)}</td>
-              <td class="p-3">
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${row.payType === 'รายปี' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-sky-500/20 text-sky-300 border border-sky-500/30'}">
-                  ${row.payType || "-"}
-                </span>
-              </td>
-              <td class="p-3 text-right font-semibold text-emerald-400">฿${amtDisplay.toLocaleString()}</td>
-            </tr>
-          `;
-        }).join("");
-      }
+      tbody.innerHTML = "";
+      list.forEach((r, idx) => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-900/60">
+            <td class="p-3 text-slate-400">${idx + 1}</td>
+            <td class="p-3 font-mono text-emerald-300">${r.binId || "-"}</td>
+            <td class="p-3 font-medium text-white">${r.fullName || "-"}</td>
+            <td class="p-3">${r.customerType || "ครัวเรือน"}</td>
+            <td class="p-3">${r.houseNo || "-"}</td>
+            <td class="p-3">${getVillageDisplay(r.village)}</td>
+            <td class="p-3 text-right font-bold text-amber-300">฿${Number(r.amount || 0).toLocaleString()}</td>
+          </tr>
+        `;
+      });
 
       const modal = document.getElementById("priceListModal");
       modal.classList.remove("hidden");
@@ -771,240 +1214,11 @@
     }
 
     function goToManagementWithPrice() {
-      closePriceModal();
-      switchPage("management");
-      const searchInput = document.getElementById("searchInput");
-      if (searchInput && selectedModalPrice !== null) {
-        searchInput.value = String(selectedModalPrice);
+      if (selectedModalPrice !== null) {
+        document.getElementById("searchInput").value = String(selectedModalPrice);
+        closePriceModal();
+        switchPage("management");
         renderTable();
-      }
-    }
-
-    function renderVerticalBarChart() {
-      const container = document.getElementById("verticalBarChartContainer");
-      if (!container) return;
-
-      const counts = VILLAGES.map(v => allRecords.filter(r => getVillageNum(r.village) === v.num).length);
-      const maxVal = Math.max(...counts, 1);
-
-      container.innerHTML = VILLAGES.map((v, idx) => {
-        const count = counts[idx];
-        const heightPct = Math.round((count / maxVal) * 100);
-        return `
-          <div class="flex flex-col items-center justify-end h-full group">
-            <span class="text-xs font-bold text-emerald-400 mb-1">${count}</span>
-            <div class="w-full max-w-[36px] bg-slate-800/80 rounded-t-lg h-36 flex items-end overflow-hidden border border-slate-700/60">
-              <div class="w-full bg-gradient-to-t from-emerald-600 to-teal-400 rounded-t-lg transition-all duration-500 group-hover:brightness-110" style="height: ${heightPct}%"></div>
-            </div>
-            <span class="text-[11px] text-slate-400 mt-2 font-medium">หมู่ ${v.num}</span>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function renderVillageCards() {
-      const grid = document.getElementById("villageCardsGrid");
-      if (!grid) return;
-
-      grid.innerHTML = VILLAGES.map(v => {
-        const rows = allRecords.filter(r => getVillageNum(r.village) === v.num);
-        const sum = rows.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
-        return `
-          <div class="bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 rounded-xl p-4 transition">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-lg">หมู่ที่ ${v.num}</span>
-              <span class="text-xs text-slate-400">${rows.length.toLocaleString()} ครัวเรือน</span>
-            </div>
-            <h4 class="font-bold text-white text-sm mb-3">${v.full}</h4>
-            <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
-              <span class="text-slate-400">ยอดจัดเก็บรวม</span>
-              <span class="text-emerald-400 font-bold text-sm">฿${sum.toLocaleString()}</span>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function renderTable() {
-      const tbody = document.getElementById("tableBody");
-      const totalCountEl = document.getElementById("totalCount");
-      if (!tbody) return;
-
-      const keyword = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
-      const filterV = document.getElementById("filterVillage")?.value || "";
-
-      const filtered = allRecords.filter(r => {
-        const matchV = !filterV || getVillageNum(r.village) === getVillageNum(filterV);
-        if (!matchV) return false;
-        if (!keyword) return true;
-
-        const binStr = (r.binId && String(r.binId).trim() !== "") ? String(r.binId) : "-";
-        const houseStr = (r.houseNo !== undefined && r.houseNo !== null) ? String(r.houseNo) : "";
-        const villageFull = getVillageDisplay(r.village);
-        const combined = `${r.regDate || ""} ${binStr} ${r.fullName || ""} ${r.phone || ""} ${houseStr} ${villageFull} ${r.payType || ""} ${r.amount || ""}`.toLowerCase();
-        return combined.includes(keyword);
-      });
-
-      if (totalCountEl) totalCountEl.innerText = filtered.length.toLocaleString();
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-400">ไม่พบข้อมูลที่ค้นหา</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = filtered.map((row, idx) => {
-        const binDisplay = (row.binId && String(row.binId).trim() !== "") ? row.binId : "-";
-        const houseDisplay = (row.houseNo !== undefined && row.houseNo !== null && String(row.houseNo).trim() !== "") ? row.houseNo : "-";
-        const amtNum = parseFloat(row.amount);
-        const amtDisplay = isNaN(amtNum) ? 0 : amtNum;
-        const encodedRow = encodeURIComponent(JSON.stringify(row));
-
-        return `
-          <tr class="hover:bg-slate-800/40 transition">
-            <td class="p-3.5 text-slate-400">${idx + 1}</td>
-            <td class="p-3.5 text-slate-300">${row.regDate || "-"}</td>
-            <td class="p-3.5 font-semibold text-emerald-400">${binDisplay}</td>
-            <td class="p-3.5 font-medium text-white">${row.fullName || "-"}</td>
-            <td class="p-3.5 text-slate-300">${row.phone || "-"}</td>
-            <td class="p-3.5 text-slate-200">${houseDisplay}</td>
-            <td class="p-3.5 text-slate-300">${getVillageDisplay(row.village)}</td>
-            <td class="p-3.5">
-              <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${row.payType === 'รายปี' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-sky-500/20 text-sky-300 border border-sky-500/30'}">
-                ${row.payType || "-"}
-              </span>
-            </td>
-            <td class="p-3.5 text-right font-bold text-emerald-400">฿${amtDisplay.toLocaleString()}</td>
-            <td class="p-3.5 text-center space-x-1.5 whitespace-nowrap">
-              <button type="button" onclick="openEditModal('${encodedRow}')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs transition" title="แก้ไข">
-                <i class="fa-solid fa-pen"></i>
-              </button>
-              <button type="button" onclick="deleteRecord('${encodedRow}')" class="px-2.5 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 text-xs transition" title="ลบ">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join("");
-    }
-
-    document.getElementById("addForm")?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById("btnSubmit");
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> กำลังบันทึก...';
-
-      const payload = {
-        action: "add",
-        regDate: document.getElementById("regDate").value.trim(),
-        binId: document.getElementById("binId").value.trim() || "-",
-        fullName: document.getElementById("fullName").value.trim(),
-        phone: document.getElementById("phone").value.trim(),
-        houseNo: document.getElementById("houseNo").value.trim(),
-        village: document.getElementById("village").value,
-        payType: document.getElementById("payType").value,
-        amount: document.getElementById("amount").value
-      };
-
-      try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
-        document.getElementById("addForm").reset();
-        setDefaultDate();
-        await fetchData();
-        alert("บันทึกข้อมูลสำเร็จ!");
-      } catch (err) {
-        console.error(err);
-        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-save"></i> บันทึกข้อมูลลง Google Sheets';
-      }
-    });
-
-    function openEditModal(encodedRow) {
-      const row = JSON.parse(decodeURIComponent(encodedRow));
-      document.getElementById("editRowNumber").value = row.rowNumber || "";
-      document.getElementById("editSheetName").value = row.sheetName || row.village || "";
-      document.getElementById("editId").value = row.id || "";
-      document.getElementById("editRegDate").value = row.regDate || "";
-      document.getElementById("editBinId").value = (row.binId && String(row.binId).trim() !== "") ? row.binId : "-";
-      document.getElementById("editHouseNo").value = row.houseNo || "";
-      document.getElementById("editPhone").value = row.phone || "";
-      document.getElementById("editFullName").value = row.fullName || "";
-      document.getElementById("editVillage").value = getVillageDisplay(row.village);
-      document.getElementById("editPayType").value = row.payType || "รายเดือน";
-      document.getElementById("editAmount").value = row.amount || 0;
-
-      const modal = document.getElementById("editModal");
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
-    }
-
-    function closeEditModal() {
-      const modal = document.getElementById("editModal");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
-    }
-
-    document.getElementById("editForm")?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById("btnSaveEdit");
-      btn.disabled = true;
-      btn.innerText = "กำลังบันทึก...";
-
-      const payload = {
-        action: "edit",
-        rowNumber: document.getElementById("editRowNumber").value,
-        sheetName: document.getElementById("editSheetName").value,
-        id: document.getElementById("editId").value,
-        regDate: document.getElementById("editRegDate").value.trim(),
-        binId: document.getElementById("editBinId").value.trim() || "-",
-        houseNo: document.getElementById("editHouseNo").value.trim(),
-        phone: document.getElementById("editPhone").value.trim(),
-        fullName: document.getElementById("editFullName").value.trim(),
-        village: document.getElementById("editVillage").value,
-        payType: document.getElementById("editPayType").value,
-        amount: document.getElementById("editAmount").value
-      };
-
-      try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
-        closeEditModal();
-        await fetchData();
-        alert("แก้ไขข้อมูลเรียบร้อยแล้ว!");
-      } catch (err) {
-        console.error(err);
-        alert("เกิดข้อผิดพลาดในการแก้ไขข้อมูล");
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "บันทึกการแก้ไข";
-      }
-    });
-
-    async function deleteRecord(encodedRow) {
-      const row = JSON.parse(decodeURIComponent(encodedRow));
-      if (!confirm(`ต้องการลบข้อมูลของ "${row.fullName || "รายการนี้"}" ใช่หรือไม่?`)) return;
-
-      try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "delete",
-            rowNumber: row.rowNumber,
-            sheetName: row.sheetName || row.village,
-            id: row.id
-          })
-        });
-        await fetchData();
-        alert("ลบข้อมูลเรียบร้อยแล้ว!");
-      } catch (err) {
-        console.error(err);
-        alert("เกิดข้อผิดพลาดในการลบข้อมูล");
       }
     }
   </script>
