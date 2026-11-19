@@ -239,10 +239,10 @@
                 <h3 class="font-bold text-white text-base">
                   <i class="fa-solid fa-tags text-emerald-400 mr-2"></i> สรุปจำนวนรายแยกตามอัตราค่าบริการ (ทุกราคา)
                 </h3>
-                <p class="text-xs text-slate-400">แสดงจำนวนครัวเรือนและยอดรวมของแต่ละราคาอัตโนมัติ (40 / 80 / 120 / ...)</p>
+                <p class="text-xs text-slate-400">คลิกที่การ์ดราคาเพื่อดูรายชื่อผู้ชำระ (40 / 80 / 120 / ...)</p>
               </div>
               <span class="text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 w-fit">
-                อัปเดตอัตโนมัติ
+                คลิกดูรายชื่อได้
               </span>
             </div>
 
@@ -449,6 +449,51 @@
     </div>
   </div>
 
+  <!-- Modal แสดงรายชื่อผู้ชำระตามราคาที่เลือก -->
+  <div id="priceListModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="tech-card rounded-2xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="flex justify-between items-center border-b border-slate-800 px-6 py-4 bg-slate-900/90">
+        <div>
+          <h3 id="priceModalTitle" class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-users text-emerald-400"></i> รายชื่อผู้ชำระอัตรา ฿0
+          </h3>
+          <p id="priceModalSubtitle" class="text-xs text-slate-400 mt-0.5">ทั้งหมด 0 ราย | ยอดรวม ฿0</p>
+        </div>
+        <button onclick="closePriceModal()" class="text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto flex-1">
+        <div class="overflow-x-auto rounded-xl border border-slate-800">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-slate-300 text-xs uppercase tracking-wider border-b border-slate-800">
+                <th class="p-3 font-semibold">ลำดับ</th>
+                <th class="p-3 font-semibold">เลขถังขยะ</th>
+                <th class="p-3 font-semibold">ชื่อ - นามสกุล</th>
+                <th class="p-3 font-semibold">บ้านเลขที่</th>
+                <th class="p-3 font-semibold">หมู่ที่ / หมู่บ้าน</th>
+                <th class="p-3 font-semibold">ประเภทชำระ</th>
+                <th class="p-3 font-semibold text-right">จำนวนเงิน</th>
+              </tr>
+            </thead>
+            <tbody id="priceModalTableBody" class="divide-y divide-slate-800 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap justify-between items-center gap-3 border-t border-slate-800 px-6 py-4 bg-slate-900/90">
+        <button type="button" onclick="goToManagementWithPrice()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition flex items-center gap-2">
+          <i class="fa-solid fa-table-list"></i> กรองราคานี้ในหน้าจัดการข้อมูล
+        </button>
+        <button type="button" onclick="closePriceModal()" class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-sm font-medium">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw01amYiV8v-fau5VFqOYg1s_ew7WPCW4vRM_Yp0tZ0LAQsUsO4_jw0VnSeva9aHD8N/exec";
 
@@ -457,7 +502,20 @@
       "Admin 2 (ระบบเธอ)": "032684112"
     };
 
+    const VILLAGES = [
+      "หมู่ 1 บ้านห้วยขวาง",
+      "หมู่ 2 บ้านนาปุ่ม",
+      "หมู่ 3 บ้านหนองคาง",
+      "หมู่ 4 บ้านหนองหญ้าปล้อง",
+      "หมู่ 5 บ้านลาดวิถี",
+      "หมู่ 6 บ้านเขาโป่ง",
+      "หมู่ 7 บ้านหนองกลางดง",
+      "หมู่ 8 บ้านเกาะนาน้อย",
+      "หมู่ 9 บ้านเขาน้อยห้วยตามา"
+    ];
+
     let allRecords = [];
+    let selectedModalPrice = null;
 
     function switchPage(pageId) {
       document.querySelectorAll(".page-content").forEach(el => el.classList.add("hidden"));
@@ -534,9 +592,9 @@
         if (json.status === "success") {
           allRecords = json.data || [];
           updateStats();
-          if (typeof renderVerticalBarChart === "function") renderVerticalBarChart();
-          if (typeof renderVillageCards === "function") renderVillageCards();
-          if (typeof renderTable === "function") renderTable();
+          renderVerticalBarChart();
+          renderVillageCards();
+          renderTable();
         } else {
           if (!isBackground) alert("แจ้งเตือนจากระบบ: " + json.message);
         }
@@ -568,9 +626,9 @@
       document.getElementById("statTotalHouse").innerText = allRecords.length.toLocaleString();
       document.getElementById("statTotalAmount").innerText = "฿" + totalAmount.toLocaleString();
       document.getElementById("statMonthlyAmount").innerText = "฿" + monthlyAmount.toLocaleString();
-      document.getElementById("statMonthlyCount").innerText = monthlyCount;
+      document.getElementById("statMonthlyCount").innerText = monthlyCount.toLocaleString();
       document.getElementById("statYearlyAmount").innerText = "฿" + yearlyAmount.toLocaleString();
-      document.getElementById("statYearlyCount").innerText = yearlyCount;
+      document.getElementById("statYearlyCount").innerText = yearlyCount.toLocaleString();
 
       let totalCount = monthlyCount + yearlyCount;
       let pctM = totalCount > 0 ? Math.round((monthlyCount / totalCount) * 100) : 0;
@@ -581,7 +639,7 @@
       document.getElementById("pctYearly").innerText = pctY + "%";
       document.getElementById("barYearly").style.width = pctY + "%";
 
-      // คำนวณแยกจำนวนรายตามราคา (40 / 80 / 120 / ... ทุกราคา)
+      // คำนวณแยกจำนวนรายตามราคา (40 / 80 / 120 / ... ทุกราคา) แบบคลิกดูรายชื่อได้
       const priceContainer = document.getElementById("priceBreakdownContainer");
       if (priceContainer) {
         if (allRecords.length === 0) {
@@ -604,18 +662,20 @@
           priceContainer.innerHTML = sortedPrices.map(price => {
             const info = priceMap[price];
             return `
-              <div class="bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 transition-all rounded-xl p-4 flex flex-col justify-between">
+              <div onclick="openPriceModal(${price})" title="คลิกเพื่อดูรายชื่อผู้ชำระราคา ฿${price.toLocaleString()}" class="bg-slate-900/90 border border-slate-800 hover:border-emerald-400 hover:bg-slate-800/90 transition-all rounded-xl p-4 flex flex-col justify-between cursor-pointer group">
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-md">
                     ราคา ฿${price.toLocaleString()}
                   </span>
+                  <i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-slate-500 group-hover:text-emerald-400 transition"></i>
                 </div>
                 <div class="my-1">
                   <span class="text-2xl font-bold text-white">${info.count.toLocaleString()}</span>
                   <span class="text-xs text-slate-400 ml-1">ราย</span>
                 </div>
-                <div class="text-xs text-slate-400 pt-2 border-t border-slate-800 mt-2">
-                  รวม <span class="text-emerald-400 font-semibold">฿${info.total.toLocaleString()}</span>
+                <div class="text-xs text-slate-400 pt-2 border-t border-slate-800 mt-2 flex items-center justify-between">
+                  <span>รวม <span class="text-emerald-400 font-semibold">฿${info.total.toLocaleString()}</span></span>
+                  <span class="text-[11px] text-emerald-400/80 group-hover:underline">ดูรายชื่อ</span>
                 </div>
               </div>
             `;
@@ -623,6 +683,237 @@
         }
       }
     }
-  </script>
-</body>
-</html>
+
+    function openPriceModal(targetPrice) {
+      selectedModalPrice = Number(targetPrice);
+      const matched = allRecords.filter(item => {
+        const amt = parseFloat(item.amount);
+        const price = isNaN(amt) ? 0 : amt;
+        return price === selectedModalPrice;
+      });
+
+      const totalSum = matched.reduce((sum, item) => {
+        const amt = parseFloat(item.amount);
+        return sum + (isNaN(amt) ? 0 : amt);
+      }, 0);
+
+      document.getElementById("priceModalTitle").innerHTML =
+        `<i class="fa-solid fa-users text-emerald-400"></i> รายชื่อผู้ชำระอัตรา ฿${selectedModalPrice.toLocaleString()}`;
+      document.getElementById("priceModalSubtitle").innerText =
+        `ทั้งหมด ${matched.length.toLocaleString()} ราย | ยอดรวม ฿${totalSum.toLocaleString()}`;
+
+      const tbody = document.getElementById("priceModalTableBody");
+      if (matched.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">ไม่พบข้อมูลผู้ชำระในราคานี้</td></tr>`;
+      } else {
+        tbody.innerHTML = matched.map((row, idx) => {
+          const binDisplay = (row.binId && String(row.binId).trim() !== "") ? row.binId : "-";
+          const houseDisplay = (row.houseNo !== undefined && row.houseNo !== null && String(row.houseNo).trim() !== "") ? row.houseNo : "-";
+          const amtNum = parseFloat(row.amount);
+          const amtDisplay = isNaN(amtNum) ? 0 : amtNum;
+
+          return `
+            <tr class="hover:bg-slate-800/50 transition">
+              <td class="p-3 text-slate-400">${idx + 1}</td>
+              <td class="p-3 font-medium text-emerald-300">${binDisplay}</td>
+              <td class="p-3 text-white font-medium">${row.fullName || "-"}</td>
+              <td class="p-3 text-slate-200">${houseDisplay}</td>
+              <td class="p-3 text-slate-300">${row.village || "-"}</td>
+              <td class="p-3">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${row.payType === 'รายปี' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-sky-500/20 text-sky-300 border border-sky-500/30'}">
+                  ${row.payType || "-"}
+                </span>
+              </td>
+              <td class="p-3 text-right font-semibold text-emerald-400">฿${amtDisplay.toLocaleString()}</td>
+            </tr>
+          `;
+        }).join("");
+      }
+
+      const modal = document.getElementById("priceListModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closePriceModal() {
+      const modal = document.getElementById("priceListModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function goToManagementWithPrice() {
+      closePriceModal();
+      switchPage("management");
+      const searchInput = document.getElementById("searchInput");
+      if (searchInput && selectedModalPrice !== null) {
+        searchInput.value = String(selectedModalPrice);
+        renderTable();
+      }
+    }
+
+    function renderVerticalBarChart() {
+      const container = document.getElementById("verticalBarChartContainer");
+      if (!container) return;
+
+      const counts = VILLAGES.map(v => allRecords.filter(r => r.village === v).length);
+      const maxVal = Math.max(...counts, 1);
+
+      container.innerHTML = VILLAGES.map((v, idx) => {
+        const count = counts[idx];
+        const heightPct = Math.round((count / maxVal) * 100);
+        return `
+          <div class="flex flex-col items-center justify-end h-full group">
+            <span class="text-xs font-bold text-emerald-400 mb-1">${count}</span>
+            <div class="w-full max-w-[36px] bg-slate-800/80 rounded-t-lg h-36 flex items-end overflow-hidden border border-slate-700/60">
+              <div class="w-full bg-gradient-to-t from-emerald-600 to-teal-400 rounded-t-lg transition-all duration-500 group-hover:brightness-110" style="height: ${heightPct}%"></div>
+            </div>
+            <span class="text-[11px] text-slate-400 mt-2 font-medium">หมู่ ${idx + 1}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderVillageCards() {
+      const grid = document.getElementById("villageCardsGrid");
+      if (!grid) return;
+
+      grid.innerHTML = VILLAGES.map((v, idx) => {
+        const rows = allRecords.filter(r => r.village === v);
+        const sum = rows.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+        return `
+          <div class="bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 rounded-xl p-4 transition">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-lg">หมู่ที่ ${idx + 1}</span>
+              <span class="text-xs text-slate-400">${rows.length.toLocaleString()} ครัวเรือน</span>
+            </div>
+            <h4 class="font-bold text-white text-sm mb-3">${v}</h4>
+            <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
+              <span class="text-slate-400">ยอดจัดเก็บรวม</span>
+              <span class="text-emerald-400 font-bold text-sm">฿${sum.toLocaleString()}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("tableBody");
+      const totalCountEl = document.getElementById("totalCount");
+      if (!tbody) return;
+
+      const keyword = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
+      const filterV = document.getElementById("filterVillage")?.value || "";
+
+      const filtered = allRecords.filter(r => {
+        const matchV = !filterV || r.village === filterV;
+        if (!matchV) return false;
+        if (!keyword) return true;
+
+        const binStr = (r.binId && String(r.binId).trim() !== "") ? String(r.binId) : "-";
+        const houseStr = (r.houseNo !== undefined && r.houseNo !== null) ? String(r.houseNo) : "";
+        const combined = `${r.regDate || ""} ${binStr} ${r.fullName || ""} ${r.phone || ""} ${houseStr} ${r.village || ""} ${r.payType || ""} ${r.amount || ""}`.toLowerCase();
+        return combined.includes(keyword);
+      });
+
+      if (totalCountEl) totalCountEl.innerText = filtered.length.toLocaleString();
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-400">ไม่พบข้อมูลที่ค้นหา</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((row, idx) => {
+        const binDisplay = (row.binId && String(row.binId).trim() !== "") ? row.binId : "-";
+        const houseDisplay = (row.houseNo !== undefined && row.houseNo !== null && String(row.houseNo).trim() !== "") ? row.houseNo : "-";
+        const amtNum = parseFloat(row.amount);
+        const amtDisplay = isNaN(amtNum) ? 0 : amtNum;
+        const encodedRow = encodeURIComponent(JSON.stringify(row));
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="p-3.5 text-slate-400">${idx + 1}</td>
+            <td class="p-3.5 text-slate-300">${row.regDate || "-"}</td>
+            <td class="p-3.5 font-semibold text-emerald-400">${binDisplay}</td>
+            <td class="p-3.5 font-medium text-white">${row.fullName || "-"}</td>
+            <td class="p-3.5 text-slate-300">${row.phone || "-"}</td>
+            <td class="p-3.5 text-slate-200">${houseDisplay}</td>
+            <td class="p-3.5 text-slate-300">${row.village || "-"}</td>
+            <td class="p-3.5">
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${row.payType === 'รายปี' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-sky-500/20 text-sky-300 border border-sky-500/30'}">
+                ${row.payType || "-"}
+              </span>
+            </td>
+            <td class="p-3.5 text-right font-bold text-emerald-400">฿${amtDisplay.toLocaleString()}</td>
+            <td class="p-3.5 text-center space-x-1.5 whitespace-nowrap">
+              <button onclick="openEditModal('${encodedRow}')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs transition" title="แก้ไข">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button onclick="deleteRecord('${encodedRow}')" class="px-2.5 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 text-xs transition" title="ลบ">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    document.getElementById("addForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("btnSubmit");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> กำลังบันทึก...';
+
+      const payload = {
+        action: "add",
+        regDate: document.getElementById("regDate").value.trim(),
+        binId: document.getElementById("binId").value.trim() || "-",
+        fullName: document.getElementById("fullName").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        houseNo: document.getElementById("houseNo").value.trim(),
+        village: document.getElementById("village").value,
+        payType: document.getElementById("payType").value,
+        amount: document.getElementById("amount").value
+      };
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        document.getElementById("addForm").reset();
+        setDefaultDate();
+        await fetchData();
+        alert("บันทึกข้อมูลสำเร็จ!");
+      } catch (err) {
+        console.error(err);
+        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-save"></i> บันทึกข้อมูลลง Google Sheets';
+      }
+    });
+
+    function openEditModal(encodedRow) {
+      const row = JSON.parse(decodeURIComponent(encodedRow));
+      document.getElementById("editRowNumber").value = row.rowNumber || "";
+      document.getElementById("editSheetName").value = row.sheetName || row.village || "";
+      document.getElementById("editId").value = row.id || "";
+      document.getElementById("editRegDate").value = row.regDate || "";
+      document.getElementById("editBinId").value = (row.binId && String(row.binId).trim() !== "") ? row.binId : "-";
+      document.getElementById("editHouseNo").value = row.houseNo || "";
+      document.getElementById("editPhone").value = row.phone || "";
+      document.getElementById("editFullName").value = row.fullName || "";
+      document.getElementById("editVillage").value = row.village || "";
+      document.getElementById("editPayType").value = row.payType || "รายเดือน";
+      document.getElementById("editAmount").value = row.amount || 0;
+
+      const modal = document.getElementById("editModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeEditModal() {
+      const modal = document.getElementById("editModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
