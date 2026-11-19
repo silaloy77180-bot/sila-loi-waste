@@ -53,7 +53,7 @@
         <div>
           <label class="block text-sm font-medium mb-1.5 text-slate-300">เลือกสิทธิ์ผู้ใช้งาน *</label>
           <select id="adminRole" required class="w-full border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
-            <option value="">-- เลือกสิทธิ์ Admin --</option>
+            <option value="">-- เลือกชื่อแอดมิน --</option>
             <option value="Admin 1">Admin 1</option>
             <option value="Admin 2">Admin 2</option>
           </select>
@@ -109,7 +109,7 @@
         <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex items-center gap-2.5">
           <div class="bg-emerald-500/20 text-emerald-400 p-2 rounded-lg border border-emerald-500/30"><i class="fa-solid fa-shield-halved"></i></div>
           <div class="overflow-hidden">
-            <p class="text-[10px] text-slate-400 uppercase font-semibold">ผู้ใช้งานปัจจุบัน</p>
+            <p class="text-[10px] text-slate-400 uppercase font-semibold">แอดมินที่เข้าใช้งาน</p>
             <p id="currentRoleDisplay" class="text-xs font-bold text-emerald-400 truncate">Admin 1</p>
           </div>
         </div>
@@ -464,7 +464,7 @@
                     <th class="p-3.5 font-semibold">บ้านเลขที่</th>
                     <th class="p-3.5 font-semibold">ชื่อ - นามสกุล</th>
                     <th class="p-3.5 font-semibold">รายละเอียด / เหตุผล</th>
-                    <th class="p-3.5 font-semibold">ผู้ดำเนินการ</th>
+                    <th class="p-3.5 font-semibold">แอดมิน</th>
                     <th class="p-3.5 font-semibold text-center">จัดการ</th>
                   </tr>
                 </thead>
@@ -647,7 +647,7 @@
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw01amYiV8v-fau5VFqOYg1s_ew7WPCW4vRM_Yp0tZ0LAQsUsO4_jw0VnSeva9aHD8N/exec";
-    const CACHE_KEY = "sila_loi_waste_cache_v4";
+    const CACHE_KEY = "sila_loi_waste_cache_v5";
 
     const PASSWORDS = {
       "Admin 1": "032684111",
@@ -675,6 +675,14 @@
       { num: "8", full: "หมู่ 8 บ้านเกาะนาน้อย" },
       { num: "9", full: "หมู่ 9 บ้านเขาน้อยห้วยตามา" }
     ];
+
+    function sendToAppsScript(payloadObj) {
+      return fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payloadObj)
+      });
+    }
 
     function toggleCustomTypeInput(mode) {
       if (mode === "add") {
@@ -1197,15 +1205,12 @@
       refreshAllViews();
 
       try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "deleteLog",
-            rowNumber: targetLog.rowNumber || "",
-            timestamp: targetLog.timestamp || "",
-            fullName: targetLog.fullName || "",
-            houseNo: targetLog.houseNo || ""
-          })
+        await sendToAppsScript({
+          action: "deleteLog",
+          rowNumber: targetLog.rowNumber || "",
+          timestamp: targetLog.timestamp || "",
+          fullName: targetLog.fullName || "",
+          houseNo: targetLog.houseNo || ""
         });
         loadData(false);
       } catch (err) {
@@ -1236,10 +1241,7 @@
       };
 
       try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
+        await sendToAppsScript(payload);
 
         const maxId = allRecords.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0);
         allRecords.push({
@@ -1334,10 +1336,7 @@
       };
 
       try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
+        await sendToAppsScript(payload);
 
         allRecords = allRecords.map(r => Number(r.id) === targetId ? { ...r, ...payload } : r);
         allLogs.unshift({
@@ -1346,167 +1345,4 @@
           cancelDate: "-",
           village: "หมู่ " + (getVillageNum(payload.village) || "-"),
           binId: payload.binId,
-          houseNo: payload.houseNo,
-          fullName: payload.fullName,
-          detail: detailText,
-          admin: adminName
-        });
-
-        closeEditModal();
-        refreshAllViews();
-        loadData(false);
-      } catch (err) {
-        alert("เกิดข้อผิดพลาดในการบันทึกการแก้ไข");
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "บันทึกการแก้ไข";
-      }
-    });
-
-    function openCancelRegModal(id) {
-      const rec = allRecords.find(r => Number(r.id) === Number(id));
-      if (!rec) return;
-
-      document.getElementById("cancelId").value = rec.id;
-      document.getElementById("cancelRowNumber").value = rec.rowNumber;
-      document.getElementById("cancelSheetName").value = rec.sheetName;
-      document.getElementById("cancelVillageNum").value = getVillageNum(rec.village) || "1";
-      document.getElementById("cancelBinId").value = rec.binId || "-";
-      document.getElementById("cancelHouseNo").value = rec.houseNo || "-";
-      document.getElementById("cancelFullName").value = rec.fullName || "-";
-      document.getElementById("cancelDate").value = getThaiDateTodaySlash();
-      document.getElementById("cancelReason").value = "";
-      document.getElementById("cancelTargetSummary").innerText =
-        `${rec.fullName} | บ้านเลขที่ ${rec.houseNo} | ${getVillageDisplay(rec.village)} | ถัง ${rec.binId}`;
-
-      const modal = document.getElementById("cancelRegModal");
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
-    }
-
-    function closeCancelRegModal() {
-      const modal = document.getElementById("cancelRegModal");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
-    }
-
-    document.getElementById("cancelRegForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const cancelDateVal = document.getElementById("cancelDate").value.trim() || getThaiDateTodaySlash();
-      const reason = document.getElementById("cancelReason").value.trim();
-      if (!reason) {
-        alert("กรุณากรอกเหตุผลการขอยกเลิกการลงทะเบียนก่อนครับ");
-        return;
-      }
-
-      const btn = document.getElementById("btnConfirmCancel");
-      btn.disabled = true;
-      btn.innerText = "กำลังบันทึก...";
-
-      const targetId = Number(document.getElementById("cancelId").value);
-      const vNum = document.getElementById("cancelVillageNum").value;
-      const binId = document.getElementById("cancelBinId").value;
-      const houseNo = document.getElementById("cancelHouseNo").value;
-      const fullName = document.getElementById("cancelFullName").value;
-      const adminName = getCurrentAdmin();
-
-      const payload = {
-        action: "cancel",
-        rowNumber: document.getElementById("cancelRowNumber").value,
-        sheetName: document.getElementById("cancelSheetName").value,
-        village: "หมู่ " + vNum,
-        binId: binId,
-        houseNo: houseNo,
-        fullName: fullName,
-        cancelDate: cancelDateVal,
-        detail: reason,
-        adminRole: adminName
-      };
-
-      try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
-
-        allRecords = allRecords.map(r => Number(r.id) === targetId ? { ...r, status: "ยกเลิก" } : r);
-        const vKey = String(vNum).trim();
-        const hKey = String(houseNo).trim().toLowerCase();
-        const nKey = String(fullName).trim().toLowerCase();
-        allLogs = allLogs.filter(item => {
-          if (!String(item.actionType || "").includes("ยกเลิก")) return true;
-          const iv = getVillageNum(item.village) || String(item.village || "").trim();
-          const ih = String(item.houseNo || "").trim().toLowerCase();
-          const iname = String(item.fullName || "").trim().toLowerCase();
-          return !(iv === vKey && ih === hKey && iname === nKey);
-        });
-
-        allLogs.unshift({
-          timestamp: getNowThaiTimestamp(),
-          actionType: "ขอยกเลิกการลงทะเบียน",
-          cancelDate: cancelDateVal,
-          village: "หมู่ " + vNum,
-          binId: binId,
-          houseNo: houseNo,
-          fullName: fullName,
-          detail: reason,
-          admin: adminName
-        });
-
-        closeCancelRegModal();
-        refreshAllViews();
-        loadData(false);
-      } catch (err) {
-        alert("เกิดข้อผิดพลาดในการขอยกเลิก");
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "ยืนยันขอยกเลิก";
-      }
-    });
-
-    function openPriceModal(price) {
-      selectedModalPrice = Number(price);
-      const list = allRecords.filter(r => String(r.status || "ปกติ") !== "ยกเลิก" && Number(r.amount) === selectedModalPrice);
-      const totalAmt = list.reduce((s, x) => s + (Number(x.amount) || 0), 0);
-
-      document.getElementById("priceModalTitle").innerHTML = `<i class="fa-solid fa-users text-emerald-400"></i> รายชื่อผู้ชำระอัตรา ฿${selectedModalPrice.toLocaleString()}`;
-      document.getElementById("priceModalSubtitle").innerText = `ทั้งหมด ${list.length.toLocaleString()} ราย | ยอดรวม ฿${totalAmt.toLocaleString()}`;
-
-      const tbody = document.getElementById("priceModalTableBody");
-      tbody.innerHTML = "";
-      list.forEach((r, idx) => {
-        tbody.innerHTML += `
-          <tr class="hover:bg-slate-900/60">
-            <td class="p-3 text-slate-400">${idx + 1}</td>
-            <td class="p-3 font-mono text-emerald-300">${r.binId || "-"}</td>
-            <td class="p-3 font-medium text-white">${r.fullName || "-"}</td>
-            <td class="p-3">${r.customerType || "ครัวเรือน"}</td>
-            <td class="p-3">${r.houseNo || "-"}</td>
-            <td class="p-3">${getVillageDisplay(r.village)}</td>
-            <td class="p-3 text-right font-bold text-amber-300">฿${Number(r.amount || 0).toLocaleString()}</td>
-          </tr>
-        `;
-      });
-
-      const modal = document.getElementById("priceListModal");
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
-    }
-
-    function closePriceModal() {
-      const modal = document.getElementById("priceListModal");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
-    }
-
-    function goToManagementWithPrice() {
-      if (selectedModalPrice !== null) {
-        document.getElementById("searchInput").value = String(selectedModalPrice);
-        closePriceModal();
-        switchPage("management");
-        renderTable();
-      }
-    }
-  </script>
-</body>
-</html>
+          house
