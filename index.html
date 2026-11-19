@@ -231,6 +231,25 @@
               </div>
             </div>
           </div>
+
+          <!-- สรุปจำนวนรายแยกตามอัตราค่าบริการ (ทุกราคา) -->
+          <div class="tech-card p-6 rounded-2xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+              <div>
+                <h3 class="font-bold text-white text-base">
+                  <i class="fa-solid fa-tags text-emerald-400 mr-2"></i> สรุปจำนวนรายแยกตามอัตราค่าบริการ (ทุกราคา)
+                </h3>
+                <p class="text-xs text-slate-400">แสดงจำนวนครัวเรือนและยอดรวมของแต่ละราคาอัตโนมัติ (40 / 80 / 120 / ...)</p>
+              </div>
+              <span class="text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 w-fit">
+                อัปเดตอัตโนมัติ
+              </span>
+            </div>
+
+            <div id="priceBreakdownContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              <div class="col-span-full text-center text-slate-400 text-sm py-4">กำลังคำนวณข้อมูลราคา...</div>
+            </div>
+          </div>
         </div>
 
         <!-- MANAGEMENT PAGE -->
@@ -515,9 +534,9 @@
         if (json.status === "success") {
           allRecords = json.data || [];
           updateStats();
-          renderVerticalBarChart();
-          renderVillageCards();
-          renderTable();
+          if (typeof renderVerticalBarChart === "function") renderVerticalBarChart();
+          if (typeof renderVillageCards === "function") renderVillageCards();
+          if (typeof renderTable === "function") renderTable();
         } else {
           if (!isBackground) alert("แจ้งเตือนจากระบบ: " + json.message);
         }
@@ -561,243 +580,49 @@
       document.getElementById("barMonthly").style.width = pctM + "%";
       document.getElementById("pctYearly").innerText = pctY + "%";
       document.getElementById("barYearly").style.width = pctY + "%";
-    }
 
-    function renderVerticalBarChart() {
-      const container = document.getElementById("verticalBarChartContainer");
-      container.innerHTML = "";
-      
-      let villageCounts = {};
-      for (let i = 1; i <= 9; i++) {
-        villageCounts[`หมู่ ${i}`] = 0;
-      }
-
-      allRecords.forEach(item => {
-        for (let i = 1; i <= 9; i++) {
-          if (item.village && String(item.village).includes(`หมู่ ${i}`)) {
-            villageCounts[`หมู่ ${i}`]++;
-          }
-        }
-      });
-
-      let maxVal = Math.max(...Object.values(villageCounts), 1);
-
-      for (let i = 1; i <= 9; i++) {
-        let count = villageCounts[`หมู่ ${i}`];
-        let heightPercent = Math.round((count / maxVal) * 100);
-        if (heightPercent < 8 && count > 0) heightPercent = 8;
-
-        let colDiv = document.createElement("div");
-        colDiv.className = "flex flex-col items-center h-full justify-end group";
-        colDiv.innerHTML = `
-          <span class="text-[10px] text-emerald-400 mb-1 transition">${count}</span>
-          <div class="w-full bg-emerald-500/30 rounded-t-lg border-t border-x border-emerald-500/50 relative overflow-hidden transition-all duration-500 group-hover:bg-emerald-500/50" style="height: ${heightPercent}%"></div>
-          <span class="text-[11px] text-slate-400 mt-2 font-medium">ม.${i}</span>
-        `;
-        container.appendChild(colDiv);
-      }
-    }
-
-    function renderVillageCards() {
-      const grid = document.getElementById("villageCardsGrid");
-      grid.innerHTML = "";
-
-      let villages = [
-        "หมู่ 1 บ้านห้วยขวาง", "หมู่ 2 บ้านนาปุ่ม", "หมู่ 3 บ้านหนองคาง",
-        "หมู่ 4 บ้านหนองหญ้าปล้อง", "หมู่ 5 บ้านลาดวิถี", "หมู่ 6 บ้านเขาโป่ง",
-        "หมู่ 7 บ้านหนองกลางดง", "หมู่ 8 บ้านเกาะนาน้อย", "หมู่ 9 บ้านเขาน้อยห้วยตามา"
-      ];
-
-      villages.forEach((vName, idx) => {
-        let vNum = `หมู่ ${idx + 1}`;
-        let vRecords = allRecords.filter(r => r.village && String(r.village).includes(vNum));
-        let vAmount = vRecords.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
-
-        let card = document.createElement("div");
-        card.className = "bg-slate-900/90 border border-slate-800 p-4 rounded-xl space-y-2";
-        card.innerHTML = `
-          <div class="flex justify-between items-start">
-            <h4 class="font-bold text-white text-sm">${vName}</h4>
-            <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded border border-emerald-500/30">${vRecords.length} หลังคาเรือน</span>
-          </div>
-          <div class="flex justify-between items-end pt-2 border-t border-slate-800/80">
-            <span class="text-xs text-slate-400">ยอดจัดเก็บรวม</span>
-            <span class="font-bold text-emerald-400 text-base">฿${vAmount.toLocaleString()}</span>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    function renderTable() {
-      const tbody = document.getElementById("tableBody");
-      const search = document.getElementById("searchInput").value.toLowerCase();
-      const filterV = document.getElementById("filterVillage").value;
-
-      let filtered = allRecords.filter(item => {
-        let matchSearch = (item.binId + "").toLowerCase().includes(search) ||
-                          (item.fullName + "").toLowerCase().includes(search) ||
-                          (item.houseNo + "").toLowerCase().includes(search) ||
-                          (item.regDate + "").toLowerCase().includes(search);
-        let matchV = filterV === "" || (item.village && String(item.village).includes(filterV.split(" ")[0] + " " + filterV.split(" ")[1]));
-        return matchSearch && matchV;
-      });
-
-      tbody.innerHTML = "";
-      filtered.forEach((item, index) => {
-        let tr = document.createElement("tr");
-        tr.className = "hover:bg-slate-900/50 transition border-b border-slate-800/60";
-        tr.innerHTML = `
-          <td class="p-3.5 text-slate-400">${index + 1}</td>
-          <td class="p-3.5 text-slate-300">${item.regDate || '-'}</td>
-          <td class="p-3.5 font-semibold text-emerald-400">${item.binId || '-'}</td>
-          <td class="p-3.5 text-white">${item.fullName || '-'}</td>
-          <td class="p-3.5 text-slate-300">${item.phone || '-'}</td>
-          <td class="p-3.5 text-slate-300">${item.houseNo || '-'}</td>
-          <td class="p-3.5 text-slate-300">${item.village || '-'}</td>
-          <td class="p-3.5"><span class="px-2 py-1 rounded text-xs ${item.payType === 'รายปี' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-sky-500/20 text-sky-400 border border-sky-500/30'}">${item.payType || '-'}</span></td>
-          <td class="p-3.5 text-right font-bold text-emerald-300">฿${(parseFloat(item.amount) || 0).toLocaleString()}</td>
-          <td class="p-3.5 text-center space-x-1">
-            <button onclick='openEditModal(${JSON.stringify(item).replace(/'/g, "&apos;")})' class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-lg text-xs transition">
-              <i class="fa-solid fa-pen"></i> แก้ไข
-            </button>
-            <button onclick='deleteRecord(${JSON.stringify(item).replace(/'/g, "&apos;")})' class="bg-red-600/20 hover:bg-red-600/40 text-red-400 border border-red-500/30 px-2.5 py-1 rounded-lg text-xs transition">
-              <i class="fa-solid fa-trash"></i> ลบ
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById("totalCount").innerText = filtered.length;
-    }
-
-    function openEditModal(item) {
-      document.getElementById("editRowNumber").value = item.rowNumber || "";
-      document.getElementById("editSheetName").value = item.sheetName || "";
-      document.getElementById("editId").value = item.id || "";
-      document.getElementById("editRegDate").value = item.regDate || "";
-      document.getElementById("editBinId").value = item.binId || "";
-      document.getElementById("editFullName").value = item.fullName || "";
-      document.getElementById("editPhone").value = item.phone || "";
-      document.getElementById("editHouseNo").value = item.houseNo || "";
-      document.getElementById("editVillage").value = item.village || "";
-      document.getElementById("editPayType").value = item.payType || "รายเดือน";
-      document.getElementById("editAmount").value = item.amount || 0;
-
-      const modal = document.getElementById("editModal");
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
-    }
-
-    function closeEditModal() {
-      const modal = document.getElementById("editModal");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
-    }
-
-    async function deleteRecord(item) {
-      if (!confirm(`คุณต้องการลบข้อมูลของ "${item.fullName}" (บ้านเลขที่ ${item.houseNo}) ใช่หรือไม่?`)) {
-        return;
-      }
-
-      const payload = {
-        action: "delete",
-        rowNumber: item.rowNumber,
-        sheetName: item.sheetName
-      };
-
-      try {
-        const res = await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
-        const json = await res.json();
-        if (json.status === "success") {
-          alert("ลบข้อมูลสำเร็จ!");
-          fetchData();
+      // คำนวณแยกจำนวนรายตามราคา (40 / 80 / 120 / ... ทุกราคา)
+      const priceContainer = document.getElementById("priceBreakdownContainer");
+      if (priceContainer) {
+        if (allRecords.length === 0) {
+          priceContainer.innerHTML = '<div class="col-span-full text-center text-slate-400 text-sm py-4">ยังไม่มีข้อมูลในระบบ</div>';
         } else {
-          alert("เกิดข้อผิดพลาด: " + json.message);
+          const priceMap = {};
+          allRecords.forEach(item => {
+            const amt = parseFloat(item.amount);
+            const price = isNaN(amt) ? 0 : amt;
+
+            if (!priceMap[price]) {
+              priceMap[price] = { count: 0, total: 0 };
+            }
+            priceMap[price].count++;
+            priceMap[price].total += price;
+          });
+
+          const sortedPrices = Object.keys(priceMap).map(Number).sort((a, b) => a - b);
+
+          priceContainer.innerHTML = sortedPrices.map(price => {
+            const info = priceMap[price];
+            return `
+              <div class="bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 transition-all rounded-xl p-4 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-md">
+                    ราคา ฿${price.toLocaleString()}
+                  </span>
+                </div>
+                <div class="my-1">
+                  <span class="text-2xl font-bold text-white">${info.count.toLocaleString()}</span>
+                  <span class="text-xs text-slate-400 ml-1">ราย</span>
+                </div>
+                <div class="text-xs text-slate-400 pt-2 border-t border-slate-800 mt-2">
+                  รวม <span class="text-emerald-400 font-semibold">฿${info.total.toLocaleString()}</span>
+                </div>
+              </div>
+            `;
+          }).join("");
         }
-      } catch (err) {
-        console.error(err);
-        alert("ไม่สามารถเชื่อมต่อเพื่อลบข้อมูลได้");
       }
     }
-
-    document.getElementById("addForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById("btnSubmit");
-      btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> กำลังบันทึก...`;
-
-      const payload = {
-        action: "add",
-        regDate: document.getElementById("regDate").value,
-        binId: document.getElementById("binId").value,
-        fullName: document.getElementById("fullName").value,
-        phone: document.getElementById("phone").value,
-        houseNo: document.getElementById("houseNo").value,
-        village: document.getElementById("village").value,
-        payType: document.getElementById("payType").value,
-        amount: Number(document.getElementById("amount").value)
-      };
-
-      try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
-        alert("บันทึกข้อมูลสำเร็จ!");
-        document.getElementById("addForm").reset();
-        setDefaultDate();
-        fetchData();
-      } catch (err) {
-        console.error(err);
-        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-save"></i> บันทึกข้อมูลลง Google Sheets`;
-      }
-    });
-
-    document.getElementById("editForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById("btnSaveEdit");
-      btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> กำลังบันทึก...`;
-
-      const payload = {
-        action: "edit",
-        rowNumber: document.getElementById("editRowNumber").value,
-        sheetName: document.getElementById("editSheetName").value,
-        id: document.getElementById("editId").value,
-        regDate: document.getElementById("editRegDate").value,
-        binId: document.getElementById("editBinId").value,
-        fullName: document.getElementById("editFullName").value,
-        phone: document.getElementById("editPhone").value,
-        houseNo: document.getElementById("editHouseNo").value,
-        village: document.getElementById("editVillage").value,
-        payType: document.getElementById("editPayType").value,
-        amount: Number(document.getElementById("editAmount").value)
-      };
-
-      try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
-        alert("บันทึกการแก้ไขสำเร็จ!");
-        closeEditModal();
-        fetchData();
-      } catch (err) {
-        console.error(err);
-        alert("เกิดข้อผิดพลาดในการแก้ไขข้อมูล");
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `บันทึกการแก้ไข`;
-      }
-    });
   </script>
 </body>
 </html>
