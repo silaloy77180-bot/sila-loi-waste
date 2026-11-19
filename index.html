@@ -90,13 +90,13 @@
         </div>
 
         <nav class="p-4 space-y-1.5">
-          <button onclick="switchPage('dashboard')" id="menu-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition bg-emerald-600 text-white shadow-lg shadow-emerald-600/20">
+          <button type="button" onclick="switchPage('dashboard')" id="menu-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition bg-emerald-600 text-white shadow-lg shadow-emerald-600/20">
             <i class="fa-solid fa-chart-pie w-5 text-center"></i> ภาพรวมระบบ (Dashboard)
           </button>
-          <button onclick="switchPage('management')" id="menu-management" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition text-slate-400 hover:bg-slate-800 hover:text-white">
+          <button type="button" onclick="switchPage('management')" id="menu-management" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition text-slate-400 hover:bg-slate-800 hover:text-white">
             <i class="fa-solid fa-file-circle-plus w-5 text-center"></i> ลงทะเบียน & จัดการข้อมูล
           </button>
-          <button onclick="switchPage('analytics')" id="menu-analytics" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition text-slate-400 hover:bg-slate-800 hover:text-white">
+          <button type="button" onclick="switchPage('analytics')" id="menu-analytics" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition text-slate-400 hover:bg-slate-800 hover:text-white">
             <i class="fa-solid fa-map-location-dot w-5 text-center"></i> สรุปรายหมู่บ้าน
           </button>
         </nav>
@@ -110,7 +110,7 @@
             <p id="currentRoleDisplay" class="text-xs font-bold text-emerald-400 truncate">ผู้ดูแลระบบ</p>
           </div>
         </div>
-        <button onclick="logout()" class="w-full bg-red-950/40 hover:bg-red-900/60 text-red-400 px-4 py-2.5 rounded-xl text-xs font-semibold transition border border-red-800/50 flex items-center justify-center gap-2">
+        <button type="button" onclick="logout()" class="w-full bg-red-950/40 hover:bg-red-900/60 text-red-400 px-4 py-2.5 rounded-xl text-xs font-semibold transition border border-red-800/50 flex items-center justify-center gap-2">
           <i class="fa-solid fa-power-off"></i> ตัดการเชื่อมต่อระบบ
         </button>
       </div>
@@ -267,7 +267,7 @@
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">เลขถังขยะ *</label>
-                <input type="text" id="binId" required placeholder="เช่น 001/2569" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+                <input type="text" id="binId" required placeholder="เช่น 001/2569 หรือ -" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">ชื่อ - นามสกุล *</label>
@@ -324,15 +324,15 @@
               <div class="w-full md:w-64">
                 <select id="filterVillage" onchange="renderTable()" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
                   <option value="">-- แสดงทุกหมู่บ้าน --</option>
-                  <option value="หมู่ 1 บ้านห้วยขวาง">หมู่ 1 บ้านห้วยขวาง</option>
-                  <option value="หมู่ 2 บ้านนาปุ่ม">หมู่ 2 บ้านนาปุ่ม</option>
-                  <option value="หมู่ 3 บ้านหนองคาง">หมู่ 3 บ้านหนองคาง</option>
-                  <option value="หมู่ 4 บ้านหนองหญ้าปล้อง">หมู่ 4 บ้านหนองหญ้าปล้อง</option>
-                  <option value="หมู่ 5 บ้านลาดวิถี">หมู่ 5 บ้านลาดวิถี</option>
-                  <option value="หมู่ 6 บ้านเขาโป่ง">หมู่ 6 บ้านเขาโป่ง</option>
-                  <option value="หมู่ 7 บ้านหนองกลางดง">หมู่ 7 บ้านหนองกลางดง</option>
-                  <option value="หมู่ 8 บ้านเกาะนาน้อย">หมู่ 8 บ้านเกาะนาน้อย</option>
-                  <option value="หมู่ 9 บ้านเขาน้อยห้วยตามา">หมู่ 9 บ้านเขาน้อยห้วยตามา</option>
+                  <option value="หมู่ 1">หมู่ 1 บ้านห้วยขวาง</option>
+                  <option value="หมู่ 2">หมู่ 2 บ้านนาปุ่ม</option>
+                  <option value="หมู่ 3">หมู่ 3 บ้านหนองคาง</option>
+                  <option value="หมู่ 4">หมู่ 4 บ้านหนองหญ้าปล้อง</option>
+                  <option value="หมู่ 5">หมู่ 5 บ้านลาดวิถี</option>
+                  <option value="หมู่ 6">หมู่ 6 บ้านเขาโป่ง</option>
+                  <option value="หมู่ 7">หมู่ 7 บ้านหนองกลางดง</option>
+                  <option value="หมู่ 8">หมู่ 8 บ้านเกาะนาน้อย</option>
+                  <option value="หมู่ 9">หมู่ 9 บ้านเขาน้อยห้วยตามา</option>
                 </select>
               </div>
             </div>
@@ -382,7 +382,7 @@
     <div class="tech-card rounded-2xl max-w-lg w-full p-6 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
         <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-pen-to-square text-amber-400 mr-2"></i> แก้ไขข้อมูลถังขยะ</h3>
-        <button onclick="closeEditModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+        <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
       </div>
 
       <form id="editForm" class="space-y-3">
@@ -459,7 +459,7 @@
           </h3>
           <p id="priceModalSubtitle" class="text-xs text-slate-400 mt-0.5">ทั้งหมด 0 ราย | ยอดรวม ฿0</p>
         </div>
-        <button onclick="closePriceModal()" class="text-slate-400 hover:text-white transition">
+        <button type="button" onclick="closePriceModal()" class="text-slate-400 hover:text-white transition">
           <i class="fa-solid fa-xmark text-xl"></i>
         </button>
       </div>
@@ -503,16 +503,28 @@
     };
 
     const VILLAGES = [
-      "หมู่ 1 บ้านห้วยขวาง",
-      "หมู่ 2 บ้านนาปุ่ม",
-      "หมู่ 3 บ้านหนองคาง",
-      "หมู่ 4 บ้านหนองหญ้าปล้อง",
-      "หมู่ 5 บ้านลาดวิถี",
-      "หมู่ 6 บ้านเขาโป่ง",
-      "หมู่ 7 บ้านหนองกลางดง",
-      "หมู่ 8 บ้านเกาะนาน้อย",
-      "หมู่ 9 บ้านเขาน้อยห้วยตามา"
+      { num: "1", full: "หมู่ 1 บ้านห้วยขวาง" },
+      { num: "2", full: "หมู่ 2 บ้านนาปุ่ม" },
+      { num: "3", full: "หมู่ 3 บ้านหนองคาง" },
+      { num: "4", full: "หมู่ 4 บ้านหนองหญ้าปล้อง" },
+      { num: "5", full: "หมู่ 5 บ้านลาดวิถี" },
+      { num: "6", full: "หมู่ 6 บ้านเขาโป่ง" },
+      { num: "7", full: "หมู่ 7 บ้านหนองกลางดง" },
+      { num: "8", full: "หมู่ 8 บ้านเกาะนาน้อย" },
+      { num: "9", full: "หมู่ 9 บ้านเขาน้อยห้วยตามา" }
     ];
+
+    function getVillageDisplay(rawV) {
+      const m = String(rawV || "").match(/\d+/);
+      if (!m) return rawV || "-";
+      const found = VILLAGES.find(v => v.num === m[0]);
+      return found ? found.full : rawV;
+    }
+
+    function getVillageNum(rawV) {
+      const m = String(rawV || "").match(/\d+/);
+      return m ? m[0] : "";
+    }
 
     let allRecords = [];
     let selectedModalPrice = null;
@@ -553,12 +565,13 @@
       const errorDiv = document.getElementById("loginError");
 
       if (PASSWORDS[role] && PASSWORDS[role] === pwd) {
+        errorDiv.classList.add("hidden");
         document.getElementById("loginOverlay").classList.add("hidden");
         document.getElementById("mainAppContent").classList.remove("hidden");
         document.getElementById("currentRoleDisplay").innerText = role;
         
-        sessionStorage.setItem("isLoggedIn", "true");
-        sessionStorage.setItem("adminRole", role);
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("adminRole", role);
 
         setDefaultDate();
         fetchData();
@@ -569,16 +582,17 @@
 
     window.onload = () => {
       setDefaultDate();
-      if (sessionStorage.getItem("isLoggedIn") === "true") {
+      if (localStorage.getItem("isLoggedIn") === "true") {
         document.getElementById("loginOverlay").classList.add("hidden");
         document.getElementById("mainAppContent").classList.remove("hidden");
-        document.getElementById("currentRoleDisplay").innerText = sessionStorage.getItem("adminRole");
+        document.getElementById("currentRoleDisplay").innerText = localStorage.getItem("adminRole") || "ผู้ดูแลระบบ";
         fetchData();
       }
     };
 
     function logout() {
-      sessionStorage.clear();
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("adminRole");
       location.reload();
     }
 
@@ -718,7 +732,7 @@
               <td class="p-3 font-medium text-emerald-300">${binDisplay}</td>
               <td class="p-3 text-white font-medium">${row.fullName || "-"}</td>
               <td class="p-3 text-slate-200">${houseDisplay}</td>
-              <td class="p-3 text-slate-300">${row.village || "-"}</td>
+              <td class="p-3 text-slate-300">${getVillageDisplay(row.village)}</td>
               <td class="p-3">
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${row.payType === 'รายปี' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-sky-500/20 text-sky-300 border border-sky-500/30'}">
                   ${row.payType || "-"}
@@ -755,7 +769,7 @@
       const container = document.getElementById("verticalBarChartContainer");
       if (!container) return;
 
-      const counts = VILLAGES.map(v => allRecords.filter(r => r.village === v).length);
+      const counts = VILLAGES.map(v => allRecords.filter(r => getVillageNum(r.village) === v.num).length);
       const maxVal = Math.max(...counts, 1);
 
       container.innerHTML = VILLAGES.map((v, idx) => {
@@ -767,7 +781,7 @@
             <div class="w-full max-w-[36px] bg-slate-800/80 rounded-t-lg h-36 flex items-end overflow-hidden border border-slate-700/60">
               <div class="w-full bg-gradient-to-t from-emerald-600 to-teal-400 rounded-t-lg transition-all duration-500 group-hover:brightness-110" style="height: ${heightPct}%"></div>
             </div>
-            <span class="text-[11px] text-slate-400 mt-2 font-medium">หมู่ ${idx + 1}</span>
+            <span class="text-[11px] text-slate-400 mt-2 font-medium">หมู่ ${v.num}</span>
           </div>
         `;
       }).join("");
@@ -777,16 +791,16 @@
       const grid = document.getElementById("villageCardsGrid");
       if (!grid) return;
 
-      grid.innerHTML = VILLAGES.map((v, idx) => {
-        const rows = allRecords.filter(r => r.village === v);
+      grid.innerHTML = VILLAGES.map(v => {
+        const rows = allRecords.filter(r => getVillageNum(r.village) === v.num);
         const sum = rows.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
         return `
           <div class="bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 rounded-xl p-4 transition">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-lg">หมู่ที่ ${idx + 1}</span>
+              <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-lg">หมู่ที่ ${v.num}</span>
               <span class="text-xs text-slate-400">${rows.length.toLocaleString()} ครัวเรือน</span>
             </div>
-            <h4 class="font-bold text-white text-sm mb-3">${v}</h4>
+            <h4 class="font-bold text-white text-sm mb-3">${v.full}</h4>
             <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
               <span class="text-slate-400">ยอดจัดเก็บรวม</span>
               <span class="text-emerald-400 font-bold text-sm">฿${sum.toLocaleString()}</span>
@@ -805,13 +819,14 @@
       const filterV = document.getElementById("filterVillage")?.value || "";
 
       const filtered = allRecords.filter(r => {
-        const matchV = !filterV || r.village === filterV;
+        const matchV = !filterV || getVillageNum(r.village) === getVillageNum(filterV);
         if (!matchV) return false;
         if (!keyword) return true;
 
         const binStr = (r.binId && String(r.binId).trim() !== "") ? String(r.binId) : "-";
         const houseStr = (r.houseNo !== undefined && r.houseNo !== null) ? String(r.houseNo) : "";
-        const combined = `${r.regDate || ""} ${binStr} ${r.fullName || ""} ${r.phone || ""} ${houseStr} ${r.village || ""} ${r.payType || ""} ${r.amount || ""}`.toLowerCase();
+        const villageFull = getVillageDisplay(r.village);
+        const combined = `${r.regDate || ""} ${binStr} ${r.fullName || ""} ${r.phone || ""} ${houseStr} ${villageFull} ${r.payType || ""} ${r.amount || ""}`.toLowerCase();
         return combined.includes(keyword);
       });
 
@@ -837,7 +852,7 @@
             <td class="p-3.5 font-medium text-white">${row.fullName || "-"}</td>
             <td class="p-3.5 text-slate-300">${row.phone || "-"}</td>
             <td class="p-3.5 text-slate-200">${houseDisplay}</td>
-            <td class="p-3.5 text-slate-300">${row.village || "-"}</td>
+            <td class="p-3.5 text-slate-300">${getVillageDisplay(row.village)}</td>
             <td class="p-3.5">
               <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${row.payType === 'รายปี' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-sky-500/20 text-sky-300 border border-sky-500/30'}">
                 ${row.payType || "-"}
@@ -845,10 +860,10 @@
             </td>
             <td class="p-3.5 text-right font-bold text-emerald-400">฿${amtDisplay.toLocaleString()}</td>
             <td class="p-3.5 text-center space-x-1.5 whitespace-nowrap">
-              <button onclick="openEditModal('${encodedRow}')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs transition" title="แก้ไข">
+              <button type="button" onclick="openEditModal('${encodedRow}')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs transition" title="แก้ไข">
                 <i class="fa-solid fa-pen"></i>
               </button>
-              <button onclick="deleteRecord('${encodedRow}')" class="px-2.5 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 text-xs transition" title="ลบ">
+              <button type="button" onclick="deleteRecord('${encodedRow}')" class="px-2.5 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 text-xs transition" title="ลบ">
                 <i class="fa-solid fa-trash"></i>
               </button>
             </td>
@@ -903,7 +918,7 @@
       document.getElementById("editHouseNo").value = row.houseNo || "";
       document.getElementById("editPhone").value = row.phone || "";
       document.getElementById("editFullName").value = row.fullName || "";
-      document.getElementById("editVillage").value = row.village || "";
+      document.getElementById("editVillage").value = getVillageDisplay(row.village);
       document.getElementById("editPayType").value = row.payType || "รายเดือน";
       document.getElementById("editAmount").value = row.amount || 0;
 
@@ -917,3 +932,66 @@
       modal.classList.add("hidden");
       modal.classList.remove("flex");
     }
+
+    document.getElementById("editForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("btnSaveEdit");
+      btn.disabled = true;
+      btn.innerText = "กำลังบันทึก...";
+
+      const payload = {
+        action: "edit",
+        rowNumber: document.getElementById("editRowNumber").value,
+        sheetName: document.getElementById("editSheetName").value,
+        id: document.getElementById("editId").value,
+        regDate: document.getElementById("editRegDate").value.trim(),
+        binId: document.getElementById("editBinId").value.trim() || "-",
+        houseNo: document.getElementById("editHouseNo").value.trim(),
+        phone: document.getElementById("editPhone").value.trim(),
+        fullName: document.getElementById("editFullName").value.trim(),
+        village: document.getElementById("editVillage").value,
+        payType: document.getElementById("editPayType").value,
+        amount: document.getElementById("editAmount").value
+      };
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        closeEditModal();
+        await fetchData();
+        alert("แก้ไขข้อมูลเรียบร้อยแล้ว!");
+      } catch (err) {
+        console.error(err);
+        alert("เกิดข้อผิดพลาดในการแก้ไขข้อมูล");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "บันทึกการแก้ไข";
+      }
+    });
+
+    async function deleteRecord(encodedRow) {
+      const row = JSON.parse(decodeURIComponent(encodedRow));
+      if (!confirm(`ต้องการลบข้อมูลของ "${row.fullName || "รายการนี้"}" ใช่หรือไม่?`)) return;
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "delete",
+            rowNumber: row.rowNumber,
+            sheetName: row.sheetName || row.village,
+            id: row.id
+          })
+        });
+        await fetchData();
+        alert("ลบข้อมูลเรียบร้อยแล้ว!");
+      } catch (err) {
+        console.error(err);
+        alert("เกิดข้อผิดพลาดในการลบข้อมูล");
+      }
+    }
+  </script>
+</body>
+</html>
