@@ -53,8 +53,8 @@
         <div>
           <label class="block text-sm font-medium mb-1.5 text-slate-300">เลือกสิทธิ์ผู้ใช้งาน *</label>
           <select id="adminRole" class="w-full border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
-            <option value="Admin 1">Admin 1</option>
-            <option value="Admin 2">Admin 2</option>
+            <option value="ระบบฉัน">ระบบฉัน</option>
+            <option value="ระบบเธอ">ระบบเธอ</option>
           </select>
         </div>
 
@@ -114,7 +114,7 @@
           <div class="bg-emerald-500/20 text-emerald-400 p-2 rounded-lg border border-emerald-500/30"><i class="fa-solid fa-shield-halved"></i></div>
           <div class="overflow-hidden">
             <p class="text-[10px] text-slate-400 uppercase font-semibold">สิทธิ์ที่เข้าใช้งาน</p>
-            <p id="currentRoleDisplay" class="text-xs font-bold text-emerald-400 truncate">Admin 1</p>
+            <p id="currentRoleDisplay" class="text-xs font-bold text-emerald-400 truncate">ระบบฉัน</p>
           </div>
         </div>
         <button type="button" onclick="logout()" class="w-full bg-red-950/40 hover:bg-red-900/60 text-red-400 px-4 py-2.5 rounded-xl text-xs font-semibold transition border border-red-800/50 flex items-center justify-center gap-2">
@@ -758,10 +758,9 @@
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw01amYiV8v-fau5VFqOYg1s_ew7WPCW4vRM_Yp0tZ0LAQsUsO4_jw0VnSeva9aHD8N/exec";
 
-    // กรอกรหัสผ่านจริงของระบบคุณในไฟล์ของคุณเอง (ไม่เผยแพร่ในโค้ดสาธารณะ)
     const PASSWORDS = {
-      "Admin 1": "",
-      "Admin 2": ""
+      "ระบบฉัน": "032684111",
+      "ระบบเธอ": "032684111"
     };
 
     const VILLAGE_FULL_NAMES = {
@@ -860,7 +859,7 @@
       const errEl = document.getElementById("loginError");
 
       if (!role) {
-        errEl.textContent = "กรุณาเลือกสิทธิ์ผู้ใช้งาน (Admin 1 หรือ Admin 2)";
+        errEl.textContent = "กรุณาเลือกสิทธิ์ผู้ใช้งาน";
         errEl.classList.remove("hidden");
         return;
       }
