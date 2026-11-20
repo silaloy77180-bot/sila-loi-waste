@@ -232,9 +232,9 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 class="font-bold text-white text-base">
-                  <i class="fa-solid fa-trash-can text-emerald-400 mr-2"></i> สรุปแยก: ผลรวมถังทั้งหมด / ไม่มีเลขถังขยะ / ถังร่วม / แยกปี พ.ศ. ตั้งแต่ 2568 เป็นต้นไป / ถังเก่า
+                  <i class="fa-solid fa-trash-can text-emerald-400 mr-2"></i> สรุปแยก: ผลรวมถังทั้งหมด / ไม่มีเลขถังขยะ / ถังร่วม / แยกปี พ.ศ. ตั้งแต่ 2568 ไปยังอนาคตอัตโนมัติ / ถังเก่า
                 </h3>
-                <p class="text-xs text-slate-400">ไม่นับรวมรายการที่ยกเลิก — รันปี พ.ศ. ตั้งแต่ 2568 ไปยังอนาคตอัตโนมัติ (เช่น 2568, 2569, 2570+)</p>
+                <p class="text-xs text-slate-400">ไม่นับรวมรายการที่ยกเลิก — แยกทุกปี พ.ศ. ที่อยู่ในเลขถัง และสร้างการ์ดตั้งแต่ 2568 ไปยังอนาคตอัตโนมัติ</p>
               </div>
               <div class="flex flex-wrap gap-2">
                 <button type="button" onclick="openSourceModal('ALL_BINS_ACTIVE')" class="text-xs px-3.5 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 font-semibold w-fit cursor-pointer">
@@ -763,7 +763,6 @@
       "ระบบเธอ": "032684111"
     };
 
-    // รันปี พ.ศ. ตั้งแต่ 2568 ไปยังอนาคตอัตโนมัติ
     const START_YEAR_BE = 2568;
 
     const VILLAGE_FULL_NAMES = {
@@ -947,11 +946,6 @@
       return matches ? Array.from(new Set(matches)) : [];
     }
 
-    function extractYearFromToken(token) {
-      const years = extractAllYearsFromBin(token);
-      return years.length > 0 ? years[years.length - 1] : null;
-    }
-
     function expandBinTokens(binIdRaw) {
       const raw = String(binIdRaw || "").trim();
       if (!raw || raw === "-" || raw === "ไม่มี" || raw === "ไม่มีเลขถัง" || raw === "ไม่มีเลขถังขยะ") {
@@ -1126,7 +1120,6 @@
       renderHistory();
     }
 
-    // สร้างปี พ.ศ. ตั้งแต่ 2568 ไปยังอนาคตอัตโนมัติ (อิงปีปัจจุบัน หรือปีสูงสุดที่มีในข้อมูล)
     function buildDynamicYears(yearCounts) {
       const currentThaiYear = getCurrentThaiYearBE();
       let maxDataYear = currentThaiYear;
