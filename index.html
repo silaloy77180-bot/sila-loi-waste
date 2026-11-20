@@ -232,9 +232,9 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 class="font-bold text-white text-base">
-                  <i class="fa-solid fa-trash-can text-emerald-400 mr-2"></i> สรุปแยก: ผลรวมถังทั้งหมด / ไม่มีเลขถังขยะ / ถังร่วม / แยกทุกปี พ.ศ. / ถังเก่า
+                  <i class="fa-solid fa-trash-can text-emerald-400 mr-2"></i> สรุปแยก: ผลรวมถังทั้งหมด / ไม่มีเลขถังขยะ / ถังร่วม / แยกปี พ.ศ. ตั้งแต่ 2560 เป็นต้นไป / ถังเก่า
                 </h3>
-                <p class="text-xs text-slate-400">ไม่นับรวมรายการที่ยกเลิก — แยกปี พ.ศ. 4 หลักจากเลขถังขยะอัตโนมัติ และนับแยกตามจำนวนใบเมื่อมีหลายเลขถัง</p>
+                <p class="text-xs text-slate-400">ไม่นับรวมรายการที่ยกเลิก — รันปี พ.ศ. ตั้งแต่ 2560 เป็นต้นไปอัตโนมัติ (หากมีปีใหม่ในชีตเช่น 2570 จะขึ้นให้อัตโนมัติ)</p>
               </div>
               <div class="flex flex-wrap gap-2">
                 <button type="button" onclick="openSourceModal('ALL_BINS_ACTIVE')" class="text-xs px-3.5 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 font-semibold w-fit cursor-pointer">
@@ -391,7 +391,7 @@
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">เลขถังขยะ</label>
-                <input type="text" id="binId" placeholder="เช่น 001/2568 หรือใช้ร่วม 1" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+                <input type="text" id="binId" placeholder="เช่น 001/2568 หรือ 001/2570" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">ชื่อ - นามสกุล *</label>
@@ -763,6 +763,8 @@
       "ระบบเธอ": "032684111"
     };
 
+    const START_YEAR_BE = 2560;
+
     const VILLAGE_FULL_NAMES = {
       "1": "หมู่ 1 บ้านห้วยขวาง",
       "2": "หมู่ 2 บ้านนาปุ่ม",
@@ -801,6 +803,10 @@
     let currentPage = 1;
     const pageSize = 20;
     let renderTimer = null;
+
+    function getCurrentThaiYearBE() {
+      return new Date().getFullYear() + 543;
+    }
 
     function parseCustomerType(rawType) {
       const text = String(rawType || "ครัวเรือน").trim();
@@ -931,14 +937,15 @@
       return { collectionFee: total, disposalFee: 0, sortDiscount: 0, total: total };
     }
 
+    // ดึงปี พ.ศ. 4 หลัก (ตั้งแต่ 2560 เป็นต้นไป) จากเลขถังขยะ
     function extractYearFromToken(token) {
       const t = String(token || "").trim();
       if (!t) return null;
-      const sepMatch = t.match(/(?:\/|-|\s|_)(25\d{2})\b/);
+      const sepMatch = t.match(/(?:\/|-|\s|_)(25[6-9]\d)\b/);
       if (sepMatch) return sepMatch[1];
-      const tailMatch = t.match(/(25\d{2})$/);
+      const tailMatch = t.match(/(25[6-9]\d)$/);
       if (tailMatch) return tailMatch[1];
-      const anyMatch = t.match(/\b(25\d{2})\b/);
+      const anyMatch = t.match(/\b(25[6-9]\d)\b/);
       return anyMatch ? anyMatch[1] : null;
     }
 
@@ -1111,6 +1118,26 @@
       renderHistory();
     }
 
+    // สร้างรายการปี พ.ศ. ตั้งแต่ 2560 จนถึงปีปัจจุบัน หรือปีสูงสุดที่มีในข้อมูล (เช่น 2570+)
+    function buildDynamicYears(yearCounts) {
+      const currentThaiYear = getCurrentThaiYearBE();
+      let maxDataYear = currentThaiYear;
+
+      Object.keys(yearCounts).forEach((yStr) => {
+        const n = Number(yStr);
+        if (Number.isFinite(n) && n > maxDataYear) {
+          maxDataYear = n;
+        }
+      });
+
+      const years = [];
+      const startY = Math.min(START_YEAR_BE, maxDataYear);
+      for (let yr = startY; yr <= maxDataYear; yr++) {
+        years.push(String(yr));
+      }
+      return years;
+    }
+
     function renderDashboard() {
       const active = allRecords.filter((r) => !isCancelled(r));
       const households = active.filter((r) => parseCustomerType(r.customerType).baseType === "ครัวเรือน");
@@ -1175,8 +1202,9 @@
         }
       });
 
-      const sortedYears = Object.keys(yearCounts).sort();
+      const dynamicYears = buildDynamicYears(yearCounts);
       const binCards = [];
+
       binCards.push(`
         <button type="button" onclick="openSourceModal('ALL_BINS_ACTIVE')" class="bg-slate-900/90 hover:bg-slate-800 border border-teal-500/50 hover:border-teal-400 p-3.5 rounded-xl text-left transition cursor-pointer">
           <p class="text-xs text-teal-300 font-semibold">ผลรวมถังทั้งหมด</p>
@@ -1198,15 +1226,19 @@
           <p class="text-[11px] text-slate-400">จาก ${sharedGroupsAll.reduce((s, g) => s + g.members.length, 0)} ชื่อผู้ร่วม • คลิกดู</p>
         </button>
       `);
-      sortedYears.forEach((y) => {
+
+      dynamicYears.forEach((y) => {
+        const cnt = yearCounts[y] || 0;
+        const isCurrent = Number(y) === getCurrentThaiYearBE();
         binCards.push(`
-          <button type="button" onclick="openSourceModal('BIN_YEAR:${y}')" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-teal-500/40 p-3.5 rounded-xl text-left transition cursor-pointer">
-            <p class="text-xs text-slate-400">ถังขยะปี ${y}</p>
-            <p class="text-lg font-bold text-teal-300 mt-0.5">${yearCounts[y].toLocaleString()} ใบ</p>
+          <button type="button" onclick="openSourceModal('BIN_YEAR:${y}')" class="bg-slate-900/90 hover:bg-slate-800 border ${isCurrent ? "border-emerald-500/50" : "border-slate-800"} hover:border-teal-500/40 p-3.5 rounded-xl text-left transition cursor-pointer">
+            <p class="text-xs ${isCurrent ? "text-emerald-300 font-semibold" : "text-slate-400"}">ถังขยะปี ${y}${isCurrent ? " (ปีปัจจุบัน)" : ""}</p>
+            <p class="text-lg font-bold text-teal-300 mt-0.5">${cnt.toLocaleString()} ใบ</p>
             <p class="text-[11px] text-slate-400">คลิกดูรายชื่อ →</p>
           </button>
         `);
       });
+
       if (otherBinCount > 0) {
         binCards.push(`
           <button type="button" onclick="openSourceModal('BIN_OTHER')" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-teal-500/40 p-3.5 rounded-xl text-left transition cursor-pointer">
@@ -1216,6 +1248,7 @@
           </button>
         `);
       }
+
       binCards.push(`
         <button type="button" onclick="openSourceModal('BIN_OLD')" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 p-3.5 rounded-xl text-left transition cursor-pointer">
           <p class="text-xs text-slate-400">ถังเก่า</p>
@@ -1223,6 +1256,7 @@
           <p class="text-[11px] text-slate-400">คลิกดูรายชื่อ →</p>
         </button>
       `);
+
       document.getElementById("binBreakdownCards").innerHTML = binCards.join("");
 
       const sharedListEl = document.getElementById("sharedBinGroupsList");
