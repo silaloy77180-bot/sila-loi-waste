@@ -234,7 +234,7 @@
                 <h3 class="font-bold text-white text-base">
                   <i class="fa-solid fa-trash-can text-emerald-400 mr-2"></i> สรุปแยก: ผลรวมถังทั้งหมด / ไม่มีเลขถังขยะ / ถังร่วม / แยกปี พ.ศ. ตั้งแต่ 2560 เป็นต้นไป / ถังเก่า
                 </h3>
-                <p class="text-xs text-slate-400">ไม่นับรวมรายการที่ยกเลิก — รันปี พ.ศ. ตั้งแต่ 2560 เป็นต้นไปอัตโนมัติ (หากมีปีใหม่ในชีตเช่น 2570 จะขึ้นให้อัตโนมัติ)</p>
+                <p class="text-xs text-slate-400">ไม่นับรวมรายการที่ยกเลิก — แยกทุกปี พ.ศ. ที่อยู่ในเลขถัง (เช่น 2560/2561/.../2569 หรือ 2570) และสร้างการ์ดปีตั้งแต่ 2560 เป็นต้นไปอัตโนมัติ</p>
               </div>
               <div class="flex flex-wrap gap-2">
                 <button type="button" onclick="openSourceModal('ALL_BINS_ACTIVE')" class="text-xs px-3.5 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 font-semibold w-fit cursor-pointer">
@@ -391,7 +391,7 @@
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">เลขถังขยะ</label>
-                <input type="text" id="binId" placeholder="เช่น 001/2568 หรือ 001/2570" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+                <input type="text" id="binId" placeholder="เช่น 2560/2561/.../2569 หรือ 001/2570" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">ชื่อ - นามสกุล *</label>
@@ -937,16 +937,19 @@
       return { collectionFee: total, disposalFee: 0, sortDiscount: 0, total: total };
     }
 
-    // ดึงปี พ.ศ. 4 หลัก (ตั้งแต่ 2560 เป็นต้นไป) จากเลขถังขยะ
+    // ดึงปี พ.ศ. 4 หลักทั้งหมด (2560-2599) ที่อยู่ในข้อความเลขถังขยะ เช่น 2560/2561/2562/.../2569 หรือ 001/2570
+    function extractAllYearsFromBin(binIdRaw) {
+      const raw = String(binIdRaw || "").trim();
+      if (!raw || raw === "-" || raw === "ไม่มี" || raw === "ไม่มีเลขถัง" || raw === "ไม่มีเลขถังขยะ") {
+        return [];
+      }
+      const matches = raw.match(/(?:25[6-9]\d)/g);
+      return matches ? Array.from(new Set(matches)) : [];
+    }
+
     function extractYearFromToken(token) {
-      const t = String(token || "").trim();
-      if (!t) return null;
-      const sepMatch = t.match(/(?:\/|-|\s|_)(25[6-9]\d)\b/);
-      if (sepMatch) return sepMatch[1];
-      const tailMatch = t.match(/(25[6-9]\d)$/);
-      if (tailMatch) return tailMatch[1];
-      const anyMatch = t.match(/\b(25[6-9]\d)\b/);
-      return anyMatch ? anyMatch[1] : null;
+      const years = extractAllYearsFromBin(token);
+      return years.length > 0 ? years[years.length - 1] : null;
     }
 
     function expandBinTokens(binIdRaw) {
@@ -956,6 +959,11 @@
       }
       if (/ร่วม|รวม/.test(raw)) {
         return [raw];
+      }
+      // กรณีมีหลายปีต่อกันแบบ 2560/2561/.../2569 ให้แยกทุกปีเป็นรายการ/ชิ้นที่ประมวลผลได้
+      const allYears = extractAllYearsFromBin(raw);
+      if (allYears.length > 1 && !raw.includes(",")) {
+        return allYears;
       }
       const suffixMatch = raw.match(/(?:\/|-)(\d{4})$/);
       const suffix = suffixMatch ? `${suffixMatch[0][0]}${suffixMatch[1]}` : "";
@@ -985,9 +993,10 @@
       if (raw.includes("เก่า")) {
         return { category: "OLD", label: "ถังเก่า", hasOwnBin: true, isNoBin: false, isShared: false };
       }
-      const yearVal = extractYearFromToken(raw);
-      if (yearVal) {
-        return { category: "YEAR:" + yearVal, label: "ถังปี " + yearVal, hasOwnBin: true, isNoBin: false, isShared: false };
+      const years = extractAllYearsFromBin(raw);
+      if (years.length > 0) {
+        const lastY = years[years.length - 1];
+        return { category: "YEAR:" + lastY, label: "ถังปี " + lastY, hasOwnBin: true, isNoBin: false, isShared: false };
       }
       return { category: "OTHER_BIN", label: "ถังระบุรหัสอื่น", hasOwnBin: true, isNoBin: false, isShared: false };
     }
@@ -1118,7 +1127,7 @@
       renderHistory();
     }
 
-    // สร้างรายการปี พ.ศ. ตั้งแต่ 2560 จนถึงปีปัจจุบัน หรือปีสูงสุดที่มีในข้อมูล (เช่น 2570+)
+    // สร้างปี พ.ศ. ตั้งแต่ 2560 จนถึงปีปัจจุบัน หรือปีสูงสุดที่มีในข้อมูล (เช่น 2570+)
     function buildDynamicYears(yearCounts) {
       const currentThaiYear = getCurrentThaiYearBE();
       let maxDataYear = currentThaiYear;
@@ -1185,20 +1194,23 @@
       active.forEach((r) => {
         const info = classifyBin(r.binId);
         if (info.isNoBin) return;
-        const tokens = expandBinTokens(r.binId);
+
         if (info.category === "OLD") {
           oldBinCount += countBinsInRecord(r);
-        } else if (info.isShared) {
+          return;
+        }
+        if (info.isShared) {
           otherBinCount += countBinsInRecord(r);
-        } else if (tokens.length > 0) {
-          tokens.forEach((tok) => {
-            const y = extractYearFromToken(tok);
-            if (y) {
-              yearCounts[y] = (yearCounts[y] || 0) + 1;
-            } else {
-              otherBinCount += 1;
-            }
+          return;
+        }
+
+        const yearsInRow = extractAllYearsFromBin(r.binId);
+        if (yearsInRow.length > 0) {
+          yearsInRow.forEach((y) => {
+            yearCounts[y] = (yearCounts[y] || 0) + 1;
           });
+        } else {
+          otherBinCount += countBinsInRecord(r);
         }
       });
 
@@ -1465,15 +1477,14 @@
             const info = classifyBin(r.binId);
             if (info.isNoBin) return false;
             if (info.category === "OLD" || info.isShared) return true;
-            const tokens = expandBinTokens(r.binId);
-            return tokens.some((tok) => !extractYearFromToken(tok));
+            return extractAllYearsFromBin(r.binId).length === 0;
           });
         } else if (mode.startsWith("BIN_YEAR:")) {
           const y = mode.slice(9);
           label = `ข้อมูลที่มา: ถังขยะปี ${y} (ยกเว้นรายการยกเลิก)`;
           rows = active.filter((r) => {
             if (classifyBin(r.binId).isNoBin || classifyBin(r.binId).isShared) return false;
-            return expandBinTokens(r.binId).some((tok) => extractYearFromToken(tok) === y);
+            return extractAllYearsFromBin(r.binId).includes(y);
           });
         } else if (mode === "HAS_DISCOUNT") {
           label = "ข้อมูลที่มา: รายชื่อที่ได้รับส่วนลดการคัดแยกขยะ";
@@ -1641,7 +1652,7 @@
                 <td class="p-3">${r.regDate || "-"}</td>
                 <td class="p-3">
                   <span>${r.binId || "-"}</span>
-                  ${tokens.length > 1 ? `<span class="block text-[11px] text-teal-300 mt-0.5">นับ ${tokens.length} ใบ (${tokens.join(", ")})</span>` : ""}
+                  ${tokens.length > 1 ? `<span class="block text-[11px] text-teal-300 mt-0.5">นับ ${tokens.length} (${tokens.join(", ")})</span>` : ""}
                   ${partners ? `<span class="block text-[11px] text-cyan-300 mt-0.5">ใช้ร่วมกับ: ${partners.length ? partners.join(", ") : "ผู้ร่วมในกลุ่ม"}</span>` : ""}
                 </td>
                 <td class="p-3 font-medium text-white">${r.fullName || "-"}</td>
