@@ -53,8 +53,8 @@
         <div>
           <label class="block text-sm font-medium mb-1.5 text-slate-300">เลือกสิทธิ์ผู้ใช้งาน *</label>
           <select id="adminRole" class="w-full border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
-            <option value="ระบบฉัน">ระบบฉัน</option>
-            <option value="ระบบเธอ">ระบบเธอ</option>
+            <option value="Admin 1">Admin 1</option>
+            <option value="Admin 2">Admin 2</option>
           </select>
         </div>
 
@@ -66,7 +66,6 @@
               <i id="passEyeIcon" class="fa-solid fa-eye"></i>
             </button>
           </div>
-          <p class="text-[11px] text-slate-400 mt-1.5">รหัสผ่าน: ระบบฉัน = <span class="text-emerald-400 font-semibold">032684111</span> | ระบบเธอ = <span class="text-emerald-400 font-semibold">032684111</span></p>
         </div>
 
         <div id="loginError" class="text-red-400 text-xs hidden text-center bg-red-950/50 border border-red-800 py-2 px-3 rounded-lg">
@@ -115,7 +114,7 @@
           <div class="bg-emerald-500/20 text-emerald-400 p-2 rounded-lg border border-emerald-500/30"><i class="fa-solid fa-shield-halved"></i></div>
           <div class="overflow-hidden">
             <p class="text-[10px] text-slate-400 uppercase font-semibold">สิทธิ์ที่เข้าใช้งาน</p>
-            <p id="currentRoleDisplay" class="text-xs font-bold text-emerald-400 truncate">ระบบฉัน</p>
+            <p id="currentRoleDisplay" class="text-xs font-bold text-emerald-400 truncate">Admin 1</p>
           </div>
         </div>
         <button type="button" onclick="logout()" class="w-full bg-red-950/40 hover:bg-red-900/60 text-red-400 px-4 py-2.5 rounded-xl text-xs font-semibold transition border border-red-800/50 flex items-center justify-center gap-2">
@@ -159,7 +158,6 @@
 
         <!-- DASHBOARD PAGE -->
         <div id="page-dashboard" class="page-content space-y-6">
-          <!-- แถวที่ 1: สถิติหลัก -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <button type="button" onclick="openSourceModal('TYPE:ครัวเรือน')" class="tech-card p-5 rounded-2xl flex justify-between items-center text-left cursor-pointer">
               <div>
@@ -198,7 +196,6 @@
             </button>
           </div>
 
-          <!-- แถวที่ 2: สรุปค่าเก็บขน / ค่ากำจัด / ส่วนลดการคัดแยกขยะ + แยกแก้ไขกับยกเลิก -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <button type="button" onclick="openSourceModal('ALL_ACTIVE')" class="tech-card p-4 rounded-2xl text-left cursor-pointer">
               <p class="text-xs font-semibold text-slate-400">รวมค่าเก็บขน (ยกเว้นยกเลิก)</p>
@@ -231,14 +228,13 @@
             </button>
           </div>
 
-          <!-- แถวที่ 3: แยกสรุป -->
           <div class="tech-card p-6 rounded-2xl space-y-5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 class="font-bold text-white text-base">
-                  <i class="fa-solid fa-trash-can text-emerald-400 mr-2"></i> สรุปแยก: ผลรวมถังทั้งหมด (รวมไม่มีเลขถัง • ยกเว้นยกเลิก) / ไม่มีเลขถังขยะ / ถังร่วม / แยกทุกปี / ถังเก่า
+                  <i class="fa-solid fa-trash-can text-emerald-400 mr-2"></i> สรุปแยก: ผลรวมถังทั้งหมด / ไม่มีเลขถังขยะ / ถังร่วม / แยกทุกปี พ.ศ. / ถังเก่า
                 </h3>
-                <p class="text-xs text-slate-400">ไม่นับรวมรายการที่ยกเลิก — แยกปีอัตโนมัติทุกปีที่มีในชีต (เช่น 2566, 2567, 2568, 2569, 2570) และนับแยกตามจำนวนใบเมื่อมีหลายเลขถัง</p>
+                <p class="text-xs text-slate-400">ไม่นับรวมรายการที่ยกเลิก — แยกปี พ.ศ. 4 หลักจากเลขถังขยะอัตโนมัติ และนับแยกตามจำนวนใบเมื่อมีหลายเลขถัง</p>
               </div>
               <div class="flex flex-wrap gap-2">
                 <button type="button" onclick="openSourceModal('ALL_BINS_ACTIVE')" class="text-xs px-3.5 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 font-semibold w-fit cursor-pointer">
@@ -270,7 +266,6 @@
             </div>
           </div>
 
-          <!-- สรุปจำนวนแยกตาม 8 ประเภท -->
           <div class="tech-card p-6 rounded-2xl">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
               <div>
@@ -286,7 +281,6 @@
             <div id="typeBreakdownCards" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
           </div>
 
-          <!-- สรุปยอดราคาแต่ละหมู่ -->
           <div class="tech-card p-6 rounded-2xl">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
               <div>
@@ -397,7 +391,7 @@
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">เลขถังขยะ</label>
-                <input type="text" id="binId" placeholder="เช่น 242,246,247,319/2569 หรือใช้ร่วม 1" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+                <input type="text" id="binId" placeholder="เช่น 001/2568 หรือใช้ร่วม 1" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">ชื่อ - นามสกุล *</label>
@@ -464,7 +458,6 @@
             </form>
           </div>
 
-          <!-- ตารางรายชื่อทุกรายการ -->
           <div class="tech-card p-6 rounded-2xl">
             <div class="flex flex-col md:flex-row justify-between gap-4 mb-5">
               <div class="relative flex-1">
@@ -765,9 +758,10 @@
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw01amYiV8v-fau5VFqOYg1s_ew7WPCW4vRM_Yp0tZ0LAQsUsO4_jw0VnSeva9aHD8N/exec";
 
+    // กรอกรหัสผ่านจริงของระบบคุณในไฟล์ของคุณเอง (ไม่เผยแพร่ในโค้ดสาธารณะ)
     const PASSWORDS = {
-      "ระบบฉัน": "032684111",
-      "ระบบเธอ": "032684111"
+      "Admin 1": "",
+      "Admin 2": ""
     };
 
     const VILLAGE_FULL_NAMES = {
@@ -866,7 +860,7 @@
       const errEl = document.getElementById("loginError");
 
       if (!role) {
-        errEl.textContent = "กรุณาเลือกสิทธิ์ผู้ใช้งาน (ระบบฉัน หรือ ระบบเธอ)";
+        errEl.textContent = "กรุณาเลือกสิทธิ์ผู้ใช้งาน (Admin 1 หรือ Admin 2)";
         errEl.classList.remove("hidden");
         return;
       }
@@ -938,7 +932,6 @@
       return { collectionFee: total, disposalFee: 0, sortDiscount: 0, total: total };
     }
 
-    // ดึงปี พ.ศ. 4 หลัก จากเลขถัง (รองรับหลายรูปแบบ เช่น /2567, -2567, เว้นวรรค 2567 หรือติดท้าย 2567)
     function extractYearFromToken(token) {
       const t = String(token || "").trim();
       if (!t) return null;
@@ -950,7 +943,6 @@
       return anyMatch ? anyMatch[1] : null;
     }
 
-    // แตกเลขถังขยะหลายใบ เช่น "242,246,247,319/2569" -> ["242/2569", "246/2569", "247/2569", "319/2569"]
     function expandBinTokens(binIdRaw) {
       const raw = String(binIdRaw || "").trim();
       if (!raw || raw === "-" || raw === "ไม่มี" || raw === "ไม่มีเลขถัง" || raw === "ไม่มีเลขถังขยะ") {
@@ -969,7 +961,6 @@
       return [raw];
     }
 
-    // นับจำนวนถังทั้งหมดทุกประเภทยกเว้นที่ยกเลิก (ไม่มีเลขถังก็นับรวมเป็นถังด้วย)
     function countBinsInRecord(rec) {
       if (isCancelled(rec)) return 0;
       const tokens = expandBinTokens(rec.binId);
