@@ -39,7 +39,7 @@
 <body class="text-slate-100">
 
   <!-- หน้าจอเข้าสู่ระบบ -->
-  <div id="loginOverlay" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
+  <div id="loginOverlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
     <div class="tech-card rounded-3xl max-w-md w-full p-8 shadow-2xl">
       <div class="text-center mb-6">
         <div class="inline-flex bg-emerald-500/20 text-emerald-400 p-4 rounded-2xl text-3xl mb-3 border border-emerald-500/30 shadow-inner">
@@ -49,29 +49,34 @@
         <p class="text-sm text-emerald-400/80 mt-1">SYSTEM SECURE LOGIN - ศิลาลอย</p>
       </div>
 
-      <form id="loginForm" action="javascript:void(0)" class="space-y-4">
+      <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium mb-1.5 text-slate-300">เลือกสิทธิ์ผู้ใช้งาน *</label>
-          <select id="adminRole" required class="w-full border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
-            <option value="">-- เลือกชื่อแอดมิน --</option>
-            <option value="Admin 1">ระบบฉัน</option>
-            <option value="Admin 2">ระบบเธอ</option>
+          <select id="adminRole" class="w-full border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
+            <option value="Admin 1">Admin 1</option>
+            <option value="Admin 2">Admin 2</option>
           </select>
         </div>
 
         <div>
           <label class="block text-sm font-medium mb-1.5 text-slate-300">รหัสผ่าน *</label>
-          <input type="password" id="adminPassword" required placeholder="กรอกรหัสผ่านเข้าสู่ระบบ" class="w-full border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
+          <div class="relative">
+            <input type="password" id="adminPassword" onkeydown="if(event.key==='Enter'){event.preventDefault();handleLogin();}" placeholder="กรอกรหัสผ่านเข้าสู่ระบบ" class="w-full border border-slate-700 rounded-xl px-4 py-3 pr-12 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
+            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3.5 top-3.5 text-slate-400 hover:text-emerald-400" title="แสดง/ซ่อนรหัสผ่าน">
+              <i id="passEyeIcon" class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1.5">รหัสเริ่มต้น: Admin 1 = <span class="text-emerald-400 font-semibold">1234</span> | Admin 2 = <span class="text-emerald-400 font-semibold">5678</span></p>
         </div>
 
-        <div id="loginError" class="text-red-400 text-xs hidden text-center bg-red-950/50 border border-red-800 py-2 rounded-lg">
+        <div id="loginError" class="text-red-400 text-xs hidden text-center bg-red-950/50 border border-red-800 py-2 px-3 rounded-lg">
           รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง
         </div>
 
-        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3.5 px-4 rounded-xl transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 mt-2">
+        <button type="button" onclick="handleLogin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3.5 px-4 rounded-xl transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 mt-2 cursor-pointer">
           <i class="fa-solid fa-terminal"></i> เชื่อมต่อระบบ (Access)
         </button>
-      </form>
+      </div>
     </div>
   </div>
 
@@ -94,7 +99,7 @@
             <i class="fa-solid fa-chart-pie w-5 text-center"></i> ภาพรวมระบบ (Dashboard)
           </button>
           <button type="button" onclick="switchPage('management')" id="menu-management" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition text-slate-400 hover:bg-slate-800 hover:text-white">
-            <i class="fa-solid fa-file-circle-plus w-5 text-center"></i> ลงทะเบียน &amp; จัดการข้อมูล
+            <i class="fa-solid fa-file-circle-plus w-5 text-center"></i> ลงทะเบียน &amp; รายชื่อทั้งหมด
           </button>
           <button type="button" onclick="switchPage('analytics')" id="menu-analytics" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition text-slate-400 hover:bg-slate-800 hover:text-white">
             <i class="fa-solid fa-map-location-dot w-5 text-center"></i> สรุปรายหมู่บ้าน
@@ -125,7 +130,7 @@
           <h2 id="pageTitle" class="text-lg font-bold text-white tracking-wide">ภาพรวมระบบ (Dashboard)</h2>
         </div>
         <div class="flex items-center gap-2">
-          <button type="button" onclick="loadData(true)" class="text-xs text-slate-300 hover:text-emerald-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5" title="ซิงค์ข้อมูลจาก Google Sheets">
+          <button type="button" onclick="loadData(true)" class="text-xs text-slate-300 hover:text-emerald-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
             <i class="fa-solid fa-arrows-rotate"></i> ซิงค์ชีต
           </button>
           <div id="loadingBar" class="text-xs text-emerald-400 bg-emerald-950/60 px-3 py-1.5 rounded-lg border border-emerald-800/60 flex items-center gap-2 hidden">
@@ -141,7 +146,7 @@
               <i class="fa-solid fa-microchip mr-1"></i> SMART ECO GRID - SILALOY
             </span>
             <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mt-2 text-white">ศูนย์ปฏิบัติการข้อมูลขยะ ตำบลศิลาลอย</h2>
-            <p class="text-slate-300 text-sm max-w-xl">ระบบควบคุมและจัดเก็บฐานข้อมูลอัจฉริยะ ครอบคลุมทั้ง 9 หมู่บ้าน ขับเคลื่อนด้วยเทคโนโลยีดิจิทัล</p>
+            <p class="text-slate-300 text-sm max-w-xl">ระบบควบคุมและจัดเก็บฐานข้อมูลอัจฉริยะ ครอบคลุมทั้ง 9 หมู่บ้าน (ใช้โครงสร้างชีตเดิมโดยไม่ต้องเพิ่มคอลัมน์)</p>
           </div>
           <div class="bg-slate-900/70 backdrop-blur-md border border-emerald-500/30 p-4 rounded-2xl flex items-center gap-3 shrink-0 shadow-lg shadow-emerald-950">
             <div class="text-3xl text-emerald-400"><i class="fa-solid fa-satellite-dish"></i></div>
@@ -154,6 +159,7 @@
 
         <!-- DASHBOARD PAGE -->
         <div id="page-dashboard" class="page-content space-y-6">
+          <!-- แถวที่ 1: สถิติหลัก -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <button type="button" onclick="openSourceModal('TYPE:ครัวเรือน')" class="tech-card p-5 rounded-2xl flex justify-between items-center text-left cursor-pointer">
               <div>
@@ -173,53 +179,75 @@
               <div class="bg-cyan-500/20 text-cyan-400 p-3.5 rounded-xl text-xl border border-cyan-500/30"><i class="fa-solid fa-building"></i></div>
             </button>
 
+            <button type="button" onclick="openSourceModal('ALL_BINS')" class="tech-card p-5 rounded-2xl flex justify-between items-center text-left cursor-pointer border-teal-500/40">
+              <div>
+                <p class="text-xs font-semibold text-teal-300 uppercase tracking-wider">จำนวนถังขยะทั้งหมด</p>
+                <h3 id="statTotalBins" class="text-2xl font-bold text-teal-300 mt-1">0 ใบ</h3>
+                <p class="text-xs text-slate-400 mt-1">ไม่นับถังร่วม/ยกเลิก • คลิกดูที่มา</p>
+              </div>
+              <div class="bg-teal-500/20 text-teal-300 p-3.5 rounded-xl text-xl border border-teal-500/30"><i class="fa-solid fa-dumpster"></i></div>
+            </button>
+
             <button type="button" onclick="openSourceModal('ALL_ACTIVE')" class="bg-gradient-to-r from-emerald-800 to-teal-800 text-white p-5 rounded-2xl shadow-lg border border-emerald-500/40 flex justify-between items-center text-left cursor-pointer">
               <div>
-                <p class="text-xs font-semibold text-emerald-200 uppercase tracking-wider">รายได้จัดเก็บรวมทุกประเภท</p>
+                <p class="text-xs font-semibold text-emerald-200 uppercase tracking-wider">รวมทั้งสิ้นทุกประเภท</p>
                 <h3 id="statTotalAmount" class="text-2xl font-bold mt-1 text-emerald-300">฿0</h3>
                 <p class="text-xs text-emerald-200 mt-1">รวม <span id="statTotalActive">0</span> ราย (ไม่นับยกเลิก) • คลิกดูที่มา</p>
               </div>
               <div class="bg-white/10 text-white p-3.5 rounded-xl text-xl border border-white/20"><i class="fa-solid fa-sack-dollar"></i></div>
             </button>
+          </div>
 
-            <div class="tech-card p-5 rounded-2xl flex justify-between items-center">
+          <!-- แถวที่ 2: สรุปค่าเก็บขน / ค่ากำจัด / ส่วนลดการคัดแยกขยะ + แยกแก้ไขกับยกเลิก -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <button type="button" onclick="openSourceModal('ALL_ACTIVE')" class="tech-card p-4 rounded-2xl text-left cursor-pointer">
+              <p class="text-xs font-semibold text-slate-400">รวมค่าเก็บขน (ไม่นับยกเลิก)</p>
+              <h3 id="sumCollectionFee" class="text-xl font-bold text-white mt-1">฿0</h3>
+              <p class="text-[11px] text-emerald-400 mt-1">คลิกดูรายละเอียดทุกรายการ →</p>
+            </button>
+
+            <button type="button" onclick="openSourceModal('ALL_ACTIVE')" class="tech-card p-4 rounded-2xl text-left cursor-pointer">
+              <p class="text-xs font-semibold text-slate-400">รวมค่ากำจัด (ไม่นับยกเลิก)</p>
+              <h3 id="sumDisposalFee" class="text-xl font-bold text-cyan-300 mt-1">฿0</h3>
+              <p class="text-[11px] text-cyan-400 mt-1">คลิกดูรายละเอียดทุกรายการ →</p>
+            </button>
+
+            <button type="button" onclick="openSourceModal('HAS_DISCOUNT')" class="tech-card p-4 rounded-2xl text-left cursor-pointer">
+              <p class="text-xs font-semibold text-slate-400">รวมส่วนลดการคัดแยกขยะ</p>
+              <h3 id="sumSortDiscount" class="text-xl font-bold text-lime-300 mt-1">฿0</h3>
+              <p class="text-[11px] text-lime-400 mt-1">คลิกดูรายชื่อที่ได้ส่วนลด →</p>
+            </button>
+
+            <button type="button" onclick="openSourceModal('EDIT_ONLY')" class="tech-card p-4 rounded-2xl text-left cursor-pointer border-amber-500/40">
+              <p class="text-xs font-semibold text-amber-400">ผลรวมการแก้ไข (แยกเฉพาะ)</p>
+              <h3 id="sumEditOnly" class="text-xl font-bold text-amber-300 mt-1">0 ครั้ง</h3>
+              <p class="text-[11px] text-amber-300/90 mt-1">ไม่รวมยอดยกเลิก • คลิกดูที่มา →</p>
+            </button>
+
+            <button type="button" onclick="openSourceModal('CANCEL_ONLY')" class="tech-card p-4 rounded-2xl text-left cursor-pointer border-rose-500/40">
+              <p class="text-xs font-semibold text-rose-400">ผลรวมการยกเลิก (แยกเฉพาะ)</p>
+              <h3 id="sumCancelOnly" class="text-xl font-bold text-rose-300 mt-1">0 รายการ</h3>
+              <p class="text-[11px] text-rose-300/90 mt-1">ไม่รวมยอดแก้ไข • คลิกดูที่มา →</p>
+            </button>
+          </div>
+
+          <!-- แถวที่ 3: จำนวนถังขยะแยกปีแต่ละปี / ถังเก่า / ใช้ถังร่วม -->
+          <div class="tech-card p-6 rounded-2xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
               <div>
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">แยก แก้ไข / ยกเลิก</p>
-                <h3 id="statSplitEditCancel" class="text-lg font-bold text-amber-400 mt-1">แก้ไข 0 • ยกเลิก 0</h3>
-                <p class="text-xs text-slate-400 mt-1">แยกนับไม่รวมกัน</p>
+                <h3 class="font-bold text-white text-base">
+                  <i class="fa-solid fa-trash-can text-emerald-400 mr-2"></i> สรุปจำนวนถังขยะแยกตามปีแต่ละปี / ถังเก่า / ใช้ถังร่วม
+                </h3>
+                <p class="text-xs text-slate-400">นับเฉพาะสถานะปกติ (ไม่นับรายการยกเลิก) — คลิกที่การ์ดเพื่อดูรายชื่อในกลุ่มนั้น</p>
               </div>
-              <div class="bg-amber-500/20 text-amber-400 p-3.5 rounded-xl text-xl border border-amber-500/30"><i class="fa-solid fa-clipboard-list"></i></div>
+              <button type="button" onclick="openSourceModal('ALL_BINS')" class="text-xs px-3.5 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 font-semibold w-fit cursor-pointer">
+                ถังขยะทั้งหมด <span id="badgeAllBins">0</span> ใบ
+              </button>
             </div>
+            <div id="binBreakdownCards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3"></div>
           </div>
 
-          <!-- ผลรวมทั้งหมดทุกประเภท (ไม่นับรายการยกเลิก) + แยกผลรวมการแก้ไข/ยกเลิก + คลิกดูข้อมูลที่มาได้ -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button type="button" onclick="openSourceModal('ALL_ACTIVE')" class="tech-card p-5 rounded-2xl text-left transition hover:scale-[1.01] cursor-pointer border-emerald-500/40">
-              <p class="text-xs font-semibold text-emerald-400">ผลรวมทั้งหมดทุกประเภท (ไม่นับยกเลิก)</p>
-              <h3 id="grandAllTypesCount" class="text-2xl font-bold text-white mt-1">0 ราย</h3>
-              <p class="text-xs text-emerald-300 mt-1">คลิกเพื่อดูข้อมูลที่มาทั้งหมด →</p>
-            </button>
-
-            <button type="button" onclick="openSourceModal('ALL_ACTIVE')" class="tech-card p-5 rounded-2xl text-left transition hover:scale-[1.01] cursor-pointer border-emerald-500/40">
-              <p class="text-xs font-semibold text-teal-300">ยอดเงินรวมทุกประเภท (ไม่นับยกเลิก)</p>
-              <h3 id="grandAllTypesAmount" class="text-2xl font-bold text-emerald-300 mt-1">฿0</h3>
-              <p class="text-xs text-emerald-300 mt-1">คลิกเพื่อดูรายการคิดยอดเงิน →</p>
-            </button>
-
-            <button type="button" onclick="openSourceModal('EDIT_ONLY')" class="tech-card p-5 rounded-2xl text-left transition hover:scale-[1.01] cursor-pointer border-amber-500/40">
-              <p class="text-xs font-semibold text-amber-400">ผลรวมการแก้ไข (แยกเฉพาะการแก้ไข)</p>
-              <h3 id="sumEditOnly" class="text-2xl font-bold text-amber-300 mt-1">0 ครั้ง</h3>
-              <p class="text-xs text-amber-300/90 mt-1">ไม่รวมยอดยกเลิก • คลิกดูข้อมูลที่มา →</p>
-            </button>
-
-            <button type="button" onclick="openSourceModal('CANCEL_ONLY')" class="tech-card p-5 rounded-2xl text-left transition hover:scale-[1.01] cursor-pointer border-rose-500/40">
-              <p class="text-xs font-semibold text-rose-400">ผลรวมการยกเลิก (แยกเฉพาะการยกเลิก)</p>
-              <h3 id="sumCancelOnly" class="text-2xl font-bold text-rose-300 mt-1">0 รายการ</h3>
-              <p class="text-xs text-rose-300/90 mt-1">ไม่รวมยอดแก้ไข • คลิกดูข้อมูลที่มา →</p>
-            </button>
-          </div>
-
-          <!-- สรุปจำนวนแยกตาม 8 ช้อยส์ (ยกเว้นรายการยกเลิก + คลิกดูข้อมูลที่มาได้) -->
+          <!-- สรุปจำนวนแยกตาม 8 ประเภท -->
           <div class="tech-card p-6 rounded-2xl">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
               <div>
@@ -252,8 +280,9 @@
                     <th class="p-3.5 font-semibold">หมู่ที่ / หมู่บ้าน</th>
                     <th class="p-3.5 font-semibold text-center">ครัวเรือน (ราย)</th>
                     <th class="p-3.5 font-semibold text-center">สถานประกอบการ (แห่ง)</th>
+                    <th class="p-3.5 font-semibold text-center">ถังขยะ (ใบ)</th>
                     <th class="p-3.5 font-semibold text-center">รวมผู้ใช้งาน</th>
-                    <th class="p-3.5 font-semibold text-right">ยอดเงินรวม (บาท)</th>
+                    <th class="p-3.5 font-semibold text-right">รวมทั้งสิ้น (บาท)</th>
                   </tr>
                 </thead>
                 <tbody id="dashboardVillageSummaryBody" class="divide-y divide-slate-800 text-sm"></tbody>
@@ -313,9 +342,9 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
               <div>
                 <h3 class="font-bold text-white text-base">
-                  <i class="fa-solid fa-tags text-emerald-400 mr-2"></i> สรุปจำนวนรายแยกตามอัตราค่าบริการ (ทุกราคา)
+                  <i class="fa-solid fa-tags text-emerald-400 mr-2"></i> สรุปจำนวนรายแยกตามอัตราค่าบริการรวมทั้งสิ้น (ทุกราคา)
                 </h3>
-                <p class="text-xs text-slate-400">คลิกที่การ์ดราคาเพื่อดูรายชื่อผู้ชำระ (40 / 80 / 120 / ...) เฉพาะสถานะปกติ</p>
+                <p class="text-xs text-slate-400">คลิกที่การ์ดราคาเพื่อดูรายชื่อผู้ชำระเฉพาะสถานะปกติ</p>
               </div>
               <span class="text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 w-fit">
                 คลิกดูรายชื่อได้
@@ -334,7 +363,7 @@
             <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-1">
               <i class="fa-solid fa-file-circle-plus text-emerald-400"></i> แบบฟอร์มลงทะเบียนถังขยะ ตำบลศิลาลอย
             </h2>
-            <p class="text-sm text-slate-400 mb-5">กรอกข้อมูลผู้ชำระค่าบริการจัดเก็บขยะมูลฝอย</p>
+            <p class="text-sm text-slate-400 mb-5">กรอกข้อมูลผู้ชำระค่าบริการจัดเก็บขยะมูลฝอย (ไม่ต้องเพิ่มคอลัมน์ในชีต)</p>
 
             <form id="addForm" action="javascript:void(0)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
@@ -343,11 +372,11 @@
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">เลขถังขยะ *</label>
-                <input type="text" id="binId" required placeholder="เช่น 001/2568 หรือ -" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+                <input type="text" id="binId" required placeholder="เช่น 001/2569, ถังเก่า, ใช้ถังร่วม" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">ชื่อ - นามสกุล *</label>
-                <input type="text" id="fullName" required placeholder="ระบุชื่อ-นามสกุล หรือชื่อหน่วยงาน" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+                <input type="text" id="fullName" required placeholder="ระบุชื่อ-นามสกุล หรือชื่อผู้ติดต่อ" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">เบอร์โทรศัพท์</label>
@@ -384,25 +413,38 @@
                   <option value="บ้านพัก/ห้องเช่า">7. บ้านพัก/ห้องเช่า</option>
                   <option value="อื่นๆ">8. อื่นๆ</option>
                 </select>
-                <input type="text" id="customerTypeOther" placeholder="พิมพ์ระบุประเภทอื่นๆ..." class="hidden mt-2 w-full border border-emerald-600/70 rounded-xl px-3.5 py-2 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-950 text-white text-sm">
+                <input type="text" id="customerTypeDetail" placeholder="พิมพ์ระบุชื่อบริษัท / หน่วยงาน..." class="hidden mt-2 w-full border border-emerald-500/80 rounded-xl px-3.5 py-2 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-950 text-emerald-200 text-sm">
               </div>
               <div>
-                <label class="block text-sm font-medium mb-1 text-slate-300">จำนวนเงิน (บาท) *</label>
-                <input type="number" id="amount" required placeholder="เช่น 40 หรือ 480" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+                <label class="block text-sm font-medium mb-1 text-slate-300">ค่าเก็บขน (บาท)</label>
+                <input type="number" id="collectionFee" oninput="calcFormTotal('add')" value="0" min="0" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
               </div>
-              <div class="md:col-span-4 flex justify-end pt-2">
-                <button type="submit" id="btnSubmit" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-8 rounded-xl transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2">
-                  <i class="fa-solid fa-save"></i> บันทึกข้อมูลลง Google Sheets
+              <div>
+                <label class="block text-sm font-medium mb-1 text-slate-300">ค่ากำจัด (บาท)</label>
+                <input type="number" id="disposalFee" oninput="calcFormTotal('add')" value="0" min="0" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1 text-slate-300">ส่วนลดการคัดแยกขยะ (บาท)</label>
+                <input type="number" id="sortDiscount" oninput="calcFormTotal('add')" value="0" min="0" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1 text-emerald-400">รวมทั้งสิ้น (บาท) *</label>
+                <input type="number" id="amount" required value="0" class="w-full border border-emerald-600/60 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-950 text-emerald-300 font-bold">
+              </div>
+              <div class="flex items-end">
+                <button type="submit" id="btnSubmit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 px-6 rounded-xl transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-save"></i> บันทึกข้อมูล
                 </button>
               </div>
             </form>
           </div>
 
+          <!-- ตารางรายชื่อทุกรายการ -->
           <div class="tech-card p-6 rounded-2xl">
             <div class="flex flex-col md:flex-row justify-between gap-4 mb-5">
               <div class="relative flex-1">
                 <i class="fa-solid fa-search absolute left-3.5 top-3.5 text-slate-400"></i>
-                <input type="text" id="searchInput" oninput="scheduleTableRender()" placeholder="ค้นหาวันลงทะเบียน, เลขถังขยะ, ชื่อ-นามสกุล, บ้านเลขที่, ประเภท..." class="w-full pl-10 pr-4 py-2.5 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
+                <input type="text" id="searchInput" oninput="scheduleTableRender()" placeholder="ค้นหาวันลงทะเบียน, เลขถังขยะ, ชื่อ-นามสกุล, บ้านเลขที่, ชื่อบริษัท/ประเภท..." class="w-full pl-10 pr-4 py-2.5 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
               </div>
               <div class="w-full md:w-56">
                 <select id="filterCustomerType" onchange="currentPage=1; renderTable()" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
@@ -437,17 +479,19 @@
               <table class="w-full text-left border-collapse">
                 <thead>
                   <tr class="bg-slate-900 text-slate-300 text-xs uppercase tracking-wider border-b border-slate-800">
-                    <th class="p-3.5 font-semibold">ลำดับ</th>
-                    <th class="p-3.5 font-semibold">วันลงทะเบียน</th>
-                    <th class="p-3.5 font-semibold">เลขถังขยะ</th>
-                    <th class="p-3.5 font-semibold">ชื่อ - นามสกุล</th>
-                    <th class="p-3.5 font-semibold">เบอร์โทรศัพท์</th>
-                    <th class="p-3.5 font-semibold">บ้านเลขที่</th>
-                    <th class="p-3.5 font-semibold">หมู่ที่ / หมู่บ้าน</th>
-                    <th class="p-3.5 font-semibold">ประเภท</th>
-                    <th class="p-3.5 font-semibold">สถานะ</th>
-                    <th class="p-3.5 font-semibold text-right">จำนวนเงิน</th>
-                    <th class="p-3.5 font-semibold text-center">จัดการ</th>
+                    <th class="p-3 font-semibold">ลำดับ</th>
+                    <th class="p-3 font-semibold">วันลงทะเบียน</th>
+                    <th class="p-3 font-semibold">เลขถังขยะ</th>
+                    <th class="p-3 font-semibold">ชื่อ - นามสกุล</th>
+                    <th class="p-3 font-semibold">บ้านเลขที่</th>
+                    <th class="p-3 font-semibold">หมู่ที่ / หมู่บ้าน</th>
+                    <th class="p-3 font-semibold">ประเภท / ชื่อหน่วยงาน</th>
+                    <th class="p-3 font-semibold text-right">ค่าเก็บขน</th>
+                    <th class="p-3 font-semibold text-right">ค่ากำจัด</th>
+                    <th class="p-3 font-semibold text-right">ส่วนลดคัดแยก</th>
+                    <th class="p-3 font-semibold text-right">รวมทั้งสิ้น</th>
+                    <th class="p-3 font-semibold">สถานะ</th>
+                    <th class="p-3 font-semibold text-center">จัดการ</th>
                   </tr>
                 </thead>
                 <tbody id="tableBody" class="divide-y divide-slate-800 text-sm"></tbody>
@@ -467,7 +511,7 @@
             <h3 class="font-bold text-white text-lg flex items-center gap-2">
               <i class="fa-solid fa-map-location-dot text-emerald-400"></i> สรุปข้อมูลรายหมู่บ้าน (ทั้ง 9 หมู่)
             </h3>
-            <p class="text-sm text-slate-400">รายละเอียดจำนวนครัวเรือน สถานประกอบการ และยอดจัดเก็บรายได้แต่ละหมู่บ้าน (ไม่นับรายการยกเลิก)</p>
+            <p class="text-sm text-slate-400">รายละเอียดจำนวนครัวเรือน สถานประกอบการ จำนวนถังขยะ และยอดรวมทั้งสิ้นแต่ละหมู่บ้าน (ไม่นับรายการยกเลิก)</p>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2" id="villageCardsGrid"></div>
           </div>
         </div>
@@ -514,7 +558,7 @@
 
   <!-- Modal แก้ไขข้อมูล -->
   <div id="editModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="tech-card rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+    <div class="tech-card rounded-2xl max-w-xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
         <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-pen-to-square text-amber-400 mr-2"></i> แก้ไขข้อมูลถังขยะ</h3>
         <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -575,13 +619,27 @@
               <option value="บ้านพัก/ห้องเช่า">7. บ้านพัก/ห้องเช่า</option>
               <option value="อื่นๆ">8. อื่นๆ</option>
             </select>
-            <input type="text" id="editCustomerTypeOther" placeholder="พิมพ์ระบุประเภทอื่นๆ..." class="hidden mt-2 w-full border border-emerald-600/70 rounded-xl px-3 py-1.5 bg-slate-950 text-white text-sm">
+            <input type="text" id="editCustomerTypeDetail" placeholder="พิมพ์ระบุชื่อบริษัท / หน่วยงาน..." class="hidden mt-2 w-full border border-emerald-500/80 rounded-xl px-3 py-1.5 bg-slate-950 text-emerald-200 text-sm">
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-medium mb-1 text-slate-300">ค่าเก็บขน (บาท)</label>
+            <input type="number" id="editCollectionFee" oninput="calcFormTotal('edit')" min="0" class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-medium mb-1 text-slate-300">ค่ากำจัด (บาท)</label>
+            <input type="number" id="editDisposalFee" oninput="calcFormTotal('edit')" min="0" class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+          </div>
+          <div>
+            <label class="block text-xs font-medium mb-1 text-slate-300">ส่วนลดคัดแยก (บาท)</label>
+            <input type="number" id="editSortDiscount" oninput="calcFormTotal('edit')" min="0" class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-medium mb-1 text-slate-300">จำนวนเงิน (บาท) *</label>
-            <input type="number" id="editAmount" required class="w-full border border-slate-700 rounded-xl px-3 py-2 bg-slate-900 text-white">
+            <label class="block text-sm font-medium mb-1 text-emerald-400">รวมทั้งสิ้น (บาท) *</label>
+            <input type="number" id="editAmount" required class="w-full border border-emerald-600/60 rounded-xl px-3 py-2 bg-slate-950 text-emerald-300 font-bold">
           </div>
           <div>
             <label class="block text-sm font-medium mb-1 text-slate-300">เหตุผลการแก้ไข *</label>
@@ -628,7 +686,7 @@
 
   <!-- Modal ดูรายชื่อผู้ชำระตามอัตราค่าบริการ -->
   <div id="priceModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="tech-card rounded-2xl max-w-4xl w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+    <div class="tech-card rounded-2xl max-w-5xl w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-800 px-6 py-4">
         <div>
           <h3 id="priceModalTitle" class="text-lg font-bold text-white">รายชื่อผู้ชำระอัตรา ฿0</h3>
@@ -643,10 +701,13 @@
               <th class="p-2.5">ลำดับ</th>
               <th class="p-2.5">เลขถังขยะ</th>
               <th class="p-2.5">ชื่อ - นามสกุล</th>
-              <th class="p-2.5">ประเภท</th>
+              <th class="p-2.5">ประเภท / ชื่อหน่วยงาน</th>
               <th class="p-2.5">บ้านเลขที่</th>
               <th class="p-2.5">หมู่ที่ / หมู่บ้าน</th>
-              <th class="p-2.5 text-right">จำนวนเงิน</th>
+              <th class="p-2.5 text-right">ค่าเก็บขน</th>
+              <th class="p-2.5 text-right">ค่ากำจัด</th>
+              <th class="p-2.5 text-right">ส่วนลดคัดแยก</th>
+              <th class="p-2.5 text-right">รวมทั้งสิ้น</th>
             </tr>
           </thead>
           <tbody id="priceModalBody" class="divide-y divide-slate-800 text-sm"></tbody>
@@ -657,7 +718,7 @@
 
   <!-- Modal คลิกผลรวมเพื่อดูข้อมูลที่มา -->
   <div id="sourceModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="tech-card rounded-2xl max-w-5xl w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
+    <div class="tech-card rounded-2xl max-w-6xl w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-800 px-6 py-4">
         <div>
           <h3 id="sourceModalTitle" class="text-lg font-bold text-white">ข้อมูลที่มา</h3>
@@ -678,9 +739,10 @@
 
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw01amYiV8v-fau5VFqOYg1s_ew7WPCW4vRM_Yp0tZ0LAQsUsO4_jw0VnSeva9aHD8N/exec";
+
     const PASSWORDS = {
-      "ระบบฉัน": "032684111",
-      "ระบบเธอ": "032684111"
+      "Admin 1": "1234",
+      "Admin 2": "5678"
     };
 
     const VILLAGE_FULL_NAMES = {
@@ -706,11 +768,166 @@
       "อื่นๆ"
     ];
 
+    const TYPE_PLACEHOLDERS = {
+      "บริษัท/สำนักงาน/โรงงาน": "พิมพ์ชื่อบริษัท / สำนักงาน / โรงงาน...",
+      "ร้านค้า/ร้านอาหาร": "พิมพ์ชื่อร้านค้า / ร้านอาหาร...",
+      "อนามัย": "พิมพ์ชื่อ รพ.สต. / สถานีอนามัย...",
+      "โรงเรียน": "พิมพ์ชื่อโรงเรียน / ศูนย์พัฒนาเด็กเล็ก...",
+      "วัด": "พิมพ์ชื่อวัด / สำนักสงฆ์...",
+      "บ้านพัก/ห้องเช่า": "พิมพ์ชื่อหอพัก / ห้องเช่า / รีสอร์ท...",
+      "อื่นๆ": "พิมพ์ระบุประเภทหรือชื่อหน่วยงาน..."
+    };
+
     let allRecords = [];
     let historyLogs = [];
     let currentPage = 1;
     const pageSize = 20;
     let renderTimer = null;
+
+    function parseCustomerType(rawType) {
+      const text = String(rawType || "ครัวเรือน").trim();
+      for (const base of PRESET_TYPES) {
+        if (text === base) {
+          return { baseType: base, customName: "", display: base };
+        }
+        if (text.startsWith(base + " (") && text.endsWith(")")) {
+          const detail = text.slice(base.length + 2, -1).trim();
+          return { baseType: base, customName: detail, display: text };
+        }
+      }
+      return { baseType: "อื่นๆ", customName: text, display: text };
+    }
+
+    function formatCustomerTypeForSave(baseType, customName) {
+      const base = String(baseType || "ครัวเรือน").trim();
+      const detail = String(customName || "").trim();
+      if (base === "ครัวเรือน" || !detail) return base;
+      return `${base} (${detail})`;
+    }
+
+    function toggleCustomTypeInput(mode) {
+      const sel = document.getElementById(mode === "add" ? "customerTypeSelect" : "editCustomerTypeSelect");
+      const inp = document.getElementById(mode === "add" ? "customerTypeDetail" : "editCustomerTypeDetail");
+      const val = sel.value;
+
+      if (val && val !== "ครัวเรือน") {
+        inp.classList.remove("hidden");
+        inp.placeholder = TYPE_PLACEHOLDERS[val] || "พิมพ์ระบุชื่อหน่วยงาน...";
+        inp.required = val === "อื่นๆ";
+      } else {
+        inp.classList.add("hidden");
+        inp.required = false;
+        inp.value = "";
+      }
+    }
+
+    function togglePasswordVisibility() {
+      const inp = document.getElementById("adminPassword");
+      const icon = document.getElementById("passEyeIcon");
+      if (inp.type === "password") {
+        inp.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+      } else {
+        inp.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+      }
+    }
+
+    function handleLogin() {
+      const role = String(document.getElementById("adminRole").value || "").trim();
+      const pass = String(document.getElementById("adminPassword").value || "").trim();
+      const errEl = document.getElementById("loginError");
+
+      if (!role) {
+        errEl.textContent = "กรุณาเลือกสิทธิ์ผู้ใช้งาน (Admin 1 หรือ Admin 2)";
+        errEl.classList.remove("hidden");
+        return;
+      }
+
+      if (PASSWORDS[role] && String(PASSWORDS[role]) === pass) {
+        errEl.classList.add("hidden");
+        try { sessionStorage.setItem("silaLoiRole", role); } catch (e) {}
+        document.getElementById("currentRoleDisplay").textContent = role;
+        document.getElementById("loginOverlay").classList.add("hidden");
+        document.getElementById("mainAppContent").classList.remove("hidden");
+        loadData(false);
+      } else {
+        errEl.textContent = "รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง";
+        errEl.classList.remove("hidden");
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", function () {
+      try {
+        const savedRole = sessionStorage.getItem("silaLoiRole");
+        if (savedRole && PASSWORDS[savedRole]) {
+          document.getElementById("currentRoleDisplay").textContent = savedRole;
+          document.getElementById("loginOverlay").classList.add("hidden");
+          document.getElementById("mainAppContent").classList.remove("hidden");
+          loadData(false);
+        }
+      } catch (e) {}
+    });
+
+    function logout() {
+      try { sessionStorage.removeItem("silaLoiRole"); } catch (e) {}
+      document.getElementById("mainAppContent").classList.add("hidden");
+      document.getElementById("loginOverlay").classList.remove("hidden");
+      document.getElementById("adminPassword").value = "";
+    }
+
+    function calcFormTotal(mode) {
+      const c = Number(document.getElementById(mode === "add" ? "collectionFee" : "editCollectionFee").value) || 0;
+      const d = Number(document.getElementById(mode === "add" ? "disposalFee" : "editDisposalFee").value) || 0;
+      const s = Number(document.getElementById(mode === "add" ? "sortDiscount" : "editSortDiscount").value) || 0;
+      const total = Math.max(0, c + d - s);
+      document.getElementById(mode === "add" ? "amount" : "editAmount").value = total;
+    }
+
+    // อ่านรายละเอียดค่าเก็บขน/ค่ากำจัด/ส่วนลดได้โดยไม่ต้องเพิ่มคอลัมน์ในชีต (ฝังใน note/detail หรือใช้ยอดรวมเดิม)
+    function encodeFeeNote(existingNote, cFee, dFee, sDisc) {
+      const cleaned = String(existingNote || "").replace(/\[FEE:[^\]]*\]/g, "").trim();
+      if (cFee > 0 || dFee > 0 || sDisc > 0) {
+        const tag = `[FEE:${cFee}|${dFee}|${sDisc}]`;
+        return cleaned ? `${cleaned} ${tag}` : tag;
+      }
+      return cleaned;
+    }
+
+    function getFeeParts(rec) {
+      const total = Number(rec.amount) || 0;
+      const noteText = String(rec.note || rec.detail || rec.reason || "");
+      const m = noteText.match(/\[FEE:(-?\d+(?:\.\d+)?)\|(-?\d+(?:\.\d+)?)\|(-?\d+(?:\.\d+)?)\]/);
+      if (m) {
+        const c = Number(m[1]) || 0;
+        const d = Number(m[2]) || 0;
+        const s = Number(m[3]) || 0;
+        return {
+          collectionFee: c,
+          disposalFee: d,
+          sortDiscount: s,
+          total: total || Math.max(0, c + d - s)
+        };
+      }
+      return { collectionFee: total, disposalFee: 0, sortDiscount: 0, total: total };
+    }
+
+    function classifyBin(binIdRaw) {
+      const raw = String(binIdRaw || "").trim();
+      if (raw === "" || raw === "-" || raw.includes("ร่วม")) {
+        return { category: "SHARED", label: "ใช้ถังร่วม", hasOwnBin: false };
+      }
+      if (raw.includes("เก่า")) {
+        return { category: "OLD", label: "ถังเก่า", hasOwnBin: true };
+      }
+      const yearMatch = raw.match(/\/(25\d{2})/);
+      if (yearMatch) {
+        return { category: "YEAR:" + yearMatch[1], label: "ถังปี " + yearMatch[1], hasOwnBin: true };
+      }
+      return { category: "OTHER_BIN", label: "ถังระบุรหัสอื่น", hasOwnBin: true };
+    }
 
     function getVillageDisplay(villageStr, villageNum) {
       const m = String(villageNum || villageStr || "").match(/\d+/);
@@ -732,28 +949,6 @@
       return text.includes("ยกเลิก");
     }
 
-    document.getElementById("loginForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-      const role = document.getElementById("adminRole").value;
-      const pass = document.getElementById("adminPassword").value;
-      if (role && PASSWORDS[role] && PASSWORDS[role] === pass) {
-        sessionStorage.setItem("silaLoiRole", role);
-        document.getElementById("currentRoleDisplay").textContent = role;
-        document.getElementById("loginOverlay").classList.add("hidden");
-        document.getElementById("mainAppContent").classList.remove("hidden");
-        loadData(false);
-      } else {
-        document.getElementById("loginError").classList.remove("hidden");
-      }
-    });
-
-    function logout() {
-      sessionStorage.removeItem("silaLoiRole");
-      document.getElementById("mainAppContent").classList.add("hidden");
-      document.getElementById("loginOverlay").classList.remove("hidden");
-      document.getElementById("adminPassword").value = "";
-    }
-
     function switchPage(page) {
       document.querySelectorAll(".page-content").forEach((el) => el.classList.add("hidden"));
       document.getElementById("page-" + page).classList.remove("hidden");
@@ -767,24 +962,11 @@
 
       const titles = {
         dashboard: "ภาพรวมระบบ (Dashboard)",
-        management: "ลงทะเบียน & จัดการข้อมูล",
+        management: "ลงทะเบียน & รายชื่อทั้งหมด",
         analytics: "สรุปรายหมู่บ้าน",
         history: "ประวัติแก้ไข & ยกเลิก"
       };
       document.getElementById("pageTitle").textContent = titles[page] || "ภาพรวมระบบ";
-    }
-
-    function toggleCustomTypeInput(mode) {
-      const sel = document.getElementById(mode === "add" ? "customerTypeSelect" : "editCustomerTypeSelect");
-      const inp = document.getElementById(mode === "add" ? "customerTypeOther" : "editCustomerTypeOther");
-      if (sel.value === "อื่นๆ") {
-        inp.classList.remove("hidden");
-        inp.required = true;
-      } else {
-        inp.classList.add("hidden");
-        inp.required = false;
-        inp.value = "";
-      }
     }
 
     async function loadData(forceRefresh = false) {
@@ -826,31 +1008,98 @@
 
     function renderDashboard() {
       const active = allRecords.filter((r) => !isCancelled(r));
-      const households = active.filter((r) => (r.customerType || "ครัวเรือน") === "ครัวเรือน");
-      const establishments = active.filter((r) => (r.customerType || "ครัวเรือน") !== "ครัวเรือน");
-      const totalAmount = active.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+      const households = active.filter((r) => parseCustomerType(r.customerType).baseType === "ครัวเรือน");
+      const establishments = active.filter((r) => parseCustomerType(r.customerType).baseType !== "ครัวเรือน");
 
+      let totalCollection = 0;
+      let totalDisposal = 0;
+      let totalDiscount = 0;
+      let totalAmount = 0;
+
+      active.forEach((r) => {
+        const f = getFeeParts(r);
+        totalCollection += f.collectionFee;
+        totalDisposal += f.disposalFee;
+        totalDiscount += f.sortDiscount;
+        totalAmount += f.total;
+      });
+
+      const binsActive = active.filter((r) => classifyBin(r.binId).hasOwnBin);
       const editOnly = historyLogs.filter(isEditLog);
       const cancelOnly = historyLogs.filter(isCancelLog);
 
       document.getElementById("statTotalHouseholds").textContent = `${households.length.toLocaleString()} ราย`;
       document.getElementById("statTotalEstablishments").textContent = `${establishments.length.toLocaleString()} แห่ง`;
+      document.getElementById("statTotalBins").textContent = `${binsActive.length.toLocaleString()} ใบ`;
+      document.getElementById("badgeAllBins").textContent = binsActive.length.toLocaleString();
       document.getElementById("statTotalAmount").textContent = `฿${totalAmount.toLocaleString()}`;
       document.getElementById("statTotalActive").textContent = active.length.toLocaleString();
-      document.getElementById("statSplitEditCancel").textContent =
-        `แก้ไข ${editOnly.length.toLocaleString()} • ยกเลิก ${cancelOnly.length.toLocaleString()}`;
 
-      document.getElementById("grandAllTypesCount").textContent = `${active.length.toLocaleString()} ราย`;
-      document.getElementById("grandAllTypesAmount").textContent = `฿${totalAmount.toLocaleString()}`;
+      document.getElementById("sumCollectionFee").textContent = `฿${totalCollection.toLocaleString()}`;
+      document.getElementById("sumDisposalFee").textContent = `฿${totalDisposal.toLocaleString()}`;
+      document.getElementById("sumSortDiscount").textContent = `฿${totalDiscount.toLocaleString()}`;
       document.getElementById("sumEditOnly").textContent = `${editOnly.length.toLocaleString()} ครั้ง`;
       document.getElementById("sumCancelOnly").textContent = `${cancelOnly.length.toLocaleString()} รายการ`;
 
+      const yearCounts = {};
+      let oldBinCount = 0;
+      let sharedBinCount = 0;
+      let otherBinCount = 0;
+
+      active.forEach((r) => {
+        const info = classifyBin(r.binId);
+        if (info.category === "SHARED") {
+          sharedBinCount++;
+        } else if (info.category === "OLD") {
+          oldBinCount++;
+        } else if (info.category.startsWith("YEAR:")) {
+          const y = info.category.slice(5);
+          yearCounts[y] = (yearCounts[y] || 0) + 1;
+        } else {
+          otherBinCount++;
+        }
+      });
+
+      const sortedYears = Object.keys(yearCounts).sort();
+      const binCards = [];
+      sortedYears.forEach((y) => {
+        binCards.push(`
+          <button type="button" onclick="openSourceModal('BIN_YEAR:${y}')" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-teal-500/40 p-3.5 rounded-xl text-left transition cursor-pointer">
+            <p class="text-xs text-slate-400">ถังขยะปี ${y}</p>
+            <p class="text-lg font-bold text-teal-300 mt-0.5">${yearCounts[y].toLocaleString()} คน</p>
+            <p class="text-[11px] text-slate-400">คลิกดูรายชื่อ →</p>
+          </button>
+        `);
+      });
+      if (otherBinCount > 0) {
+        binCards.push(`
+          <button type="button" onclick="openSourceModal('BIN_OTHER')" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-teal-500/40 p-3.5 rounded-xl text-left transition cursor-pointer">
+            <p class="text-xs text-slate-400">ถังระบุรหัสอื่น</p>
+            <p class="text-lg font-bold text-teal-300 mt-0.5">${otherBinCount.toLocaleString()} คน</p>
+            <p class="text-[11px] text-slate-400">คลิกดูรายชื่อ →</p>
+          </button>
+        `);
+      }
+      binCards.push(`
+        <button type="button" onclick="openSourceModal('BIN_OLD')" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 p-3.5 rounded-xl text-left transition cursor-pointer">
+          <p class="text-xs text-slate-400">ถังเก่า</p>
+          <p class="text-lg font-bold text-amber-300 mt-0.5">${oldBinCount.toLocaleString()} ราย</p>
+          <p class="text-[11px] text-slate-400">คลิกดูรายชื่อ →</p>
+        </button>
+      `);
+      binCards.push(`
+        <button type="button" onclick="openSourceModal('BIN_SHARED')" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 p-3.5 rounded-xl text-left transition cursor-pointer">
+          <p class="text-xs text-slate-400">ใช้ถังร่วม (ไม่มีเลขถังแยก)</p>
+          <p class="text-lg font-bold text-cyan-300 mt-0.5">${sharedBinCount.toLocaleString()} ราย</p>
+          <p class="text-[11px] text-slate-400">คลิกดูรายชื่อ →</p>
+        </button>
+      `);
+      document.getElementById("binBreakdownCards").innerHTML = binCards.join("");
+
       const typeContainer = document.getElementById("typeBreakdownCards");
       typeContainer.innerHTML = PRESET_TYPES.map((t) => {
-        const matched = t === "อื่นๆ"
-          ? active.filter((r) => !PRESET_TYPES.slice(0, 7).includes(r.customerType))
-          : active.filter((r) => r.customerType === t);
-        const amt = matched.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+        const matched = active.filter((r) => parseCustomerType(r.customerType).baseType === t);
+        const amt = matched.reduce((s, r) => s + getFeeParts(r).total, 0);
         const safeT = t.replace(/'/g, "\\'");
         return `
           <button type="button" onclick="openSourceModal('TYPE:${safeT}')" class="bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/40 p-3.5 rounded-xl text-left transition cursor-pointer">
@@ -862,19 +1111,21 @@
       }).join("");
 
       const summaryBody = document.getElementById("dashboardVillageSummaryBody");
-      let grandHH = 0, grandEst = 0, grandAll = 0, grandAmt = 0;
+      let grandHH = 0, grandEst = 0, grandBins = 0, grandAll = 0, grandAmt = 0;
       const villageNums = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
       summaryBody.innerHTML = villageNums.map((vNum) => {
         const rows = active.filter((r) => String(r.villageNum) === vNum || String(r.village || "").match(/\d+/)?.[0] === vNum);
-        const hh = rows.filter((r) => (r.customerType || "ครัวเรือน") === "ครัวเรือน").length;
+        const hh = rows.filter((r) => parseCustomerType(r.customerType).baseType === "ครัวเรือน").length;
         const est = rows.length - hh;
-        const amt = rows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
-        grandHH += hh; grandEst += est; grandAll += rows.length; grandAmt += amt;
+        const vBins = rows.filter((r) => classifyBin(r.binId).hasOwnBin).length;
+        const amt = rows.reduce((s, r) => s + getFeeParts(r).total, 0);
+        grandHH += hh; grandEst += est; grandBins += vBins; grandAll += rows.length; grandAmt += amt;
         return `
           <tr class="hover:bg-slate-900/60">
             <td class="p-3 font-medium text-white">${VILLAGE_FULL_NAMES[vNum]}</td>
             <td class="p-3 text-center text-emerald-400">${hh.toLocaleString()}</td>
             <td class="p-3 text-center text-cyan-400">${est.toLocaleString()}</td>
+            <td class="p-3 text-center text-teal-300">${vBins.toLocaleString()}</td>
             <td class="p-3 text-center font-semibold text-white">${rows.length.toLocaleString()}</td>
             <td class="p-3 text-right font-semibold text-emerald-300">฿${amt.toLocaleString()}</td>
           </tr>
@@ -884,6 +1135,7 @@
           <td class="p-3">รวมทั้งหมดทุกประเภท (ไม่นับยกเลิก • คลิกดูที่มา)</td>
           <td class="p-3 text-center">${grandHH.toLocaleString()}</td>
           <td class="p-3 text-center">${grandEst.toLocaleString()}</td>
+          <td class="p-3 text-center">${grandBins.toLocaleString()}</td>
           <td class="p-3 text-center">${grandAll.toLocaleString()}</td>
           <td class="p-3 text-right">฿${grandAmt.toLocaleString()}</td>
         </tr>
@@ -916,7 +1168,7 @@
 
       const priceMap = {};
       active.forEach((r) => {
-        const p = Number(r.amount) || 0;
+        const p = getFeeParts(r).total;
         if (!priceMap[p]) priceMap[p] = [];
         priceMap[p].push(r);
       });
@@ -982,45 +1234,71 @@
       } else {
         let rows = active;
         let label = "ข้อมูลที่มา: ผลรวมทั้งหมดทุกประเภท (ไม่นับรายการยกเลิก)";
+
         if (mode === "ESTABLISHMENTS_ONLY") {
           label = "ข้อมูลที่มา: สถานประกอบการทั้งหมด (ไม่นับรายการยกเลิก)";
-          rows = active.filter((r) => (r.customerType || "ครัวเรือน") !== "ครัวเรือน");
+          rows = active.filter((r) => parseCustomerType(r.customerType).baseType !== "ครัวเรือน");
+        } else if (mode === "ALL_BINS") {
+          label = "ข้อมูลที่มา: ถังขยะทั้งหมด (ไม่นับถังร่วมและรายการยกเลิก)";
+          rows = active.filter((r) => classifyBin(r.binId).hasOwnBin);
+        } else if (mode === "BIN_OLD") {
+          label = "ข้อมูลที่มา: ผู้ใช้ถังเก่า";
+          rows = active.filter((r) => classifyBin(r.binId).category === "OLD");
+        } else if (mode === "BIN_SHARED") {
+          label = "ข้อมูลที่มา: ผู้ใช้ถังร่วม";
+          rows = active.filter((r) => classifyBin(r.binId).category === "SHARED");
+        } else if (mode === "BIN_OTHER") {
+          label = "ข้อมูลที่มา: ถังระบุรหัสอื่น";
+          rows = active.filter((r) => classifyBin(r.binId).category === "OTHER_BIN");
+        } else if (mode.startsWith("BIN_YEAR:")) {
+          const y = mode.slice(9);
+          label = `ข้อมูลที่มา: ถังขยะปี ${y}`;
+          rows = active.filter((r) => classifyBin(r.binId).category === "YEAR:" + y);
+        } else if (mode === "HAS_DISCOUNT") {
+          label = "ข้อมูลที่มา: รายชื่อที่ได้รับส่วนลดการคัดแยกขยะ";
+          rows = active.filter((r) => getFeeParts(r).sortDiscount > 0);
         } else if (mode.startsWith("TYPE:")) {
           const t = mode.slice(5);
           label = `ข้อมูลที่มาประเภท: ${t} (ไม่นับรายการยกเลิก)`;
-          rows = t === "อื่นๆ"
-            ? active.filter((r) => !PRESET_TYPES.slice(0, 7).includes(r.customerType))
-            : active.filter((r) => r.customerType === t);
+          rows = active.filter((r) => parseCustomerType(r.customerType).baseType === t);
         }
-        const sumAmt = rows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+
+        const sumAmt = rows.reduce((s, r) => s + getFeeParts(r).total, 0);
         titleEl.textContent = label;
-        metaEl.textContent = `ทั้งหมด ${rows.length.toLocaleString()} รายการ (ไม่นับรายการยกเลิก) | ยอดรวม ฿${sumAmt.toLocaleString()}`;
+        metaEl.textContent = `ทั้งหมด ${rows.length.toLocaleString()} รายการ | รวมทั้งสิ้น ฿${sumAmt.toLocaleString()}`;
         headEl.innerHTML = `
           <tr>
             <th class="p-2.5">ลำดับ</th>
             <th class="p-2.5">เลขถังขยะ</th>
             <th class="p-2.5">ชื่อ - นามสกุล</th>
-            <th class="p-2.5">ประเภท</th>
+            <th class="p-2.5">ประเภท / ชื่อหน่วยงาน</th>
             <th class="p-2.5">บ้านเลขที่</th>
             <th class="p-2.5">หมู่ที่ / หมู่บ้าน</th>
-            <th class="p-2.5">สถานะ</th>
-            <th class="p-2.5 text-right">จำนวนเงิน</th>
+            <th class="p-2.5 text-right">ค่าเก็บขน</th>
+            <th class="p-2.5 text-right">ค่ากำจัด</th>
+            <th class="p-2.5 text-right">ส่วนลดคัดแยก</th>
+            <th class="p-2.5 text-right">รวมทั้งสิ้น</th>
           </tr>
         `;
         bodyEl.innerHTML = rows.length
-          ? rows.map((r, i) => `
-              <tr class="hover:bg-slate-900/60">
-                <td class="p-2.5">${i + 1}</td>
-                <td class="p-2.5">${r.binId || "-"}</td>
-                <td class="p-2.5 text-white">${r.fullName || "-"}</td>
-                <td class="p-2.5">${r.customerType || "ครัวเรือน"}</td>
-                <td class="p-2.5">${r.houseNo || "-"}</td>
-                <td class="p-2.5">${getVillageDisplay(r.village, r.villageNum)}</td>
-                <td class="p-2.5 text-emerald-400">${r.status || "ปกติ"}</td>
-                <td class="p-2.5 text-right text-emerald-300">฿${(Number(r.amount) || 0).toLocaleString()}</td>
-              </tr>
-            `).join("")
-          : `<tr><td colspan="8" class="p-6 text-center text-slate-400">ไม่พบข้อมูลที่มา</td></tr>`;
+          ? rows.map((r, i) => {
+              const f = getFeeParts(r);
+              return `
+                <tr class="hover:bg-slate-900/60">
+                  <td class="p-2.5">${i + 1}</td>
+                  <td class="p-2.5">${r.binId || "-"}</td>
+                  <td class="p-2.5 text-white">${r.fullName || "-"}</td>
+                  <td class="p-2.5">${parseCustomerType(r.customerType).display}</td>
+                  <td class="p-2.5">${r.houseNo || "-"}</td>
+                  <td class="p-2.5">${getVillageDisplay(r.village, r.villageNum)}</td>
+                  <td class="p-2.5 text-right">฿${f.collectionFee.toLocaleString()}</td>
+                  <td class="p-2.5 text-right">฿${f.disposalFee.toLocaleString()}</td>
+                  <td class="p-2.5 text-right text-lime-300">฿${f.sortDiscount.toLocaleString()}</td>
+                  <td class="p-2.5 text-right text-emerald-300 font-semibold">฿${f.total.toLocaleString()}</td>
+                </tr>
+              `;
+            }).join("")
+          : `<tr><td colspan="10" class="p-6 text-center text-slate-400">ไม่พบข้อมูลที่มา</td></tr>`;
       }
 
       const modal = document.getElementById("sourceModal");
@@ -1035,23 +1313,29 @@
     }
 
     function openPriceModal(price) {
-      const rows = allRecords.filter((r) => !isCancelled(r) && (Number(r.amount) || 0) === Number(price));
-      const sumAmt = rows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+      const rows = allRecords.filter((r) => !isCancelled(r) && getFeeParts(r).total === Number(price));
+      const sumAmt = rows.reduce((s, r) => s + getFeeParts(r).total, 0);
       document.getElementById("priceModalTitle").textContent = `รายชื่อผู้ชำระอัตรา ฿${Number(price).toLocaleString()}`;
-      document.getElementById("priceModalMeta").textContent = `ทั้งหมด ${rows.length.toLocaleString()} ราย | ยอดรวม ฿${sumAmt.toLocaleString()}`;
+      document.getElementById("priceModalMeta").textContent = `ทั้งหมด ${rows.length.toLocaleString()} ราย | รวมทั้งสิ้น ฿${sumAmt.toLocaleString()}`;
       document.getElementById("priceModalBody").innerHTML = rows.length
-        ? rows.map((r, i) => `
-            <tr class="hover:bg-slate-900/60">
-              <td class="p-2.5">${i + 1}</td>
-              <td class="p-2.5">${r.binId || "-"}</td>
-              <td class="p-2.5 text-white">${r.fullName || "-"}</td>
-              <td class="p-2.5">${r.customerType || "ครัวเรือน"}</td>
-              <td class="p-2.5">${r.houseNo || "-"}</td>
-              <td class="p-2.5">${getVillageDisplay(r.village, r.villageNum)}</td>
-              <td class="p-2.5 text-right text-emerald-300">฿${(Number(r.amount) || 0).toLocaleString()}</td>
-            </tr>
-          `).join("")
-        : `<tr><td colspan="7" class="p-6 text-center text-slate-400">ไม่พบข้อมูล</td></tr>`;
+        ? rows.map((r, i) => {
+            const f = getFeeParts(r);
+            return `
+              <tr class="hover:bg-slate-900/60">
+                <td class="p-2.5">${i + 1}</td>
+                <td class="p-2.5">${r.binId || "-"}</td>
+                <td class="p-2.5 text-white">${r.fullName || "-"}</td>
+                <td class="p-2.5">${parseCustomerType(r.customerType).display}</td>
+                <td class="p-2.5">${r.houseNo || "-"}</td>
+                <td class="p-2.5">${getVillageDisplay(r.village, r.villageNum)}</td>
+                <td class="p-2.5 text-right">฿${f.collectionFee.toLocaleString()}</td>
+                <td class="p-2.5 text-right">฿${f.disposalFee.toLocaleString()}</td>
+                <td class="p-2.5 text-right text-lime-300">฿${f.sortDiscount.toLocaleString()}</td>
+                <td class="p-2.5 text-right text-emerald-300 font-semibold">฿${f.total.toLocaleString()}</td>
+              </tr>
+            `;
+          }).join("")
+        : `<tr><td colspan="10" class="p-6 text-center text-slate-400">ไม่พบข้อมูล</td></tr>`;
       const modal = document.getElementById("priceModal");
       modal.classList.remove("hidden");
       modal.classList.add("flex");
@@ -1077,12 +1361,8 @@
       const v = document.getElementById("filterVillage").value;
 
       return allRecords.filter((r) => {
-        if (t) {
-          if (t === "อื่นๆ") {
-            if (PRESET_TYPES.slice(0, 7).includes(r.customerType)) return false;
-          } else if (r.customerType !== t) {
-            return false;
-          }
+        if (t && parseCustomerType(r.customerType).baseType !== t) {
+          return false;
         }
         if (v) {
           const vNum = String(r.villageNum || String(r.village || "").match(/\d+/)?.[0] || "");
@@ -1112,22 +1392,29 @@
       tbody.innerHTML = pageRows.length
         ? pageRows.map((r, idx) => {
             const cancelled = isCancelled(r);
+            const f = getFeeParts(r);
+            const parsedType = parseCustomerType(r.customerType);
             return `
               <tr class="hover:bg-slate-900/60 ${cancelled ? "opacity-60" : ""}">
                 <td class="p-3">${start + idx + 1}</td>
                 <td class="p-3">${r.regDate || "-"}</td>
                 <td class="p-3">${r.binId || "-"}</td>
                 <td class="p-3 font-medium text-white">${r.fullName || "-"}</td>
-                <td class="p-3">${r.phone || "-"}</td>
                 <td class="p-3">${r.houseNo || "-"}</td>
                 <td class="p-3">${getVillageDisplay(r.village, r.villageNum)}</td>
-                <td class="p-3">${r.customerType || "ครัวเรือน"}</td>
+                <td class="p-3">
+                  <span class="text-slate-200">${parsedType.baseType}</span>
+                  ${parsedType.customName ? `<span class="block text-xs text-cyan-300 font-medium">${parsedType.customName}</span>` : ""}
+                </td>
+                <td class="p-3 text-right">฿${f.collectionFee.toLocaleString()}</td>
+                <td class="p-3 text-right">฿${f.disposalFee.toLocaleString()}</td>
+                <td class="p-3 text-right text-lime-300">฿${f.sortDiscount.toLocaleString()}</td>
+                <td class="p-3 text-right font-semibold text-emerald-300">฿${f.total.toLocaleString()}</td>
                 <td class="p-3">
                   <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${cancelled ? "bg-rose-500/20 text-rose-300" : "bg-emerald-500/20 text-emerald-300"}">
                     ${r.status || "ปกติ"}
                   </span>
                 </td>
-                <td class="p-3 text-right font-semibold text-emerald-300">฿${(Number(r.amount) || 0).toLocaleString()}</td>
                 <td class="p-3 text-center whitespace-nowrap">
                   <button type="button" onclick="openEditModal(${r.id})" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs mr-1">แก้ไข</button>
                   <button type="button" onclick="openCancelModal(${r.id})" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs">ยกเลิก</button>
@@ -1135,7 +1422,7 @@
               </tr>
             `;
           }).join("")
-        : `<tr><td colspan="11" class="p-6 text-center text-slate-400">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</td></tr>`;
+        : `<tr><td colspan="13" class="p-6 text-center text-slate-400">ไม่พบข้อมูลที่ตรงกับเงื่อนไข</td></tr>`;
 
       const pagEl = document.getElementById("tablePagination");
       pagEl.innerHTML = `
@@ -1156,8 +1443,14 @@
       btn.disabled = true;
 
       const selType = document.getElementById("customerTypeSelect").value;
-      const otherType = document.getElementById("customerTypeOther").value.trim();
-      const finalType = selType === "อื่นๆ" && otherType ? otherType : selType;
+      const detailType = document.getElementById("customerTypeDetail").value.trim();
+      const finalType = formatCustomerTypeForSave(selType, detailType);
+
+      const cFee = Number(document.getElementById("collectionFee").value) || 0;
+      const dFee = Number(document.getElementById("disposalFee").value) || 0;
+      const sDisc = Number(document.getElementById("sortDiscount").value) || 0;
+      const totalAmt = Number(document.getElementById("amount").value) || Math.max(0, cFee + dFee - sDisc);
+      const encodedNote = encodeFeeNote("", cFee, dFee, sDisc);
 
       const payload = {
         action: "add",
@@ -1168,7 +1461,9 @@
         houseNo: document.getElementById("houseNo").value.trim(),
         village: document.getElementById("village").value,
         customerType: finalType,
-        amount: Number(document.getElementById("amount").value) || 0,
+        amount: totalAmt,
+        note: encodedNote,
+        detail: encodedNote,
         status: "ปกติ",
         adminRole: document.getElementById("currentRoleDisplay").textContent
       };
@@ -1176,7 +1471,7 @@
       try {
         await postToGas(payload);
         this.reset();
-        document.getElementById("customerTypeOther").classList.add("hidden");
+        document.getElementById("customerTypeDetail").classList.add("hidden");
         await loadData(true);
       } finally {
         btn.disabled = false;
@@ -1186,6 +1481,9 @@
     function openEditModal(id) {
       const rec = allRecords.find((r) => Number(r.id) === Number(id));
       if (!rec) return;
+      const f = getFeeParts(rec);
+      const parsedType = parseCustomerType(rec.customerType);
+
       document.getElementById("editId").value = rec.id;
       document.getElementById("editRowNumber").value = rec.rowNumber || "";
       document.getElementById("editSheetName").value = rec.sheetName || "";
@@ -1195,20 +1493,17 @@
       document.getElementById("editPhone").value = rec.phone || "-";
       document.getElementById("editFullName").value = rec.fullName || "";
       document.getElementById("editVillage").value = getVillageDisplay(rec.village, rec.villageNum);
-      document.getElementById("editAmount").value = rec.amount || 0;
+      document.getElementById("editCollectionFee").value = f.collectionFee;
+      document.getElementById("editDisposalFee").value = f.disposalFee;
+      document.getElementById("editSortDiscount").value = f.sortDiscount;
+      document.getElementById("editAmount").value = f.total;
       document.getElementById("editReason").value = "";
 
       const typeSel = document.getElementById("editCustomerTypeSelect");
-      const typeOther = document.getElementById("editCustomerTypeOther");
-      if (PRESET_TYPES.slice(0, 7).includes(rec.customerType)) {
-        typeSel.value = rec.customerType;
-        typeOther.classList.add("hidden");
-        typeOther.value = "";
-      } else {
-        typeSel.value = "อื่นๆ";
-        typeOther.classList.remove("hidden");
-        typeOther.value = rec.customerType || "";
-      }
+      const typeDetail = document.getElementById("editCustomerTypeDetail");
+      typeSel.value = parsedType.baseType;
+      toggleCustomTypeInput("edit");
+      typeDetail.value = parsedType.customName || "";
 
       const modal = document.getElementById("editModal");
       modal.classList.remove("hidden");
@@ -1227,8 +1522,15 @@
       btn.disabled = true;
 
       const selType = document.getElementById("editCustomerTypeSelect").value;
-      const otherType = document.getElementById("editCustomerTypeOther").value.trim();
-      const finalType = selType === "อื่นๆ" && otherType ? otherType : selType;
+      const detailType = document.getElementById("editCustomerTypeDetail").value.trim();
+      const finalType = formatCustomerTypeForSave(selType, detailType);
+
+      const cFee = Number(document.getElementById("editCollectionFee").value) || 0;
+      const dFee = Number(document.getElementById("editDisposalFee").value) || 0;
+      const sDisc = Number(document.getElementById("editSortDiscount").value) || 0;
+      const totalAmt = Number(document.getElementById("editAmount").value) || Math.max(0, cFee + dFee - sDisc);
+      const reasonText = document.getElementById("editReason").value.trim();
+      const encodedDetail = encodeFeeNote(reasonText, cFee, dFee, sDisc);
 
       const payload = {
         action: "edit",
@@ -1241,8 +1543,9 @@
         fullName: document.getElementById("editFullName").value.trim(),
         village: document.getElementById("editVillage").value,
         customerType: finalType,
-        amount: Number(document.getElementById("editAmount").value) || 0,
-        reason: document.getElementById("editReason").value.trim(),
+        amount: totalAmt,
+        note: encodedDetail,
+        reason: encodedDetail,
         adminRole: document.getElementById("currentRoleDisplay").textContent
       };
 
@@ -1313,14 +1616,16 @@
       const villageNums = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
       grid.innerHTML = villageNums.map((vNum) => {
         const rows = active.filter((r) => String(r.villageNum) === vNum || String(r.village || "").match(/\d+/)?.[0] === vNum);
-        const hh = rows.filter((r) => (r.customerType || "ครัวเรือน") === "ครัวเรือน").length;
+        const hh = rows.filter((r) => parseCustomerType(r.customerType).baseType === "ครัวเรือน").length;
         const est = rows.length - hh;
-        const amt = rows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+        const vBins = rows.filter((r) => classifyBin(r.binId).hasOwnBin).length;
+        const amt = rows.reduce((s, r) => s + getFeeParts(r).total, 0);
         return `
           <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-2">
             <h4 class="font-bold text-white">${VILLAGE_FULL_NAMES[vNum]}</h4>
             <p class="text-xs text-slate-400">ครัวเรือน: <span class="text-emerald-400 font-semibold">${hh} ราย</span> • สถานประกอบการ: <span class="text-cyan-400 font-semibold">${est} แห่ง</span></p>
-            <p class="text-base font-bold text-emerald-300 pt-1">ยอดจัดเก็บ: ฿${amt.toLocaleString()}</p>
+            <p class="text-xs text-slate-400">ถังขยะรวม: <span class="text-teal-300 font-semibold">${vBins} ใบ</span></p>
+            <p class="text-base font-bold text-emerald-300 pt-1">รวมทั้งสิ้น: ฿${amt.toLocaleString()}</p>
           </div>
         `;
       }).join("");
