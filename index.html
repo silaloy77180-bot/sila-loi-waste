@@ -19,7 +19,7 @@
     }
     .anime-hero-bg {
       background: linear-gradient(rgba(3, 7, 18, 0.8), rgba(6, 78, 59, 0.9)),
-                  url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1600&q=80');
+                  url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&w=1600&q=80');
       background-size: cover;
       background-position: center;
       border: 1px solid rgba(16, 185, 129, 0.3);
@@ -231,7 +231,7 @@
             </button>
           </div>
 
-          <!-- แถวที่ 3: แยกสรุป ไม่มีเลขถังขยะ / ถังร่วม (นับ 1 รายการต่อกลุ่มถังร่วม + แสดงชื่อผู้ร่วม) / แยกปี / ถังเก่า -->
+          <!-- แถวที่ 3: แยกสรุป ไม่มีเลขถังขยะ / ถังร่วม (นับ 1 รายการต่อกลุ่ม) / แยกปี / ถังเก่า -->
           <div class="tech-card p-6 rounded-2xl space-y-5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
@@ -953,25 +953,42 @@
       return { category: "OTHER_BIN", label: "ถังระบุรหัสอื่น", hasOwnBin: true, isNoBin: false, isShared: false };
     }
 
-    // จัดกลุ่มถังร่วม: นับ 1 รายการต่อกลุ่มถังร่วม และรวมรายชื่อว่าใครใช้ร่วมกับใคร
+    // จัดกลุ่มถังร่วม: รองรับทั้งรหัสกลุ่มตรงกัน และบ้านเลขที่ที่อ้างอิงถึงกันในหมู่เดียวกัน
     function getSharedBinGroups(activeRecords) {
       const sharedRows = activeRecords.filter((r) => classifyBin(r.binId).isShared);
       const groupsMap = new Map();
 
-      sharedRows.forEach((r) => {
-        const vLabel = getVillageDisplay(r.village, r.villageNum);
-        const binLabel = String(r.binId || "ใช้ถังร่วม").trim();
-        const key = `${vLabel}::${binLabel}`;
-        if (!groupsMap.has(key)) {
-          groupsMap.set(key, {
-            key,
+      function normalizeGroupKey(row) {
+        const vLabel = getVillageDisplay(row.village, row.villageNum);
+        const binRaw = String(row.binId || "").trim();
+        const houseMatch = binRaw.match(/(?:ร่วม\s*(?:กับ)?\s*(?:บ\.?|บ้าน(?:เลขที่)?)?\s*)([0-9]+(?:\/[0-9]+)?)/i);
+        if (houseMatch) {
+          return {
+            key: `${vLabel}::HOUSE:${houseMatch[1].trim()}`,
             village: vLabel,
-            binId: binLabel,
+            binId: `ถังร่วม (อ้างอิงบ้าน ${houseMatch[1].trim()})`
+          };
+        }
+        const cleanedLabel = binRaw.replace(/\s+/g, " ").trim() || "ใช้ถังร่วม";
+        return {
+          key: `${vLabel}::BIN:${cleanedLabel.toLowerCase()}`,
+          village: vLabel,
+          binId: cleanedLabel
+        };
+      }
+
+      sharedRows.forEach((r) => {
+        const info = normalizeGroupKey(r);
+        if (!groupsMap.has(info.key)) {
+          groupsMap.set(info.key, {
+            key: info.key,
+            village: info.village,
+            binId: info.binId,
             members: [],
             totalAmount: 0
           });
         }
-        const grp = groupsMap.get(key);
+        const grp = groupsMap.get(info.key);
         const namePart = String(r.fullName || "-").trim();
         const housePart = String(r.houseNo || "").trim();
         grp.members.push({
@@ -1064,7 +1081,6 @@
     }
 
     function renderDashboard() {
-      // ผลรวมทั้งหมด: นับทุกรายการยกเว้นรายการที่ยกเลิก
       const active = allRecords.filter((r) => !isCancelled(r));
       const households = active.filter((r) => parseCustomerType(r.customerType).baseType === "ครัวเรือน");
       const establishments = active.filter((r) => parseCustomerType(r.customerType).baseType !== "ครัวเรือน");
@@ -1160,7 +1176,6 @@
       `);
       document.getElementById("binBreakdownCards").innerHTML = binCards.join("");
 
-      // แสดงกลุ่มถังร่วม: นับ 1 รายการต่อถังร่วม พร้อมรายชื่อว่าใครใช้ร่วมกับใคร
       const sharedListEl = document.getElementById("sharedBinGroupsList");
       sharedListEl.innerHTML = sharedGroupsAll.length
         ? sharedGroupsAll.map((grp, idx) => {
