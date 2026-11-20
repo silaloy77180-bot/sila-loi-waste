@@ -19,7 +19,7 @@
     }
     .anime-hero-bg {
       background: linear-gradient(rgba(3, 7, 18, 0.8), rgba(6, 78, 59, 0.9)),
-                  url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&w=1600&q=80');
+                  url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1600&q=80');
       background-size: cover;
       background-position: center;
       border: 1px solid rgba(16, 185, 129, 0.3);
@@ -231,14 +231,14 @@
             </button>
           </div>
 
-          <!-- แถวที่ 3: แยกสรุป ไม่มีเลขถังขยะ / ถังร่วม (นับ 1 รายการต่อกลุ่ม) / แยกปี / ถังเก่า -->
+          <!-- แถวที่ 3: แยกสรุป ไม่มีเลขถังขยะ / ถังร่วม (นับ 1 รายการต่อกลุ่ม) / แยกปี / ถังเก่า / นับเป็นใบ -->
           <div class="tech-card p-6 rounded-2xl space-y-5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 class="font-bold text-white text-base">
-                  <i class="fa-solid fa-trash-can text-emerald-400 mr-2"></i> สรุปแยก: ไม่มีเลขถังขยะ / ถังร่วม (นับ 1 รายการต่อกลุ่ม) / แยกปี / ถังเก่า
+                  <i class="fa-solid fa-trash-can text-emerald-400 mr-2"></i> สรุปแยก: ไม่มีเลขถังขยะ / ถังร่วม (นับ 1 รายการต่อกลุ่ม) / แยกปี / ถังเก่า / จำนวนใบ
                 </h3>
-                <p class="text-xs text-slate-400">ยกเว้นรายการที่ยกเลิก — ถังที่ใช้ร่วมกันจะนับเป็น 1 รายการต่อถังร่วม และแสดงรายชื่อว่าใครใช้ร่วมกับใคร</p>
+                <p class="text-xs text-slate-400">ยกเว้นรายการที่ยกเลิก — ถังร่วมนับ 1 รายการต่อกลุ่มและแสดงชื่อผู้ร่วม ส่วนเลขถังหลายใบ (เช่น 242,246,247,319/2569) นับแยกตามจำนวนใบด้วย</p>
               </div>
               <div class="flex flex-wrap gap-2">
                 <button type="button" onclick="openSourceModal('NO_BIN')" class="text-xs px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-semibold w-fit cursor-pointer">
@@ -291,7 +291,7 @@
                 <h3 class="font-bold text-white text-base">
                   <i class="fa-solid fa-table text-emerald-400 mr-2"></i> สรุปยอดราคา และแยกจำนวนครัวเรือนกับสถานประกอบการ (รายหมู่)
                 </h3>
-                <p class="text-xs text-slate-400">คำนวณเฉพาะผู้ลงทะเบียนสถานะปกติ (ยกเว้นรายการที่ยกเลิก) — ถังร่วมนับเป็น 1 รายการต่อกลุ่ม</p>
+                <p class="text-xs text-slate-400">คำนวณเฉพาะผู้ลงทะเบียนสถานะปกติ (ยกเว้นรายการที่ยกเลิก) — ถังร่วมนับ 1 รายการต่อกลุ่ม และนับจำนวนใบแยกให้ด้วย</p>
               </div>
             </div>
             <div class="overflow-x-auto rounded-xl border border-slate-800">
@@ -303,6 +303,7 @@
                     <th class="p-3.5 font-semibold text-center">สถานประกอบการ (แห่ง)</th>
                     <th class="p-3.5 font-semibold text-center">ไม่มีเลขถัง</th>
                     <th class="p-3.5 font-semibold text-center">ถังร่วม (กลุ่ม)</th>
+                    <th class="p-3.5 font-semibold text-center">จำนวนถัง (ใบ)</th>
                     <th class="p-3.5 font-semibold text-center">รวมทั้งหมด (รายการ)</th>
                     <th class="p-3.5 font-semibold text-right">รวมทั้งสิ้น (บาท)</th>
                   </tr>
@@ -394,7 +395,7 @@
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">เลขถังขยะ</label>
-                <input type="text" id="binId" placeholder="เช่น 001/2569, ใช้ร่วม 1 หรือเว้นว่าง" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+                <input type="text" id="binId" placeholder="เช่น 242,246,247,319/2569 หรือใช้ร่วม 1" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">ชื่อ - นามสกุล *</label>
@@ -533,7 +534,7 @@
             <h3 class="font-bold text-white text-lg flex items-center gap-2">
               <i class="fa-solid fa-map-location-dot text-emerald-400"></i> สรุปข้อมูลรายหมู่บ้าน (ทั้ง 9 หมู่)
             </h3>
-            <p class="text-sm text-slate-400">รายละเอียดจำนวนครัวเรือน สถานประกอบการ ไม่มีเลขถัง ถังร่วม และผลรวมทั้งหมดแต่ละหมู่บ้าน (ยกเว้นรายการยกเลิก)</p>
+            <p class="text-sm text-slate-400">รายละเอียดจำนวนครัวเรือน สถานประกอบการ ไม่มีเลขถัง ถังร่วม จำนวนใบ และผลรวมทั้งหมดแต่ละหมู่บ้าน (ยกเว้นรายการยกเลิก)</p>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2" id="villageCardsGrid"></div>
           </div>
         </div>
@@ -935,6 +936,33 @@
       return { collectionFee: total, disposalFee: 0, sortDiscount: 0, total: total };
     }
 
+    // แตกเลขถังขยะหลายใบ เช่น "242,246,247,319/2569" -> ["242/2569", "246/2569", "247/2569", "319/2569"]
+    function expandBinTokens(binIdRaw) {
+      const raw = String(binIdRaw || "").trim();
+      if (!raw || raw === "-" || raw === "ไม่มี" || raw === "ไม่มีเลขถัง" || raw === "ไม่มีเลขถังขยะ") {
+        return [];
+      }
+      if (raw.includes("ร่วม")) {
+        return [raw];
+      }
+      const suffixMatch = raw.match(/\/(25\d{2})$/);
+      const suffix = suffixMatch ? `/${suffixMatch[1]}` : "";
+      const corePart = suffixMatch ? raw.slice(0, -suffix.length) : raw;
+      const parts = corePart.split(/[,،]+/).map((p) => p.trim()).filter(Boolean);
+      if (parts.length > 1) {
+        return parts.map((p) => (p.includes("/") || !suffix ? p : `${p}${suffix}`));
+      }
+      return [raw];
+    }
+
+    function countBinsInRecord(rec) {
+      const raw = String(rec.binId || "").trim();
+      if (!raw || raw === "-" || raw === "ไม่มี" || raw === "ไม่มีเลขถัง" || raw === "ไม่มีเลขถังขยะ") {
+        return 0;
+      }
+      return expandBinTokens(raw).length;
+    }
+
     function classifyBin(binIdRaw) {
       const raw = String(binIdRaw || "").trim();
       if (raw === "" || raw === "-" || raw === "ไม่มี" || raw === "ไม่มีเลขถัง" || raw === "ไม่มีเลขถังขยะ") {
@@ -953,7 +981,7 @@
       return { category: "OTHER_BIN", label: "ถังระบุรหัสอื่น", hasOwnBin: true, isNoBin: false, isShared: false };
     }
 
-    // จัดกลุ่มถังร่วม: รองรับทั้งรหัสกลุ่มตรงกัน และบ้านเลขที่ที่อ้างอิงถึงกันในหมู่เดียวกัน
+    // จัดกลุ่มถังร่วม: นับ 1 รายการต่อกลุ่มถังร่วม และรวมรายชื่อว่าใครใช้ร่วมกับใคร
     function getSharedBinGroups(activeRecords) {
       const sharedRows = activeRecords.filter((r) => classifyBin(r.binId).isShared);
       const groupsMap = new Map();
@@ -1089,6 +1117,7 @@
       let totalDisposal = 0;
       let totalDiscount = 0;
       let totalAmount = 0;
+      let totalBinsCount = 0;
 
       active.forEach((r) => {
         const f = getFeeParts(r);
@@ -1096,6 +1125,7 @@
         totalDisposal += f.disposalFee;
         totalDiscount += f.sortDiscount;
         totalAmount += f.total;
+        totalBinsCount += countBinsInRecord(r);
       });
 
       const noBinActive = active.filter((r) => classifyBin(r.binId).isNoBin);
@@ -1123,18 +1153,27 @@
 
       active.forEach((r) => {
         const info = classifyBin(r.binId);
+        const tokens = expandBinTokens(r.binId);
+        const unitCount = Math.max(1, tokens.length);
         if (info.category === "OLD") {
-          oldBinCount++;
+          oldBinCount += unitCount;
         } else if (info.category.startsWith("YEAR:")) {
           const y = info.category.slice(5);
-          yearCounts[y] = (yearCounts[y] || 0) + 1;
+          yearCounts[y] = (yearCounts[y] || 0) + unitCount;
         } else if (info.category === "OTHER_BIN") {
-          otherBinCount++;
+          otherBinCount += unitCount;
         }
       });
 
       const sortedYears = Object.keys(yearCounts).sort();
       const binCards = [];
+      binCards.push(`
+        <button type="button" onclick="openSourceModal('ALL_ACTIVE')" class="bg-slate-900/90 hover:bg-slate-800 border border-emerald-500/40 hover:border-emerald-400 p-3.5 rounded-xl text-left transition cursor-pointer">
+          <p class="text-xs text-emerald-300 font-semibold">รวมจำนวนถังขยะ (นับเป็นใบ)</p>
+          <p class="text-lg font-bold text-emerald-300 mt-0.5">${totalBinsCount.toLocaleString()} ใบ</p>
+          <p class="text-[11px] text-slate-400">แยกตามเลขถังย่อย (เช่น 4 ใบ/ชื่อ) • คลิกดู</p>
+        </button>
+      `);
       binCards.push(`
         <button type="button" onclick="openSourceModal('NO_BIN')" class="bg-slate-900/90 hover:bg-slate-800 border border-amber-500/40 hover:border-amber-400 p-3.5 rounded-xl text-left transition cursor-pointer">
           <p class="text-xs text-amber-300 font-semibold">ไม่มีเลขถังขยะ</p>
@@ -1207,7 +1246,7 @@
       }).join("");
 
       const summaryBody = document.getElementById("dashboardVillageSummaryBody");
-      let grandHH = 0, grandEst = 0, grandNoBin = 0, grandShared = 0, grandAll = 0, grandAmt = 0;
+      let grandHH = 0, grandEst = 0, grandNoBin = 0, grandShared = 0, grandBins = 0, grandAll = 0, grandAmt = 0;
       const villageNums = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
       summaryBody.innerHTML = villageNums.map((vNum) => {
         const rows = active.filter((r) => String(r.villageNum) === vNum || String(r.village || "").match(/\d+/)?.[0] === vNum);
@@ -1215,8 +1254,9 @@
         const est = rows.length - hh;
         const vNoBin = rows.filter((r) => classifyBin(r.binId).isNoBin).length;
         const vSharedGroups = getSharedBinGroups(rows).length;
+        const vBins = rows.reduce((s, r) => s + countBinsInRecord(r), 0);
         const amt = rows.reduce((s, r) => s + getFeeParts(r).total, 0);
-        grandHH += hh; grandEst += est; grandNoBin += vNoBin; grandShared += vSharedGroups; grandAll += rows.length; grandAmt += amt;
+        grandHH += hh; grandEst += est; grandNoBin += vNoBin; grandShared += vSharedGroups; grandBins += vBins; grandAll += rows.length; grandAmt += amt;
         return `
           <tr class="hover:bg-slate-900/60">
             <td class="p-3 font-medium text-white">${VILLAGE_FULL_NAMES[vNum]}</td>
@@ -1224,6 +1264,7 @@
             <td class="p-3 text-center text-cyan-400">${est.toLocaleString()}</td>
             <td class="p-3 text-center text-amber-300">${vNoBin.toLocaleString()}</td>
             <td class="p-3 text-center text-cyan-300">${vSharedGroups.toLocaleString()}</td>
+            <td class="p-3 text-center text-teal-300">${vBins.toLocaleString()}</td>
             <td class="p-3 text-center font-semibold text-white">${rows.length.toLocaleString()}</td>
             <td class="p-3 text-right font-semibold text-emerald-300">฿${amt.toLocaleString()}</td>
           </tr>
@@ -1235,6 +1276,7 @@
           <td class="p-3 text-center">${grandEst.toLocaleString()}</td>
           <td class="p-3 text-center text-amber-300">${grandNoBin.toLocaleString()}</td>
           <td class="p-3 text-center text-cyan-300">${grandShared.toLocaleString()}</td>
+          <td class="p-3 text-center text-teal-300">${grandBins.toLocaleString()}</td>
           <td class="p-3 text-center">${grandAll.toLocaleString()}</td>
           <td class="p-3 text-right">฿${grandAmt.toLocaleString()}</td>
         </tr>
@@ -1387,12 +1429,14 @@
         }
 
         const sumAmt = rows.reduce((s, r) => s + getFeeParts(r).total, 0);
+        const sumBins = rows.reduce((s, r) => s + countBinsInRecord(r), 0);
         titleEl.textContent = label;
-        metaEl.textContent = `ทั้งหมด ${rows.length.toLocaleString()} รายการ | รวมทั้งสิ้น ฿${sumAmt.toLocaleString()}`;
+        metaEl.textContent = `ทั้งหมด ${rows.length.toLocaleString()} รายการ (${sumBins.toLocaleString()} ใบ) | รวมทั้งสิ้น ฿${sumAmt.toLocaleString()}`;
         headEl.innerHTML = `
           <tr>
             <th class="p-2.5">ลำดับ</th>
             <th class="p-2.5">เลขถังขยะ</th>
+            <th class="p-2.5 text-center">จำนวนใบ</th>
             <th class="p-2.5">ชื่อ - นามสกุล</th>
             <th class="p-2.5">ประเภท / ชื่อหน่วยงาน</th>
             <th class="p-2.5">บ้านเลขที่</th>
@@ -1406,10 +1450,16 @@
         bodyEl.innerHTML = rows.length
           ? rows.map((r, i) => {
               const f = getFeeParts(r);
+              const tokens = expandBinTokens(r.binId);
+              const bCount = countBinsInRecord(r);
               return `
                 <tr class="hover:bg-slate-900/60">
                   <td class="p-2.5">${i + 1}</td>
-                  <td class="p-2.5">${r.binId || "-"}</td>
+                  <td class="p-2.5">
+                    <span>${r.binId || "-"}</span>
+                    ${tokens.length > 1 ? `<span class="block text-[11px] text-teal-300">${tokens.join(", ")}</span>` : ""}
+                  </td>
+                  <td class="p-2.5 text-center text-teal-300 font-semibold">${bCount} ใบ</td>
                   <td class="p-2.5 text-white">${r.fullName || "-"}</td>
                   <td class="p-2.5">${parseCustomerType(r.customerType).display}</td>
                   <td class="p-2.5">${r.houseNo || "-"}</td>
@@ -1421,7 +1471,7 @@
                 </tr>
               `;
             }).join("")
-          : `<tr><td colspan="10" class="p-6 text-center text-slate-400">ไม่พบข้อมูลที่มา</td></tr>`;
+          : `<tr><td colspan="11" class="p-6 text-center text-slate-400">ไม่พบข้อมูลที่มา</td></tr>`;
       }
 
       const modal = document.getElementById("sourceModal");
@@ -1528,12 +1578,14 @@
             const f = getFeeParts(r);
             const parsedType = parseCustomerType(r.customerType);
             const partners = sharedPartnerMap.get(r);
+            const tokens = expandBinTokens(r.binId);
             return `
               <tr class="hover:bg-slate-900/60 ${cancelled ? "opacity-60" : ""}">
                 <td class="p-3">${start + idx + 1}</td>
                 <td class="p-3">${r.regDate || "-"}</td>
                 <td class="p-3">
                   <span>${r.binId || "-"}</span>
+                  ${tokens.length > 1 ? `<span class="block text-[11px] text-teal-300 mt-0.5">นับ ${tokens.length} ใบ (${tokens.join(", ")})</span>` : ""}
                   ${partners ? `<span class="block text-[11px] text-cyan-300 mt-0.5">ใช้ร่วมกับ: ${partners.length ? partners.join(", ") : "ผู้ร่วมในกลุ่ม"}</span>` : ""}
                 </td>
                 <td class="p-3 font-medium text-white">${r.fullName || "-"}</td>
@@ -1757,12 +1809,13 @@
         const est = rows.length - hh;
         const vNoBin = rows.filter((r) => classifyBin(r.binId).isNoBin).length;
         const vSharedGroups = getSharedBinGroups(rows).length;
+        const vBins = rows.reduce((s, r) => s + countBinsInRecord(r), 0);
         const amt = rows.reduce((s, r) => s + getFeeParts(r).total, 0);
         return `
           <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-2">
             <h4 class="font-bold text-white">${VILLAGE_FULL_NAMES[vNum]}</h4>
             <p class="text-xs text-slate-400">ครัวเรือน: <span class="text-emerald-400 font-semibold">${hh} ราย</span> • สถานประกอบการ: <span class="text-cyan-400 font-semibold">${est} แห่ง</span></p>
-            <p class="text-xs text-slate-400">ไม่มีเลขถัง: <span class="text-amber-300 font-semibold">${vNoBin} รายการ</span> • ถังร่วม: <span class="text-cyan-300 font-semibold">${vSharedGroups} กลุ่ม</span></p>
+            <p class="text-xs text-slate-400">ไม่มีเลขถัง: <span class="text-amber-300 font-semibold">${vNoBin} รายการ</span> • ถังร่วม: <span class="text-cyan-300 font-semibold">${vSharedGroups} กลุ่ม</span> • จำนวนถัง: <span class="text-teal-300 font-semibold">${vBins} ใบ</span></p>
             <p class="text-base font-bold text-emerald-300 pt-1">ผลรวมทั้งหมด: ฿${amt.toLocaleString()}</p>
           </div>
         `;
