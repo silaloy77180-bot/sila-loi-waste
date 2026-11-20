@@ -192,10 +192,10 @@
             </div>
           </div>
 
-          <!-- แถบสรุปหลัก 4 ช่อง: 1. รวมทุกประเภท (ไม่นับยกเลิก) 2. ยอดเงินรวมทุกประเภท (ไม่นับยกเลิก) 3. แยกผลรวมการแก้ไข 4. แยกผลรวมการยกเลิก (คลิกดูข้อมูลที่มาได้ทุกช่อง) -->
+          <!-- แถบสรุป 4 การ์ด: 1. ผลรวมทุกประเภทไม่นับยกเลิก 2. ยอดเงินรวมทุกประเภทไม่นับยกเลิก 3. แยกผลรวมแก้ไข 4. แยกผลรวมยกเลิก (คลิกดูข้อมูลที่มาได้) -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <button type="button" onclick="openSourceModal('ALL_ACTIVE')" class="tech-card p-5 rounded-2xl text-left transition hover:scale-[1.01] cursor-pointer border-emerald-500/40">
-              <p class="text-xs font-semibold text-emerald-400">1. ผลรวมทั้งหมดทุกประเภท (ไม่นับยกเลิก)</p>
+              <p class="text-xs font-semibold text-emerald-400">ผลรวมทั้งหมดทุกประเภท (ไม่นับยกเลิก)</p>
               <h3 id="grandAllTypesCount" class="text-2xl font-bold text-white mt-1">0 ราย</h3>
               <p class="text-xs text-emerald-300 mt-1">คลิกเพื่อดูข้อมูลที่มาทั้งหมด →</p>
             </button>
@@ -207,13 +207,13 @@
             </button>
 
             <button type="button" onclick="openSourceModal('EDIT_ONLY')" class="tech-card p-5 rounded-2xl text-left transition hover:scale-[1.01] cursor-pointer border-amber-500/40">
-              <p class="text-xs font-semibold text-amber-400">3. ผลรวมการแก้ไข (แยกเฉพาะการแก้ไข)</p>
+              <p class="text-xs font-semibold text-amber-400">ผลรวมการแก้ไข (แยกเฉพาะการแก้ไข)</p>
               <h3 id="sumEditOnly" class="text-2xl font-bold text-amber-300 mt-1">0 ครั้ง</h3>
               <p class="text-xs text-amber-300/90 mt-1">ไม่รวมยอดยกเลิก • คลิกดูข้อมูลที่มา →</p>
             </button>
 
             <button type="button" onclick="openSourceModal('CANCEL_ONLY')" class="tech-card p-5 rounded-2xl text-left transition hover:scale-[1.01] cursor-pointer border-rose-500/40">
-              <p class="text-xs font-semibold text-rose-400">3. ผลรวมการยกเลิก (แยกเฉพาะการยกเลิก)</p>
+              <p class="text-xs font-semibold text-rose-400">ผลรวมการยกเลิก (แยกเฉพาะการยกเลิก)</p>
               <h3 id="sumCancelOnly" class="text-2xl font-bold text-rose-300 mt-1">0 รายการ</h3>
               <p class="text-xs text-rose-300/90 mt-1">ไม่รวมยอดแก้ไข • คลิกดูข้อมูลที่มา →</p>
             </button>
@@ -242,7 +242,7 @@
                 <h3 class="font-bold text-white text-base">
                   <i class="fa-solid fa-table text-emerald-400 mr-2"></i> สรุปยอดราคา และแยกจำนวนครัวเรือนกับสถานประกอบการ (รายหมู่)
                 </h3>
-                <p class="text-xs text-slate-400">คำนวณเฉพาะผู้ลงทะเบียนสถานะปกติ (ไม่รวมรายการที่ขอยกเลิก)</p>
+                <p class="text-xs text-slate-400">คำนวณเฉพาะผู้ลงทะเบียนสถานะปกติ (ไม่รวมรายการที่ขอยกเลิก) — คลิกแถวรวมเพื่อดูข้อมูลที่มา</p>
               </div>
             </div>
             <div class="overflow-x-auto rounded-xl border border-slate-800">
@@ -339,11 +339,11 @@
             <form id="addForm" action="javascript:void(0)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">วันลงทะเบียน *</label>
-                <input type="text" id="regDate" required placeholder="เช่น 20/11/2569" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+                <input type="text" id="regDate" required placeholder="เช่น 20.11.2569" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">เลขถังขยะ *</label>
-                <input type="text" id="binId" required placeholder="เช่น 001/2569 หรือ -" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+                <input type="text" id="binId" required placeholder="เช่น 001/2568 หรือ -" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">ชื่อ - นามสกุล *</label>
@@ -405,7 +405,7 @@
                 <input type="text" id="searchInput" oninput="scheduleTableRender()" placeholder="ค้นหาวันลงทะเบียน, เลขถังขยะ, ชื่อ-นามสกุล, บ้านเลขที่, ประเภท..." class="w-full pl-10 pr-4 py-2.5 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
               </div>
               <div class="w-full md:w-56">
-                <select id="filterCustomerType" onchange="renderTable()" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
+                <select id="filterCustomerType" onchange="currentPage=1; renderTable()" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
                   <option value="">-- ทุกประเภท --</option>
                   <option value="ครัวเรือน">1. ครัวเรือน</option>
                   <option value="บริษัท/สำนักงาน/โรงงาน">2. บริษัท/สำนักงาน/โรงงาน</option>
@@ -418,17 +418,17 @@
                 </select>
               </div>
               <div class="w-full md:w-64">
-                <select id="filterVillage" onchange="renderTable()" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
+                <select id="filterVillage" onchange="currentPage=1; renderTable()" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
                   <option value="">-- แสดงทุกหมู่บ้าน --</option>
-                  <option value="หมู่ 1">หมู่ 1 บ้านห้วยขวาง</option>
-                  <option value="หมู่ 2">หมู่ 2 บ้านนาปุ่ม</option>
-                  <option value="หมู่ 3">หมู่ 3 บ้านหนองคาง</option>
-                  <option value="หมู่ 4">หมู่ 4 บ้านหนองหญ้าปล้อง</option>
-                  <option value="หมู่ 5">หมู่ 5 บ้านลาดวิถี</option>
-                  <option value="หมู่ 6">หมู่ 6 บ้านเขาโป่ง</option>
-                  <option value="หมู่ 7">หมู่ 7 บ้านหนองกลางดง</option>
-                  <option value="หมู่ 8">หมู่ 8 บ้านเกาะนาน้อย</option>
-                  <option value="หมู่ 9">หมู่ 9 บ้านเขาน้อยห้วยตามา</option>
+                  <option value="1">หมู่ 1 บ้านห้วยขวาง</option>
+                  <option value="2">หมู่ 2 บ้านนาปุ่ม</option>
+                  <option value="3">หมู่ 3 บ้านหนองคาง</option>
+                  <option value="4">หมู่ 4 บ้านหนองหญ้าปล้อง</option>
+                  <option value="5">หมู่ 5 บ้านลาดวิถี</option>
+                  <option value="6">หมู่ 6 บ้านเขาโป่ง</option>
+                  <option value="7">หมู่ 7 บ้านหนองกลางดง</option>
+                  <option value="8">หมู่ 8 บ้านเกาะนาน้อย</option>
+                  <option value="9">หมู่ 9 บ้านเขาน้อยห้วยตามา</option>
                 </select>
               </div>
             </div>
@@ -480,7 +480,7 @@
                 <h3 class="font-bold text-white text-lg flex items-center gap-2">
                   <i class="fa-solid fa-clock-rotate-left text-amber-400"></i> ประวัติการขอยกเลิกการลงทะเบียนและแก้ไขข้อมูล
                 </h3>
-                <p class="text-sm text-slate-400">แยกนับจำนวนการแก้ไขและการยกเลิกออกจากกันชัดเจน พร้อมปุ่มลบประวัติ</p>
+                <p class="text-sm text-slate-400">แยกนับจำนวนการแก้ไขและการยกเลิกออกจากกันชัดเจน พร้อมวันที่ยกเลิกและปุ่มลบ</p>
               </div>
               <button type="button" onclick="loadData(true)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold border border-slate-700 flex items-center gap-2 w-fit">
                 <i class="fa-solid fa-rotate"></i> รีเฟรชประวัติ
@@ -663,7 +663,7 @@
           <h3 id="sourceModalTitle" class="text-lg font-bold text-white">ข้อมูลที่มา</h3>
           <p id="sourceModalMeta" class="text-xs text-emerald-400">0 รายการ</p>
         </div>
-        <button type="button" onclick="closeSourceModal()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs cursor-pointer">
+        <button type="button" onclick="closeSourceModal()" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs cursor-pointer">
           ปิดหน้าต่าง
         </button>
       </div>
@@ -677,23 +677,25 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = ""; // ใส่ URL ของ Google Apps Script Web App หากมี
+    // ใส่ Web App URL ของ Google Apps Script ที่ Deploy แล้วที่นี่
+    const APPS_SCRIPT_URL = "";
+
     const PASSWORDS = {
       "Admin 1": "1234",
       "Admin 2": "5678"
     };
 
-    const VILLAGES = [
-      "หมู่ 1 บ้านห้วยขวาง",
-      "หมู่ 2 บ้านนาปุ่ม",
-      "หมู่ 3 บ้านหนองคาง",
-      "หมู่ 4 บ้านหนองหญ้าปล้อง",
-      "หมู่ 5 บ้านลาดวิถี",
-      "หมู่ 6 บ้านเขาโป่ง",
-      "หมู่ 7 บ้านหนองกลางดง",
-      "หมู่ 8 บ้านเกาะนาน้อย",
-      "หมู่ 9 บ้านเขาน้อยห้วยตามา"
-    ];
+    const VILLAGE_FULL_NAMES = {
+      "1": "หมู่ 1 บ้านห้วยขวาง",
+      "2": "หมู่ 2 บ้านนาปุ่ม",
+      "3": "หมู่ 3 บ้านหนองคาง",
+      "4": "หมู่ 4 บ้านหนองหญ้าปล้อง",
+      "5": "หมู่ 5 บ้านลาดวิถี",
+      "6": "หมู่ 6 บ้านเขาโป่ง",
+      "7": "หมู่ 7 บ้านหนองกลางดง",
+      "8": "หมู่ 8 บ้านเกาะนาน้อย",
+      "9": "หมู่ 9 บ้านเขาน้อยห้วยตามา"
+    };
 
     const PRESET_TYPES = [
       "ครัวเรือน",
@@ -712,28 +714,23 @@
     const pageSize = 20;
     let renderTimer = null;
 
-    function formatHouseNo(val) {
-      if (val === null || val === undefined || String(val).trim() === "") return "-";
-      return String(val).trim();
-    }
-
-    function formatBinNo(val) {
-      if (val === null || val === undefined || String(val).trim() === "") return "-";
-      return String(val).trim();
+    function getVillageDisplay(villageStr, villageNum) {
+      const m = String(villageNum || villageStr || "").match(/\d+/);
+      const num = m ? m[0] : "";
+      return VILLAGE_FULL_NAMES[num] || String(villageStr || "-");
     }
 
     function isCancelled(record) {
-      const s = String(record.status || "").trim();
-      return s.includes("ยกเลิก");
+      return String(record.status || "").trim() === "ยกเลิก";
     }
 
     function isEditLog(log) {
-      const text = String(log.action || log.รายการ || "").trim();
+      const text = String(log.actionType || "").trim();
       return text.includes("แก้ไข") && !text.includes("ยกเลิก");
     }
 
     function isCancelLog(log) {
-      const text = String(log.action || log.รายการ || "").trim();
+      const text = String(log.actionType || "").trim();
       return text.includes("ยกเลิก");
     }
 
@@ -798,26 +795,28 @@
       try {
         if (APPS_SCRIPT_URL) {
           const res = await fetch(APPS_SCRIPT_URL + "?t=" + Date.now());
-          const data = await res.json();
-          allRecords = Array.isArray(data.records) ? data.records : [];
-          historyLogs = Array.isArray(data.history) ? data.history : [];
-        } else if (!allRecords.length) {
-          allRecords = [
-            { id: "1", regDate: "01/11/2569", binNo: "001/2569", fullName: "นายสมชาย ใจดี", phone: "081-234-5678", houseNo: "2/1", village: "หมู่ 1 บ้านห้วยขวาง", type: "ครัวเรือน", status: "ปกติ", amount: 40 },
-            { id: "2", regDate: "02/11/2569", binNo: "002/2569", fullName: "ร้านอาหารศรีศิลา", phone: "089-999-8888", houseNo: "15/2", village: "หมู่ 2 บ้านนาปุ่ม", type: "ร้านค้า/ร้านอาหาร", status: "ปกติ", amount: 120 },
-            { id: "3", regDate: "03/11/2569", binNo: "-", fullName: "นางสาวมาลี สุขใจ", phone: "", houseNo: "88", village: "หมู่ 3 บ้านหนองคาง", type: "ครัวเรือน", status: "ยกเลิก", amount: 40 }
-          ];
-          historyLogs = [
-            { timestamp: "02/11/2569 10:15", action: "แก้ไขข้อมูล", cancelDate: "-", village: "หมู่ 2 บ้านนาปุ่ม", binNo: "002/2569", houseNo: "15/2", fullName: "ร้านอาหารศรีศิลา", reason: "ปรับอัตราค่าบริการ", admin: "Admin 1" },
-            { timestamp: "03/11/2569 14:20", action: "ขอยกเลิก", cancelDate: "03/11/2569", village: "หมู่ 3 บ้านหนองคาง", binNo: "-", houseNo: "88", fullName: "นางสาวมาลี สุขใจ", reason: "ย้ายออกนอกพื้นที่", admin: "Admin 1" }
-          ];
+          const json = await res.json();
+          if (json.status === "success") {
+            allRecords = Array.isArray(json.data) ? json.data : [];
+            historyLogs = Array.isArray(json.logs) ? json.logs : [];
+          }
         }
         renderAll();
       } catch (err) {
-        console.error(err);
+        console.error("โหลดข้อมูลไม่สำเร็จ:", err);
       } finally {
         loading.classList.add("hidden");
       }
+    }
+
+    async function postToGas(payload) {
+      if (!APPS_SCRIPT_URL) return { status: "local" };
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      return await res.json();
     }
 
     function renderAll() {
@@ -829,8 +828,8 @@
 
     function renderDashboard() {
       const active = allRecords.filter((r) => !isCancelled(r));
-      const households = active.filter((r) => r.type === "ครัวเรือน");
-      const establishments = active.filter((r) => r.type !== "ครัวเรือน");
+      const households = active.filter((r) => (r.customerType || "ครัวเรือน") === "ครัวเรือน");
+      const establishments = active.filter((r) => (r.customerType || "ครัวเรือน") !== "ครัวเรือน");
       const totalAmount = active.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
 
       const editOnly = historyLogs.filter(isEditLog);
@@ -851,8 +850,8 @@
       const typeContainer = document.getElementById("typeBreakdownCards");
       typeContainer.innerHTML = PRESET_TYPES.map((t) => {
         const matched = t === "อื่นๆ"
-          ? active.filter((r) => !PRESET_TYPES.slice(0, 7).includes(r.type))
-          : active.filter((r) => r.type === t);
+          ? active.filter((r) => !PRESET_TYPES.slice(0, 7).includes(r.customerType))
+          : active.filter((r) => r.customerType === t);
         const amt = matched.reduce((s, r) => s + (Number(r.amount) || 0), 0);
         const safeT = t.replace(/'/g, "\\'");
         return `
@@ -866,15 +865,16 @@
 
       const summaryBody = document.getElementById("dashboardVillageSummaryBody");
       let grandHH = 0, grandEst = 0, grandAll = 0, grandAmt = 0;
-      summaryBody.innerHTML = VILLAGES.map((v) => {
-        const rows = active.filter((r) => r.village === v);
-        const hh = rows.filter((r) => r.type === "ครัวเรือน").length;
+      const villageNums = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+      summaryBody.innerHTML = villageNums.map((vNum) => {
+        const rows = active.filter((r) => String(r.villageNum) === vNum || String(r.village || "").match(/\d+/)?.[0] === vNum);
+        const hh = rows.filter((r) => (r.customerType || "ครัวเรือน") === "ครัวเรือน").length;
         const est = rows.length - hh;
         const amt = rows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
         grandHH += hh; grandEst += est; grandAll += rows.length; grandAmt += amt;
         return `
           <tr class="hover:bg-slate-900/60">
-            <td class="p-3 font-medium text-white">${v}</td>
+            <td class="p-3 font-medium text-white">${VILLAGE_FULL_NAMES[vNum]}</td>
             <td class="p-3 text-center text-emerald-400">${hh.toLocaleString()}</td>
             <td class="p-3 text-center text-cyan-400">${est.toLocaleString()}</td>
             <td class="p-3 text-center font-semibold text-white">${rows.length.toLocaleString()}</td>
@@ -892,16 +892,18 @@
       `;
 
       const barContainer = document.getElementById("verticalBarChartContainer");
-      const countsByVillage = VILLAGES.map((v) => active.filter((r) => r.village === v).length);
+      const countsByVillage = villageNums.map((vNum) =>
+        active.filter((r) => String(r.villageNum) === vNum || String(r.village || "").match(/\d+/)?.[0] === vNum).length
+      );
       const maxCount = Math.max(...countsByVillage, 1);
-      barContainer.innerHTML = VILLAGES.map((v, idx) => {
+      barContainer.innerHTML = villageNums.map((vNum, idx) => {
         const c = countsByVillage[idx];
         const pct = Math.max(Math.round((c / maxCount) * 100), 4);
         return `
           <div class="flex flex-col items-center justify-end h-full gap-1">
             <span class="text-[11px] font-bold text-emerald-400">${c}</span>
             <div class="w-full max-w-[32px] bg-emerald-500/80 rounded-t-lg" style="height: ${pct}%"></div>
-            <span class="text-[11px] text-slate-400">ม.${idx + 1}</span>
+            <span class="text-[11px] text-slate-400">ม.${vNum}</span>
           </div>
         `;
       }).join("");
@@ -968,13 +970,13 @@
               <tr class="hover:bg-slate-900/60">
                 <td class="p-2.5">${i + 1}</td>
                 <td class="p-2.5">${row.timestamp || "-"}</td>
-                <td class="p-2.5">${row.action || "-"}</td>
+                <td class="p-2.5">${row.actionType || "-"}</td>
                 <td class="p-2.5">${row.cancelDate || "-"}</td>
-                <td class="p-2.5">${row.village || "-"}</td>
-                <td class="p-2.5">${formatBinNo(row.binNo)}</td>
-                <td class="p-2.5">${formatHouseNo(row.houseNo)}</td>
+                <td class="p-2.5">${getVillageDisplay(row.village)}</td>
+                <td class="p-2.5">${row.binId || "-"}</td>
+                <td class="p-2.5">${row.houseNo || "-"}</td>
                 <td class="p-2.5 text-white">${row.fullName || "-"}</td>
-                <td class="p-2.5">${row.reason || "-"}</td>
+                <td class="p-2.5">${row.detail || "-"}</td>
                 <td class="p-2.5">${row.admin || "-"}</td>
               </tr>
             `).join("")
@@ -984,13 +986,13 @@
         let label = "ข้อมูลที่มา: ผลรวมทั้งหมดทุกประเภท (ไม่นับรายการยกเลิก)";
         if (mode === "ESTABLISHMENTS_ONLY") {
           label = "ข้อมูลที่มา: สถานประกอบการทั้งหมด (ไม่นับรายการยกเลิก)";
-          rows = active.filter((r) => r.type !== "ครัวเรือน");
+          rows = active.filter((r) => (r.customerType || "ครัวเรือน") !== "ครัวเรือน");
         } else if (mode.startsWith("TYPE:")) {
           const t = mode.slice(5);
           label = `ข้อมูลที่มาประเภท: ${t} (ไม่นับรายการยกเลิก)`;
           rows = t === "อื่นๆ"
-            ? active.filter((r) => !PRESET_TYPES.slice(0, 7).includes(r.type))
-            : active.filter((r) => r.type === t);
+            ? active.filter((r) => !PRESET_TYPES.slice(0, 7).includes(r.customerType))
+            : active.filter((r) => r.customerType === t);
         }
         const sumAmt = rows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
         titleEl.textContent = label;
@@ -1011,11 +1013,11 @@
           ? rows.map((r, i) => `
               <tr class="hover:bg-slate-900/60">
                 <td class="p-2.5">${i + 1}</td>
-                <td class="p-2.5">${formatBinNo(r.binNo)}</td>
+                <td class="p-2.5">${r.binId || "-"}</td>
                 <td class="p-2.5 text-white">${r.fullName || "-"}</td>
-                <td class="p-2.5">${r.type || "-"}</td>
-                <td class="p-2.5">${formatHouseNo(r.houseNo)}</td>
-                <td class="p-2.5">${r.village || "-"}</td>
+                <td class="p-2.5">${r.customerType || "ครัวเรือน"}</td>
+                <td class="p-2.5">${r.houseNo || "-"}</td>
+                <td class="p-2.5">${getVillageDisplay(r.village, r.villageNum)}</td>
                 <td class="p-2.5 text-emerald-400">${r.status || "ปกติ"}</td>
                 <td class="p-2.5 text-right text-emerald-300">฿${(Number(r.amount) || 0).toLocaleString()}</td>
               </tr>
@@ -1043,11 +1045,11 @@
         ? rows.map((r, i) => `
             <tr class="hover:bg-slate-900/60">
               <td class="p-2.5">${i + 1}</td>
-              <td class="p-2.5">${formatBinNo(r.binNo)}</td>
+              <td class="p-2.5">${r.binId || "-"}</td>
               <td class="p-2.5 text-white">${r.fullName || "-"}</td>
-              <td class="p-2.5">${r.type || "-"}</td>
-              <td class="p-2.5">${formatHouseNo(r.houseNo)}</td>
-              <td class="p-2.5">${r.village || "-"}</td>
+              <td class="p-2.5">${r.customerType || "ครัวเรือน"}</td>
+              <td class="p-2.5">${r.houseNo || "-"}</td>
+              <td class="p-2.5">${getVillageDisplay(r.village, r.villageNum)}</td>
               <td class="p-2.5 text-right text-emerald-300">฿${(Number(r.amount) || 0).toLocaleString()}</td>
             </tr>
           `).join("")
@@ -1077,12 +1079,22 @@
       const v = document.getElementById("filterVillage").value;
 
       return allRecords.filter((r) => {
-        if (t && r.type !== t) return false;
-        if (v && !String(r.village || "").includes(v)) return false;
+        if (t) {
+          if (t === "อื่นๆ") {
+            if (PRESET_TYPES.slice(0, 7).includes(r.customerType)) return false;
+          } else if (r.customerType !== t) {
+            return false;
+          }
+        }
+        if (v) {
+          const vNum = String(r.villageNum || String(r.village || "").match(/\d+/)?.[0] || "");
+          if (vNum !== v) return false;
+        }
         if (q) {
-          const hay = [r.regDate, r.binNo, r.fullName, r.phone, r.houseNo, r.village, r.type, r.status]
-            .map((x) => String(x || "").toLowerCase())
-            .join(" ");
+          const hay = [
+            r.regDate, r.binId, r.fullName, r.phone, r.houseNo,
+            getVillageDisplay(r.village, r.villageNum), r.customerType, r.status
+          ].map((x) => String(x || "").toLowerCase()).join(" ");
           if (!hay.includes(q)) return false;
         }
         return true;
@@ -1106,12 +1118,12 @@
               <tr class="hover:bg-slate-900/60 ${cancelled ? "opacity-60" : ""}">
                 <td class="p-3">${start + idx + 1}</td>
                 <td class="p-3">${r.regDate || "-"}</td>
-                <td class="p-3">${formatBinNo(r.binNo)}</td>
+                <td class="p-3">${r.binId || "-"}</td>
                 <td class="p-3 font-medium text-white">${r.fullName || "-"}</td>
                 <td class="p-3">${r.phone || "-"}</td>
-                <td class="p-3">${formatHouseNo(r.houseNo)}</td>
-                <td class="p-3">${r.village || "-"}</td>
-                <td class="p-3">${r.type || "-"}</td>
+                <td class="p-3">${r.houseNo || "-"}</td>
+                <td class="p-3">${getVillageDisplay(r.village, r.villageNum)}</td>
+                <td class="p-3">${r.customerType || "ครัวเรือน"}</td>
                 <td class="p-3">
                   <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${cancelled ? "bg-rose-500/20 text-rose-300" : "bg-emerald-500/20 text-emerald-300"}">
                     ${r.status || "ปกติ"}
@@ -1119,8 +1131,8 @@
                 </td>
                 <td class="p-3 text-right font-semibold text-emerald-300">฿${(Number(r.amount) || 0).toLocaleString()}</td>
                 <td class="p-3 text-center whitespace-nowrap">
-                  <button type="button" onclick="openEditModal('${r.id}')" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs mr-1">แก้ไข</button>
-                  <button type="button" onclick="openCancelModal('${r.id}')" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs">ยกเลิก</button>
+                  <button type="button" onclick="openEditModal(${r.id})" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs mr-1">แก้ไข</button>
+                  <button type="button" onclick="openCancelModal(${r.id})" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs">ยกเลิก</button>
                 </td>
               </tr>
             `;
@@ -1140,53 +1152,64 @@
       renderTable();
     }
 
-    document.getElementById("addForm").addEventListener("submit", function (e) {
+    document.getElementById("addForm").addEventListener("submit", async function (e) {
       e.preventDefault();
+      const btn = document.getElementById("btnSubmit");
+      btn.disabled = true;
+
       const selType = document.getElementById("customerTypeSelect").value;
       const otherType = document.getElementById("customerTypeOther").value.trim();
       const finalType = selType === "อื่นๆ" && otherType ? otherType : selType;
 
-      const newRec = {
-        id: String(Date.now()),
+      const payload = {
+        action: "add",
         regDate: document.getElementById("regDate").value.trim(),
-        binNo: formatBinNo(document.getElementById("binId").value),
+        binId: document.getElementById("binId").value.trim() || "-",
         fullName: document.getElementById("fullName").value.trim(),
-        phone: document.getElementById("phone").value.trim(),
-        houseNo: formatHouseNo(document.getElementById("houseNo").value),
+        phone: document.getElementById("phone").value.trim() || "-",
+        houseNo: document.getElementById("houseNo").value.trim(),
         village: document.getElementById("village").value,
-        type: finalType,
+        customerType: finalType,
+        amount: Number(document.getElementById("amount").value) || 0,
         status: "ปกติ",
-        amount: Number(document.getElementById("amount").value) || 0
+        adminRole: document.getElementById("currentRoleDisplay").textContent
       };
-      allRecords.unshift(newRec);
-      this.reset();
-      document.getElementById("customerTypeOther").classList.add("hidden");
-      renderAll();
+
+      try {
+        await postToGas(payload);
+        this.reset();
+        document.getElementById("customerTypeOther").classList.add("hidden");
+        await loadData(true);
+      } finally {
+        btn.disabled = false;
+      }
     });
 
     function openEditModal(id) {
-      const rec = allRecords.find((r) => String(r.id) === String(id));
+      const rec = allRecords.find((r) => Number(r.id) === Number(id));
       if (!rec) return;
       document.getElementById("editId").value = rec.id;
+      document.getElementById("editRowNumber").value = rec.rowNumber || "";
+      document.getElementById("editSheetName").value = rec.sheetName || "";
       document.getElementById("editRegDate").value = rec.regDate || "";
-      document.getElementById("editBinId").value = rec.binNo || "";
+      document.getElementById("editBinId").value = rec.binId || "-";
       document.getElementById("editHouseNo").value = rec.houseNo || "";
-      document.getElementById("editPhone").value = rec.phone || "";
+      document.getElementById("editPhone").value = rec.phone || "-";
       document.getElementById("editFullName").value = rec.fullName || "";
-      document.getElementById("editVillage").value = rec.village || VILLAGES[0];
+      document.getElementById("editVillage").value = getVillageDisplay(rec.village, rec.villageNum);
       document.getElementById("editAmount").value = rec.amount || 0;
       document.getElementById("editReason").value = "";
 
       const typeSel = document.getElementById("editCustomerTypeSelect");
       const typeOther = document.getElementById("editCustomerTypeOther");
-      if (PRESET_TYPES.slice(0, 7).includes(rec.type)) {
-        typeSel.value = rec.type;
+      if (PRESET_TYPES.slice(0, 7).includes(rec.customerType)) {
+        typeSel.value = rec.customerType;
         typeOther.classList.add("hidden");
         typeOther.value = "";
       } else {
         typeSel.value = "อื่นๆ";
         typeOther.classList.remove("hidden");
-        typeOther.value = rec.type || "";
+        typeOther.value = rec.customerType || "";
       }
 
       const modal = document.getElementById("editModal");
@@ -1200,48 +1223,49 @@
       modal.classList.remove("flex");
     }
 
-    document.getElementById("editForm").addEventListener("submit", function (e) {
+    document.getElementById("editForm").addEventListener("submit", async function (e) {
       e.preventDefault();
-      const id = document.getElementById("editId").value;
-      const rec = allRecords.find((r) => String(r.id) === String(id));
-      if (!rec) return;
+      const btn = document.getElementById("btnSaveEdit");
+      btn.disabled = true;
 
       const selType = document.getElementById("editCustomerTypeSelect").value;
       const otherType = document.getElementById("editCustomerTypeOther").value.trim();
       const finalType = selType === "อื่นๆ" && otherType ? otherType : selType;
-      const reason = document.getElementById("editReason").value.trim();
 
-      rec.regDate = document.getElementById("editRegDate").value.trim();
-      rec.binNo = formatBinNo(document.getElementById("editBinId").value);
-      rec.houseNo = formatHouseNo(document.getElementById("editHouseNo").value);
-      rec.phone = document.getElementById("editPhone").value.trim();
-      rec.fullName = document.getElementById("editFullName").value.trim();
-      rec.village = document.getElementById("editVillage").value;
-      rec.type = finalType;
-      rec.amount = Number(document.getElementById("editAmount").value) || 0;
+      const payload = {
+        action: "edit",
+        rowNumber: Number(document.getElementById("editRowNumber").value),
+        sheetName: document.getElementById("editSheetName").value,
+        regDate: document.getElementById("editRegDate").value.trim(),
+        binId: document.getElementById("editBinId").value.trim() || "-",
+        houseNo: document.getElementById("editHouseNo").value.trim(),
+        phone: document.getElementById("editPhone").value.trim() || "-",
+        fullName: document.getElementById("editFullName").value.trim(),
+        village: document.getElementById("editVillage").value,
+        customerType: finalType,
+        amount: Number(document.getElementById("editAmount").value) || 0,
+        reason: document.getElementById("editReason").value.trim(),
+        adminRole: document.getElementById("currentRoleDisplay").textContent
+      };
 
-      historyLogs.unshift({
-        timestamp: new Date().toLocaleString("th-TH"),
-        action: "แก้ไขข้อมูล",
-        cancelDate: "-",
-        village: rec.village,
-        binNo: rec.binNo,
-        houseNo: rec.houseNo,
-        fullName: rec.fullName,
-        reason,
-        admin: document.getElementById("currentRoleDisplay").textContent
-      });
-
-      closeEditModal();
-      renderAll();
+      try {
+        await postToGas(payload);
+        closeEditModal();
+        await loadData(true);
+      } finally {
+        btn.disabled = false;
+      }
     });
 
     function openCancelModal(id) {
-      const rec = allRecords.find((r) => String(r.id) === String(id));
+      const rec = allRecords.find((r) => Number(r.id) === Number(id));
       if (!rec) return;
       document.getElementById("cancelId").value = rec.id;
-      document.getElementById("cancelTargetName").textContent = `${rec.fullName} (บ้านเลขที่ ${formatHouseNo(rec.houseNo)})`;
-      document.getElementById("cancelDate").value = new Date().toLocaleDateString("th-TH");
+      document.getElementById("cancelRowNumber").value = rec.rowNumber || "";
+      document.getElementById("cancelSheetName").value = rec.sheetName || "";
+      document.getElementById("cancelTargetName").textContent = `${rec.fullName} (บ้านเลขที่ ${rec.houseNo || "-"})`;
+      const now = new Date();
+      document.getElementById("cancelDate").value = `${now.getDate()}.${now.getMonth() + 1}.${now.getFullYear() + 543}`;
       document.getElementById("cancelReason").value = "";
       const modal = document.getElementById("cancelModal");
       modal.classList.remove("hidden");
@@ -1254,43 +1278,49 @@
       modal.classList.remove("flex");
     }
 
-    document.getElementById("cancelForm").addEventListener("submit", function (e) {
+    document.getElementById("cancelForm").addEventListener("submit", async function (e) {
       e.preventDefault();
-      const id = document.getElementById("cancelId").value;
-      const rec = allRecords.find((r) => String(r.id) === String(id));
+      const btn = document.getElementById("btnConfirmCancel");
+      btn.disabled = true;
+
+      const id = Number(document.getElementById("cancelId").value);
+      const rec = allRecords.find((r) => Number(r.id) === id);
       if (!rec) return;
 
-      const cancelDate = document.getElementById("cancelDate").value.trim();
-      const reason = document.getElementById("cancelReason").value.trim();
-      rec.status = "ยกเลิก";
-
-      historyLogs.unshift({
-        timestamp: new Date().toLocaleString("th-TH"),
-        action: "ขอยกเลิก",
-        cancelDate,
+      const payload = {
+        action: "cancel",
+        rowNumber: Number(document.getElementById("cancelRowNumber").value),
+        sheetName: document.getElementById("cancelSheetName").value,
         village: rec.village,
-        binNo: rec.binNo,
-        houseNo: rec.houseNo,
+        binId: rec.binId || "-",
+        houseNo: rec.houseNo || "-",
         fullName: rec.fullName,
-        reason,
-        admin: document.getElementById("currentRoleDisplay").textContent
-      });
+        cancelDate: document.getElementById("cancelDate").value.trim(),
+        reason: document.getElementById("cancelReason").value.trim(),
+        adminRole: document.getElementById("currentRoleDisplay").textContent
+      };
 
-      closeCancelModal();
-      renderAll();
+      try {
+        await postToGas(payload);
+        closeCancelModal();
+        await loadData(true);
+      } finally {
+        btn.disabled = false;
+      }
     });
 
     function renderAnalytics() {
       const active = allRecords.filter((r) => !isCancelled(r));
       const grid = document.getElementById("villageCardsGrid");
-      grid.innerHTML = VILLAGES.map((v) => {
-        const rows = active.filter((r) => r.village === v);
-        const hh = rows.filter((r) => r.type === "ครัวเรือน").length;
+      const villageNums = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+      grid.innerHTML = villageNums.map((vNum) => {
+        const rows = active.filter((r) => String(r.villageNum) === vNum || String(r.village || "").match(/\d+/)?.[0] === vNum);
+        const hh = rows.filter((r) => (r.customerType || "ครัวเรือน") === "ครัวเรือน").length;
         const est = rows.length - hh;
         const amt = rows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
         return `
           <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-2">
-            <h4 class="font-bold text-white">${v}</h4>
+            <h4 class="font-bold text-white">${VILLAGE_FULL_NAMES[vNum]}</h4>
             <p class="text-xs text-slate-400">ครัวเรือน: <span class="text-emerald-400 font-semibold">${hh} ราย</span> • สถานประกอบการ: <span class="text-cyan-400 font-semibold">${est} แห่ง</span></p>
             <p class="text-base font-bold text-emerald-300 pt-1">ยอดจัดเก็บ: ฿${amt.toLocaleString()}</p>
           </div>
@@ -1306,15 +1336,15 @@
               <td class="p-3">${log.timestamp || "-"}</td>
               <td class="p-3">
                 <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${isCancelLog(log) ? "bg-rose-500/20 text-rose-300" : "bg-amber-500/20 text-amber-300"}">
-                  ${log.action || "-"}
+                  ${log.actionType || "-"}
                 </span>
               </td>
               <td class="p-3">${log.cancelDate || "-"}</td>
-              <td class="p-3">${log.village || "-"}</td>
-              <td class="p-3">${formatBinNo(log.binNo)}</td>
-              <td class="p-3">${formatHouseNo(log.houseNo)}</td>
+              <td class="p-3">${getVillageDisplay(log.village)}</td>
+              <td class="p-3">${log.binId || "-"}</td>
+              <td class="p-3">${log.houseNo || "-"}</td>
               <td class="p-3 text-white">${log.fullName || "-"}</td>
-              <td class="p-3">${log.reason || "-"}</td>
+              <td class="p-3">${log.detail || "-"}</td>
               <td class="p-3">${log.admin || "-"}</td>
               <td class="p-3 text-center">
                 <button type="button" onclick="deleteHistoryLog(${i})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-rose-900/60 text-slate-300 hover:text-rose-300 text-xs">ลบ</button>
@@ -1324,10 +1354,17 @@
         : `<tr><td colspan="10" class="p-6 text-center text-slate-400">ยังไม่มีประวัติการแก้ไขหรือยกเลิก</td></tr>`;
     }
 
-    function deleteHistoryLog(index) {
-      historyLogs.splice(index, 1);
-      renderDashboard();
-      renderHistory();
+    async function deleteHistoryLog(index) {
+      const log = historyLogs[index];
+      if (!log) return;
+      await postToGas({
+        action: "deleteLog",
+        rowNumber: log.rowNumber,
+        timestamp: log.timestamp,
+        fullName: log.fullName,
+        houseNo: log.houseNo
+      });
+      await loadData(true);
     }
   </script>
 </body>
