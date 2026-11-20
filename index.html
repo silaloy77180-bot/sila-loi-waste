@@ -232,9 +232,9 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 class="font-bold text-white text-base">
-                  <i class="fa-solid fa-trash-can text-emerald-400 mr-2"></i> สรุปแยก: ผลรวมถังทั้งหมด / ไม่มีเลขถังขยะ / ถังร่วม / แยกปี พ.ศ. ตั้งแต่ 2560 เป็นต้นไป / ถังเก่า
+                  <i class="fa-solid fa-trash-can text-emerald-400 mr-2"></i> สรุปแยก: ผลรวมถังทั้งหมด / ไม่มีเลขถังขยะ / ถังร่วม / แยกปี พ.ศ. ตั้งแต่ 2568 เป็นต้นไป / ถังเก่า
                 </h3>
-                <p class="text-xs text-slate-400">ไม่นับรวมรายการที่ยกเลิก — แยกทุกปี พ.ศ. ที่อยู่ในเลขถัง (เช่น 2560/2561/.../2569 หรือ 2570) และสร้างการ์ดปีตั้งแต่ 2560 เป็นต้นไปอัตโนมัติ</p>
+                <p class="text-xs text-slate-400">ไม่นับรวมรายการที่ยกเลิก — รันปี พ.ศ. ตั้งแต่ 2568 ไปยังอนาคตอัตโนมัติ (เช่น 2568, 2569, 2570+)</p>
               </div>
               <div class="flex flex-wrap gap-2">
                 <button type="button" onclick="openSourceModal('ALL_BINS_ACTIVE')" class="text-xs px-3.5 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 font-semibold w-fit cursor-pointer">
@@ -391,7 +391,7 @@
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">เลขถังขยะ</label>
-                <input type="text" id="binId" placeholder="เช่น 2560/2561/.../2569 หรือ 001/2570" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
+                <input type="text" id="binId" placeholder="เช่น 001/2568 หรือ 001/2570" class="w-full border border-slate-700 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500 outline-none bg-slate-900 text-white">
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1 text-slate-300">ชื่อ - นามสกุล *</label>
@@ -763,7 +763,8 @@
       "ระบบเธอ": "032684111"
     };
 
-    const START_YEAR_BE = 2560;
+    // รันปี พ.ศ. ตั้งแต่ 2568 ไปยังอนาคตอัตโนมัติ
+    const START_YEAR_BE = 2568;
 
     const VILLAGE_FULL_NAMES = {
       "1": "หมู่ 1 บ้านห้วยขวาง",
@@ -937,7 +938,6 @@
       return { collectionFee: total, disposalFee: 0, sortDiscount: 0, total: total };
     }
 
-    // ดึงปี พ.ศ. 4 หลักทั้งหมด (2560-2599) ที่อยู่ในข้อความเลขถังขยะ เช่น 2560/2561/2562/.../2569 หรือ 001/2570
     function extractAllYearsFromBin(binIdRaw) {
       const raw = String(binIdRaw || "").trim();
       if (!raw || raw === "-" || raw === "ไม่มี" || raw === "ไม่มีเลขถัง" || raw === "ไม่มีเลขถังขยะ") {
@@ -960,7 +960,6 @@
       if (/ร่วม|รวม/.test(raw)) {
         return [raw];
       }
-      // กรณีมีหลายปีต่อกันแบบ 2560/2561/.../2569 ให้แยกทุกปีเป็นรายการ/ชิ้นที่ประมวลผลได้
       const allYears = extractAllYearsFromBin(raw);
       if (allYears.length > 1 && !raw.includes(",")) {
         return allYears;
@@ -1127,7 +1126,7 @@
       renderHistory();
     }
 
-    // สร้างปี พ.ศ. ตั้งแต่ 2560 จนถึงปีปัจจุบัน หรือปีสูงสุดที่มีในข้อมูล (เช่น 2570+)
+    // สร้างปี พ.ศ. ตั้งแต่ 2568 ไปยังอนาคตอัตโนมัติ (อิงปีปัจจุบัน หรือปีสูงสุดที่มีในข้อมูล)
     function buildDynamicYears(yearCounts) {
       const currentThaiYear = getCurrentThaiYearBE();
       let maxDataYear = currentThaiYear;
