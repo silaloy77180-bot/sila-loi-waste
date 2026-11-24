@@ -63,8 +63,8 @@
         <div>
           <label class="block text-sm font-medium mb-1.5 text-slate-300">เลือกสิทธิ์ผู้ใช้งาน *</label>
           <select id="adminRole" class="w-full border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
-            <option value="Admin 1">ระบบฉัน</option>
-            <option value="Admin 2">ระบบเธอ</option>
+            <option value="ระบบฉัน">ระบบฉัน</option>
+            <option value="ระบบเธอ">ระบบเธอ</option>
           </select>
         </div>
 
@@ -79,7 +79,7 @@
         </div>
 
         <div id="loginError" class="text-red-400 text-xs hidden text-center bg-red-950/50 border border-red-800 py-2 px-3 rounded-lg">
-          รหัสผ่านไม่ถูกต้อง หรือยังไม่ได้ตั้งค่า SCRIPT_URL / รหัสผ่าน
+          รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง
         </div>
 
         <button type="button" onclick="handleLogin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3.5 px-4 rounded-xl transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 mt-2 cursor-pointer">
@@ -750,11 +750,10 @@
   </div>
 
   <script>
-    // กรอกลิงก์ Web App URL ของ Google Apps Script และรหัสผ่านเดิมของคุณด้านล่างนี้
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw01amYiV8v-fau5VFqOYg1s_ew7WPCW4vRM_Yp0tZ0LAQsUsO4_jw0VnSeva9aHD8N/exec";
     const ADMIN_PASSWORDS = {
-      "Admin 1": "032684111",
-      "Admin 2": "032684112"
+      "ระบบฉัน": "รหัสผ่าน032684111",
+      "ระบบเธอ": "รหัสผ่าน032684112"
     };
 
     const VILLAGE_NAMES = {
@@ -785,7 +784,7 @@
     let currentPage = 1;
     const rowsPerPage = 20;
     let renderTimeout = null;
-    let currentRole = "Admin 1";
+    let currentRole = "ระบบฉัน";
 
     function preserveText(val, fallback = "-") {
       if (val === null || val === undefined) return fallback;
@@ -848,7 +847,7 @@
 
     window.addEventListener("DOMContentLoaded", () => {
       if (sessionStorage.getItem("silaloyLoggedIn") === "true") {
-        currentRole = sessionStorage.getItem("silaloyRole") || "Admin 1";
+        currentRole = sessionStorage.getItem("silaloyRole") || "ระบบฉัน";
         document.getElementById("adminRole").value = currentRole;
         document.getElementById("currentRoleDisplay").textContent = currentRole;
         document.getElementById("loginOverlay").classList.add("hidden");
