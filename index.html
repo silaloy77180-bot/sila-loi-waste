@@ -37,7 +37,6 @@
       border-color: rgba(16, 185, 129, 0.5);
       box-shadow: 0 0 16px rgba(16, 185, 129, 0.12);
     }
-    /* Fallback CSS กัน Modal ค้างหรือหน้าจอเพี้ยน */
     .hidden { display: none !important; }
     .fixed { position: fixed; }
     .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
@@ -64,8 +63,8 @@
         <div>
           <label class="block text-sm font-medium mb-1.5 text-slate-300">เลือกสิทธิ์ผู้ใช้งาน *</label>
           <select id="adminRole" class="w-full border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-900 text-white">
-            <option value="Admin 1">ระบบฉัน</option>
-            <option value="Admin 2">ระบบเธอ</option>
+            <option value="Admin 1">Admin 1</option>
+            <option value="Admin 2">Admin 2</option>
           </select>
         </div>
 
@@ -80,7 +79,7 @@
         </div>
 
         <div id="loginError" class="text-red-400 text-xs hidden text-center bg-red-950/50 border border-red-800 py-2 px-3 rounded-lg">
-          รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง
+          รหัสผ่านไม่ถูกต้อง หรือยังไม่ได้ตั้งค่า SCRIPT_URL / รหัสผ่าน
         </div>
 
         <button type="button" onclick="handleLogin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3.5 px-4 rounded-xl transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 mt-2 cursor-pointer">
@@ -162,7 +161,7 @@
             <div class="text-3xl text-emerald-400"><i class="fa-solid fa-satellite-dish"></i></div>
             <div>
               <p class="text-xs text-slate-400">สถานะเครือข่าย</p>
-              <p class="text-sm font-bold text-emerald-400">ONLINE (TURBO SPEED)</p>
+              <p id="connectionStatusText" class="text-sm font-bold text-emerald-400">READY</p>
             </div>
           </div>
         </div>
@@ -363,7 +362,7 @@
 
               <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 mt-6 text-center">
                 <p class="text-xs text-slate-400">สถานะระบบฐานข้อมูล</p>
-                <p class="text-sm font-bold text-emerald-400 mt-0.5"><i class="fa-solid fa-circle-check"></i> เชื่อมต่อฐานข้อมูลสำเร็จ</p>
+                <p id="dbStatusText" class="text-sm font-bold text-emerald-400 mt-0.5"><i class="fa-solid fa-circle-check"></i> พร้อมซิงค์ข้อมูล</p>
               </div>
             </div>
           </div>
@@ -393,7 +392,7 @@
             <h2 class="text-lg font-bold text-white flex items-center gap-2 mb-1">
               <i class="fa-solid fa-file-circle-plus text-emerald-400"></i> แบบฟอร์มลงทะเบียนถังขยะ ตำบลศิลาลอย
             </h2>
-            <p class="text-sm text-slate-400 mb-5">กรอกข้อมูลผู้ชำระค่าบริการจัดเก็บขยะมูลฝอย (ตรงกับคอลัมน์ในชีส)</p>
+            <p class="text-sm text-slate-400 mb-5">กรอกข้อมูลผู้ชำระค่าบริการจัดเก็บขยะมูลฝอย (ตรงกับคอลัมน์ A–P ในชีส)</p>
 
             <form id="addForm" action="javascript:void(0)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
@@ -751,11 +750,11 @@
   </div>
 
   <script>
-    // กรุณาใส่ Web App URL ของ Google Apps Script และรหัสผ่านเดิมของคุณใน 2 บรรทัดนี้ก่อนบันทึก
+    // กรอกลิงก์ Web App URL ของ Google Apps Script และรหัสผ่านเดิมของคุณด้านล่างนี้
     const SCRIPT_URL = "วาง_SCRIPT_URL_ของคุณที่นี่";
     const ADMIN_PASSWORDS = {
-      "Admin 1": "032684111",
-      "Admin 2": "032684112"
+      "Admin 1": "รหัสผ่านเดิม_Admin1",
+      "Admin 2": "รหัสผ่านเดิม_Admin2"
     };
 
     const VILLAGE_NAMES = {
@@ -786,13 +785,26 @@
     let currentPage = 1;
     const rowsPerPage = 20;
     let renderTimeout = null;
-    let currentRole = "ระบบฉัน";
+    let currentRole = "Admin 1";
 
-    // ป้องกันการแปลงเลขที่บ้านเช่น "2/1" ให้กลายเป็นวันที่
-    function preserveTextValue(val, fallback = "-") {
+    function preserveText(val, fallback = "-") {
       if (val === null || val === undefined) return fallback;
       const str = String(val).trim();
       return str === "" ? fallback : str;
+    }
+
+    function normalizeBin(bin) {
+      const s = String(bin || "").trim();
+      if (!s || s === "-" || s === "ไม่มี" || s.toLowerCase() === "none" || s.toLowerCase() === "null") return "";
+      return s.toUpperCase();
+    }
+
+    function extractBinYear(bin) {
+      const norm = normalizeBin(bin);
+      if (!norm) return "NONE";
+      const match = norm.match(/\/(25\d{2})/);
+      if (match) return match[1];
+      return "OLD";
     }
 
     function togglePasswordVisibility() {
@@ -909,7 +921,15 @@
     }
 
     async function loadData(showToast = false) {
-      if (!SCRIPT_URL || SCRIPT_URL.startsWith("วาง_")) return;
+      const connEl = document.getElementById("connectionStatusText");
+      const dbEl = document.getElementById("dbStatusText");
+
+      if (!SCRIPT_URL || SCRIPT_URL.startsWith("วาง_")) {
+        if (connEl) connEl.textContent = "รอใส่ SCRIPT_URL";
+        if (dbEl) dbEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-400"></i> ยังไม่ได้ใส่ SCRIPT_URL';
+        return;
+      }
+
       setLoading(true);
       try {
         const res = await fetch(SCRIPT_URL + "?t=" + Date.now());
@@ -920,8 +940,8 @@
             const dFee = Number(item.disposalFee) || 0;
             const disc = Number(item.discount) || 0;
             const amt = Number(item.amount) || 0;
-            const rawBin = preserveTextValue(item.binId, "-");
-            const cleanBin = rawBin === "-" ? "-" : rawBin.replace(/\s+/g, "");
+            const binNorm = normalizeBin(item.binId);
+
             return {
               ...item,
               id: idx + 1,
@@ -929,36 +949,29 @@
               disposalFee: dFee,
               discount: disc,
               amount: amt,
-              phone: preserveTextValue(item.phone, "-"),
-              binId: cleanBin || "-",
-              houseNo: preserveTextValue(item.houseNo, "-"),
-              regDate: preserveTextValue(item.regDate, "-"),
-              status: preserveTextValue(item.status, "ปกติ")
+              phone: preserveText(item.phone, "-"),
+              binId: binNorm ? preserveText(item.binId, "-") : "-",
+              houseNo: preserveText(item.houseNo, "-"),
+              regDate: preserveText(item.regDate, "-"),
+              status: preserveText(item.status, "ปกติ")
             };
           });
           allLogs = json.logs || [];
+          if (connEl) connEl.textContent = "ONLINE (" + allRecords.length + " รายการ)";
+          if (dbEl) dbEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> เชื่อมต่อชีตสำเร็จ';
           renderAll();
           if (showToast) console.log("ซิงค์ข้อมูลสำเร็จ:", allRecords.length);
+        } else {
+          if (connEl) connEl.textContent = "SCRIPT ERROR";
+          if (dbEl) dbEl.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-400"></i> ' + (json.message || "เกิดข้อผิดพลาด");
         }
       } catch (err) {
         console.error("Error loading data:", err);
+        if (connEl) connEl.textContent = "OFFLINE / CORS";
+        if (dbEl) dbEl.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-400"></i> เชื่อมต่อไม่ได้ (ตรวจ Deploy Web App)';
       } finally {
         setLoading(false);
       }
-    }
-
-    function normalizeBin(bin) {
-      const s = String(bin || "").trim();
-      if (!s || s === "-" || s === "ไม่มี") return "";
-      return s.toUpperCase();
-    }
-
-    function extractBinYear(bin) {
-      const norm = normalizeBin(bin);
-      if (!norm) return "NONE";
-      const match = norm.match(/\/(25\d{2})/);
-      if (match) return match[1];
-      return "OLD";
     }
 
     function computeBinAnalytics(activeRecords) {
